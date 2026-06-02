@@ -1,4 +1,4 @@
-<!-- CHRONOS v1.0.1 -->
+<!-- CHRONOS v1.0.2 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -391,13 +391,30 @@
     transition: opacity .2s; z-index: 50;
   }
   .toast.show { opacity: 1; }
+  /* Fixed license stamp pinned to the bottom of the viewport (sits behind
+     content, never enters #capture so it stays out of exported PNGs). */
+  .footer-stamp {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 6px;
+    z-index: 0;
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.15);
+    pointer-events: none;
+    user-select: none;
+  }
 </style>
 </head>
 <body>
 <div class="app">
   <header class="top">
     <div class="logo">&gt; CHRONOS_</div>
-    <div class="tag"><span id="tagWord" class="glitchable">CALENDAR CONSTRUCTOR</span><span id="tagMeta" class="tag-meta"> // v<span id="tagVersion">1.0.1</span></span></div>
+    <div class="tag"><span id="tagWord" class="glitchable">CALENDAR CONSTRUCTOR</span><span id="tagMeta" class="tag-meta"> // v<span id="tagVersion">1.0.2</span></span></div>
   </header>
 
   <div class="layout">
@@ -522,6 +539,7 @@
   </div><!-- /layout -->
 </div>
 <div class="toast" id="toast"></div>
+<div class="footer-stamp" aria-hidden="true">CHRONOS_CALENDAR_CONSTRUCTOR (c) // 2026 // CYBERDELAAI // MIT</div>
 
 <script>
 (function () {
@@ -841,7 +859,7 @@
     const meta = $('tagMeta');
     if (!meta) return;
     const GH_REPO = 'CyberDelaai/chronos-ui';
-    const VER = ' // v1.0.1';
+    const VER = ' // v1.0.2';
     const CHARS = '!@#$%&*<>{}[]/|01ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     let commitCount = '';
 

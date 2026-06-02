@@ -29,4 +29,8 @@ the colors and layout, then click **⬇ SAVE PNG**.
 
 ## Version
 
-`1.0.1`
+`1.0.2`
+
+## License
+
+[MIT](LICENSE) © 2026 CyberDelaai

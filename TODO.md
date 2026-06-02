@@ -10,4 +10,3 @@ Pending issues, features, and ideas for CHRONOS. Items are removed from the list
 
 1. Add cyberdeck.tools home link
 2. Add donate button 
-3. Add license info like in commlink
