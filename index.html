@@ -1,4 +1,4 @@
-<!-- CHRONOS v1.0.2 -->
+<!-- CHRONOS v1.0.3 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -106,10 +106,18 @@
     display: flex; align-items: center; gap: 18px;
     border-bottom: 1px solid rgba(252,238,10,0.25); padding-bottom: 16px; margin-bottom: 22px;
   }
+  /* logo doubles as the tool-switcher trigger — reset the <button> chrome */
+  .logo-menu { position: relative; }
   .logo {
     font-family: 'JetBrains Mono', monospace;
     color: var(--yellow); font-size: 22px; letter-spacing: 2px;
+    background: none; border: none; padding: 0; cursor: pointer;
+    transition: filter .15s;
   }
+  .logo:hover { filter: drop-shadow(0 0 6px rgba(var(--accent-rgb),0.6)); }
+  /* the leading ">" rotates 90° clockwise while the menu is open */
+  .logo .chev { display: inline-block; transition: transform .2s ease; }
+  .logo[aria-expanded="true"] .chev { transform: rotate(90deg); }
   /* tag (ported from commlink-ui) — border-left acts as the delimiter after the logo */
   .tag {
     font-family: 'JetBrains Mono', monospace; color: var(--cyan);
@@ -117,6 +125,24 @@
     border-left: 1px solid var(--dim); padding-left: 18px;
   }
   .tag .tag-meta { cursor: default; color: var(--cyan); }
+  /* Tool-switcher dropdown anchored under the logo */
+  .app-menu {
+    position: absolute; top: calc(100% + 12px); left: 0; z-index: 30;
+    display: flex; flex-direction: column; gap: 4px;
+    min-width: 240px; padding: 12px 14px;
+    background: var(--panel);
+    --aug-border-all: 1px; --aug-border-bg: rgba(var(--main-rgb),0.5);
+    --aug-tl: 10px; --aug-br: 10px;
+  }
+  .app-menu[hidden] { display: none; }
+  .app-menu-item {
+    font-family: 'JetBrains Mono', monospace; font-size: 16px; letter-spacing: 2px;
+    color: var(--yellow); text-decoration: none; white-space: nowrap;
+    padding: 6px 8px; transition: color .12s, background .12s;
+  }
+  .app-menu-item:hover { background: rgba(var(--main-rgb),0.12); color: var(--accent); }
+  .app-menu-item.current { color: var(--main); cursor: default; }
+  .app-menu-item.current:hover { background: none; }
   /* glitch tag (ported from commlink-ui) */
   .glitchable { display: inline-block; white-space: pre; }
   .glitchable.glitching {
@@ -413,8 +439,15 @@
 <body>
 <div class="app">
   <header class="top">
-    <div class="logo">&gt; CHRONOS_</div>
-    <div class="tag"><span id="tagWord" class="glitchable">CALENDAR CONSTRUCTOR</span><span id="tagMeta" class="tag-meta"> // v<span id="tagVersion">1.0.2</span></span></div>
+    <div class="logo-menu">
+      <button class="logo" id="logoBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="appMenu"><span class="chev" aria-hidden="true">&gt;</span> CHRONOS_</button>
+      <nav class="app-menu" id="appMenu" data-augmented-ui="tl-clip br-clip border" aria-label="cyberdeck.tools navigation" hidden>
+        <a class="app-menu-item" href="https://cyberdeck.tools/">/ CYBERDECK_TOOLS</a>
+        <a class="app-menu-item" href="https://cyberdeck.tools/commlink-ui/">&gt; COMMLINK_</a>
+        <a class="app-menu-item current" href="https://cyberdeck.tools/chronos-ui/" aria-current="page">&gt; CHRONOS_</a>
+      </nav>
+    </div>
+    <div class="tag"><span id="tagWord" class="glitchable">CALENDAR CONSTRUCTOR</span><span id="tagMeta" class="tag-meta"> // v<span id="tagVersion">1.0.3</span></span></div>
   </header>
 
   <div class="layout">
@@ -805,6 +838,24 @@
   applySize();
   render();
 
+  // ---- Logo tool-switcher dropdown ----
+  (function setupAppMenu() {
+    const btn = $('logoBtn');
+    const menu = $('appMenu');
+    if (!btn || !menu) return;
+    const open = () => { menu.hidden = false; btn.setAttribute('aria-expanded', 'true'); };
+    const close = () => { menu.hidden = true; btn.setAttribute('aria-expanded', 'false'); };
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      menu.hidden ? open() : close();
+    });
+    // Close on outside click or Escape
+    document.addEventListener('click', (e) => {
+      if (!menu.hidden && !menu.contains(e.target) && e.target !== btn) close();
+    });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+  })();
+
   // ---- Header tag glitch (ported from commlink-ui effects.js) ----
   // Periodically scrambles CALENDAR CONSTRUCTOR <-> BORROW YOUR TIME and back.
   (function startTagGlitch() {
@@ -859,7 +910,7 @@
     const meta = $('tagMeta');
     if (!meta) return;
     const GH_REPO = 'CyberDelaai/chronos-ui';
-    const VER = ' // v1.0.2';
+    const VER = ' // v1.0.3';
     const CHARS = '!@#$%&*<>{}[]/|01ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     let commitCount = '';
 

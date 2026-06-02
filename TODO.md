@@ -8,5 +8,4 @@ Pending issues, features, and ideas for CHRONOS. Items are removed from the list
 
 ## SMALL (Z version bump)
 
-1. Add cyberdeck.tools home link
-2. Add donate button 
+1. Add donate button 
