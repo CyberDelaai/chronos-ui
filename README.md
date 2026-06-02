@@ -1,1 +1,32 @@
-# chronos-ui
+# CHRONOS
+
+**Cyberpunk Monthly Calendar Constructor** — a free, in-browser tool that builds a
+Cyberpunk 2077-styled monthly calendar and exports it as a clean PNG. Great for TTRPG
+game masters and netrunner handouts.
+
+## Features
+
+- **Pick any month / year** and render a styled monthly grid.
+- **PNG export** — one click saves the calendar as a transparent-corner PNG.
+- **Color controls** — set the **Main** (grid/frame) and **Accent** (text/glow) colors.
+- **Size presets** — `S` / `M` / `L` cap the calendar width; the exported PNG width
+  matches the on-screen `// PREVIEW: NxMpx` label (L renders at 2× for crisper output).
+- **First weekday toggle** — start the week on Monday or Sunday.
+- **Weekend highlighting** — independently highlight Saturday and/or Sunday.
+- **Self-contained fonts** — JetBrains Mono is embedded as base64 `@font-face` rules,
+  so the typeface renders correctly in the exported PNG without any external font fetch.
+
+## Usage
+
+Open `index.html` in any modern browser — there is no build step. Pick a month, tweak
+the colors and layout, then click **⬇ SAVE PNG**.
+
+## Built with
+
+- [augmented-ui](https://augmented-ui.com/) — clipped/beveled cyberpunk panel styling
+- [html-to-image](https://github.com/bubkoo/html-to-image) — DOM → PNG export
+- [JetBrains Mono](https://www.jetbrains.com/lp/mono/) — embedded base64 webfont
+
+## Version
+
+`1.0.1`
