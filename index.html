@@ -1,0 +1,868 @@
+<!-- CHRONOS v1.0.0 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CHRONOS — Cyberpunk Monthly Calendar Constructor</title>
+<meta name="description" content="CHRONOS is a free in-browser cyberpunk monthly calendar generator. Pick a month and export a clean Cyberpunk 2077-styled calendar PNG — great for TTRPG game masters and netrunner handouts." />
+<meta name="keywords" content="cyberpunk, calendar, calendar generator, monthly calendar, cyberpunk 2077, shadowrun, ttrpg, gm tools, png export, netrunner" />
+<meta name="author" content="CyberDelaai" />
+<meta name="robots" content="index, follow" />
+<meta name="theme-color" content="#050507" />
+<link rel="canonical" href="https://cyberdeck.tools/chronos-ui/" />
+<link rel="icon" type="image/svg+xml" href="favicon.svg" />
+
+<!-- Open Graph / Twitter -->
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="CHRONOS" />
+<meta property="og:title" content="CHRONOS — Cyberpunk Monthly Calendar Constructor" />
+<meta property="og:description" content="Build a Cyberpunk 2077-styled monthly calendar in your browser and export it as a PNG. Perfect for TTRPG handouts." />
+<meta property="og:url" content="https://cyberdeck.tools/chronos-ui/" />
+<meta property="og:image" content="https://cyberdeck.tools/chronos-ui/og-preview.png" />
+<meta property="og:image:type" content="image/png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="CHRONOS — cyberpunk monthly calendar constructor preview" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="CHRONOS — Cyberpunk Monthly Calendar Constructor" />
+<meta name="twitter:description" content="Build a cyberpunk monthly calendar and export it as a PNG." />
+<meta name="twitter:image" content="https://cyberdeck.tools/chronos-ui/og-preview.png" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://unpkg.com/augmented-ui@2/augmented-ui.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.js"></script>
+<style>
+  :root {
+    --yellow: #fcee0a;
+    --cyan: #00f0ff;
+    --magenta: #ff003c;
+    --bg: #050507;
+    --panel: #0b0b10;
+    --text: #e8e8ee;
+    --dim: #7a7a88;
+    --accent: #fcee0a;        /* text + glow */
+    --accent-rgb: 252,238,10;
+    --main: #00f0ff;          /* bg gradient, grid lines, frame */
+    --main-rgb: 0,240,255;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    min-height: 100vh;
+    padding: 28px 18px 64px;
+    background-image: repeating-linear-gradient(0deg, rgba(var(--main-rgb),0.03) 0 1px, transparent 1px 3px);
+  }
+  .app { max-width: 1560px; margin: 0 auto; }
+  /* Controls sidebar on the left, calendar on the right */
+  .layout { display: flex; gap: 28px; align-items: stretch; flex-wrap: wrap; }
+  .sidebar { display: flex; flex-direction: column; gap: 12px; width: 320px; flex-shrink: 0; }
+  .calendar-area { flex: 1; min-width: 320px; }
+  /* capture + vertical preview label sit side by side, left-packed */
+  .preview-row { display: flex; align-items: stretch; gap: 10px; }
+  /* SIZE toggle caps the calendar width (S/M/L). Export is 1× so these are the
+     literal exported-PNG widths (matching the // PREVIEW label). */
+  .calendar-area.size-s #capture { max-width: 504px; }
+  .calendar-area.size-m #capture { max-width: 1100px; }
+  .calendar-area.size-l #capture { max-width: none; }
+  /* Small size: shrink weekday labels + day numbers (vw-based defaults don't
+     track the capped calendar width) */
+  .calendar-area.size-s .dow { font-size: 22px; }
+  .calendar-area.size-s .cell .num { font-size: 31px; }
+  #capture { flex: 0 1 auto; }
+  /* Vertical "// PREVIEW: NxMpx" label running top→bottom, right of the calendar
+     (mirrors commlink-ui's vertical channel label) */
+  .preview-label {
+    writing-mode: vertical-rl;
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 2px;
+    color: var(--dim); text-transform: uppercase; white-space: nowrap;
+    align-self: flex-start; user-select: none;
+  }
+  /* SAVE PNG sits directly under the month/year controls */
+  .sidebar .export-btn { width: 100%; }
+  header.top {
+    display: flex; align-items: center; gap: 18px;
+    border-bottom: 1px solid rgba(252,238,10,0.25); padding-bottom: 16px; margin-bottom: 22px;
+  }
+  .logo {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--yellow); font-size: 22px; letter-spacing: 2px;
+  }
+  /* tag (ported from commlink-ui) — border-left acts as the delimiter after the logo */
+  .tag {
+    font-family: 'JetBrains Mono', monospace; color: var(--cyan);
+    font-size: 12px; letter-spacing: 1px;
+    border-left: 1px solid var(--dim); padding-left: 18px;
+  }
+  .tag .tag-meta { cursor: default; color: var(--cyan); }
+  /* glitch tag (ported from commlink-ui) */
+  .glitchable { display: inline-block; white-space: pre; }
+  .glitchable.glitching {
+    color: var(--yellow);
+    text-shadow: 2px 0 var(--cyan), -2px 0 var(--magenta);
+    animation: tagGlitchJitter 0.08s steps(2) infinite;
+  }
+  @keyframes tagGlitchJitter {
+    0%, 100% { transform: translate(0, 0); }
+    25% { transform: translate(-1px, 1px); }
+    50% { transform: translate(1px, -1px); }
+    75% { transform: translate(-1px, -1px); }
+  }
+
+  .controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 20px; }
+  .controls .group { display: flex; gap: 6px; align-items: center; width: 100%; }
+  .controls #monthSel { flex: 1; min-width: 0; } /* month chooser fills the row */
+  label.fld { color: var(--dim); font-size: 11px; letter-spacing: 1px; text-transform: uppercase; }
+  select, input[type="number"] {
+    background: var(--panel); color: var(--text); border: 1px solid rgba(var(--main-rgb),0.4);
+    font-family: 'JetBrains Mono', monospace; font-size: 13px; padding: 7px 9px;
+  }
+  input[type="number"] { width: 64px; }
+  /* hide native spinner — custom arrows replace it */
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
+  /* custom year stepper */
+  .year-wrap { display: flex; align-items: stretch; }
+  .year-wrap input[type="number"] { border-right: none; }
+  .year-spin { display: flex; flex-direction: column; }
+  .year-btn {
+    flex: 1; width: 22px; padding: 0; cursor: pointer; line-height: 1;
+    background: var(--panel); color: var(--dim);
+    border: 1px solid rgba(var(--main-rgb),0.4); font-size: 8px;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .12s, color .12s, border-color .12s;
+  }
+  .year-btn:hover { background: var(--main); color: var(--bg); border-color: var(--main); }
+  .year-spin .year-btn + .year-btn { border-top: none; } /* shared middle edge */
+  /* custom focus highlight: a single ring around the WHOLE year-wrap (input +
+     arrows), nothing on the inner edges */
+  .year-wrap :focus { outline: none; }
+  .year-wrap:focus-within { outline: 2px solid var(--accent); outline-offset: 0px; }
+  /* same highlight on all toggles + buttons (year arrows excluded) */
+  .btn:focus, .nav-arrow:focus, .side-switch:focus, #monthSel:focus {
+    outline: 2px solid var(--accent); outline-offset: 0px;
+  }
+  .year-btn:focus { outline: none; }
+  /* Button system copied from commlink-ui */
+  .btn {
+    --btn-color: var(--yellow);
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    background: transparent; color: var(--btn-color);
+    height: 32px; padding: 0 16px; box-sizing: border-box;
+    font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 1; letter-spacing: 2px;
+    cursor: pointer; text-transform: uppercase;
+    transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+    border: none; margin: 0; vertical-align: middle;
+    --aug-border-all: 1px; --aug-border-bg: var(--btn-color);
+    --aug-inlay-all: 0px; --aug-inlay-bg: transparent;
+    --aug-tl: 8px; --aug-br: 8px;
+  }
+  .btn:hover {
+    background: color-mix(in srgb, var(--btn-color) 22%, transparent);
+    box-shadow: 0 0 12px color-mix(in srgb, var(--btn-color) 45%, transparent);
+  }
+  .btn.cyan { --btn-color: var(--cyan); }
+  .btn.export-btn { height: 44px; font-size: 14px; letter-spacing: 3px; --aug-tl: 12px; --aug-br: 12px; }
+
+  /* ---- Color palettes (pattern copied from commlink-ui) ---- */
+  .palette-row {
+    display: flex; align-items: center; gap: 10px; margin: 0;
+    padding: 12px 14px;
+    --aug-border-all: 1px; --aug-border-bg: rgba(var(--main-rgb),0.4);
+    --aug-tl: 10px; --aug-br: 10px;
+  }
+  .palette-row > label.fld { min-width: 52px; }
+  .color-grid { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .grid-break { flex-basis: 100%; height: 0; }   /* forces a row break: 5 swatches, then the rest */
+  .swatch { width: 28px; height: 28px; border: 1px solid var(--dim); cursor: pointer; transition: transform .1s, border-color .1s; }
+  .swatch:hover { transform: scale(1.1); }
+  .swatch.active { border-color: #fff; box-shadow: 0 0 8px currentColor; }
+  .custom-color-group {
+    display: inline-flex; align-items: center; justify-content: center; gap: 4px; padding: 4px;
+    background: transparent;
+    --aug-border-all: 1px; --aug-border-bg: rgba(var(--main-rgb),0.45);
+    --aug-tl: 8px; --aug-br: 8px;
+  }
+  .swatch-saved {
+    border: none !important;
+    --aug-border-all: 1px; --aug-border-bg: var(--dim); --aug-tl: 7px;
+  }
+  .swatch-saved.active { --aug-border-bg: #fff; }
+  .swatch-pick-btn {
+    position: relative; width: 28px; height: 28px; margin: 0; padding: 0;
+    color: var(--main); cursor: pointer; display: inline-block; background: transparent;
+    transition: background .15s; border: none;
+    --aug-border-all: 1px; --aug-border-bg: var(--main); --aug-br: 7px;
+  }
+  .swatch-pick-btn .pick-icon { position: absolute; inset: 0; margin: auto; width: 18px; height: 18px; pointer-events: none; }
+  .swatch-pick-btn input[type="color"] { position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer; border: none; padding: 0; }
+
+  /* ---- Month nav arrows (look ported from commlink-ui .side-switch labels) ---- */
+  .nav-arrow {
+    height: 34px; width: 38px;
+    background: var(--panel); border: 1px solid rgba(var(--main-rgb),0.4);
+    color: var(--dim); font-family: 'JetBrains Mono', monospace; font-size: 17px; font-weight: 700;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: background .15s, color .15s, border-color .15s;
+  }
+  .nav-arrow:hover { background: var(--main); color: var(--bg); border-color: var(--main); }
+
+  /* ---- Sliding toggle (ported from commlink-ui .side-switch / .fx) ---- */
+  .fx-toggle { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; justify-content: space-between; }
+  .fx-label { font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 1.5px; color: var(--main); text-transform: uppercase; }
+  .side-switch {
+    position: relative; height: 32px; width: 96px; background: var(--panel);
+    border: 1px solid rgba(var(--main-rgb),0.3); cursor: pointer; padding: 0; margin: 0;
+    display: flex; align-items: stretch; overflow: hidden; flex-shrink: 0;
+    font-family: 'JetBrains Mono', monospace; transition: border-color .15s;
+  }
+  .side-switch:hover { border-color: var(--main); }
+  .side-switch .thumb {
+    position: absolute; top: 0; left: 0; width: 50%; height: 100%;
+    background: color-mix(in srgb, var(--main) 22%, transparent);
+    transition: transform .22s cubic-bezier(.4,0,.2,1); z-index: 0;
+  }
+  .side-switch[data-pos="right"] .thumb { transform: translateX(100%); }
+  .side-switch .lab {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; letter-spacing: 1px; z-index: 1; position: relative;
+    pointer-events: none; color: var(--dim); transition: color .15s .08s;
+  }
+  .side-switch[data-pos="left"] .lab.l,
+  .side-switch[data-pos="right"] .lab.r { color: var(--main); }
+
+  /* 3-segment variant (S | M | L) — thumb is 1/3 wide and slides in thirds */
+  .side-switch.tri { width: 120px; }
+  .side-switch.tri .thumb { width: 33.3333%; }
+  .side-switch.tri[data-pos="m"] .thumb { transform: translateX(100%); }
+  .side-switch.tri[data-pos="l"] .thumb { transform: translateX(200%); }
+  .side-switch.tri[data-pos="s"] .lab.s,
+  .side-switch.tri[data-pos="m"] .lab.m,
+  .side-switch.tri[data-pos="l"] .lab.l3 { color: var(--main); }
+
+  /* ---- Capture frame ---- */
+  #capture {
+    position: relative;
+    --aug-border-all: 1px; --aug-border-bg: rgba(var(--main-rgb),0.5);
+    --aug-tl: 18px; --aug-tr: 18px; --aug-br: 18px; --aug-bl: 18px;
+    padding: 16px 18px 20px;
+    /* main-tinted bloom leaking from the top-right corner over a dark base,
+       with a soft white hotspot at the corner */
+    background:
+      radial-gradient(58% 44% at 100% -8%, rgba(255,255,255,0.32) 0%, rgba(255,255,255,0) 42%),
+      radial-gradient(135% 100% at 100% -12%, rgba(var(--main-rgb),0.50) 0%, rgba(var(--main-rgb),0.12) 28%, rgba(var(--main-rgb),0) 56%),
+      radial-gradient(90% 70% at 110% 114%, rgba(var(--main-rgb),0.20) 0%, rgba(var(--main-rgb),0) 48%),
+      linear-gradient(155deg, #05100c 0%, #07140f 55%, #081a13 100%);
+  }
+  .cal-head {
+    font-family: 'JetBrains Mono', monospace; font-weight: 700;
+    /* font-size is set by JS (fitHead) to fill the calendar width on one line.
+       letter-spacing is in em so width scales linearly with font-size. */
+    font-size: 80px; letter-spacing: 0.06em; color: var(--accent);
+    text-transform: uppercase; text-align: center; margin-bottom: 8px; line-height: 1;
+    white-space: nowrap;
+    text-shadow: 0 0 8px rgba(var(--accent-rgb),0.55), 0 0 22px rgba(var(--accent-rgb),0.35);
+  }
+  .grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0; }
+  .dow {
+    text-align: center; padding: 2px 0 8px; font-size: clamp(22px, 5vw, 36px); letter-spacing: 4px; font-weight: 700;
+    color: var(--accent); background: transparent; text-transform: uppercase;
+    text-shadow: 0 0 7px rgba(var(--accent-rgb),0.55), 0 0 18px rgba(var(--accent-rgb),0.3);
+    /* match the day cells' horizontal box geometry so each label centers over
+       its column (same 4px transparent border + -4px overlap as .cell) */
+    border: 4px solid transparent; border-bottom: 0; margin: 0 0 0 -4px;
+    /* nudge right by half the letter-spacing to offset the trailing gap */
+    text-indent: 4px;
+  }
+  .cell {
+    aspect-ratio: 1 / 1; background: transparent;
+    border: 4px solid rgb(var(--main-rgb)); /* one consistent, opaque line color */
+    box-shadow: inset 0 0 12px rgba(var(--main-rgb),0.12);
+    display: flex; align-items: center; justify-content: center;
+    /* Uniform grid lines: with gap:0 every cell draws its own border, so a
+       shared edge would otherwise stack two borders (double thickness) while
+       outer edges show one. The negative top/left margin pulls each cell onto
+       its neighbour so the two shared borders coincide into a single line.
+       KEEP THESE THREE IN SYNC — all equal the desired line width (4px):
+         border-width  = 4px
+         margin (t/l)  = -4px   (overlaps the shared border)
+         #grid padding =  4px   (offsets the first row/col overhang so the
+                                 grid still aligns with the weekday header) */
+    margin: -4px 0 0 -4px;
+  }
+
+  /* ============================================================
+     WEEKEND COLUMN TINT — three INDEPENDENT classes so each can be
+     tuned on its own:
+       .sat   = Saturday (either week-start)
+       .sun0  = Sunday as the FIRST column (Sun-start)
+       .sun6  = Sunday as the LAST column  (Mon-start)
+     Each has: (a) the day-cell tint, (b) the blank-cell tint, and
+     (c) the first-row (.r0) ::before strip that extends the tint UP
+     over the untinted header (--dow-h = measured header height).
+     ============================================================ */
+
+  /* --- SATURDAY --- */
+  .cell.sat { background: linear-gradient(rgba(var(--main-rgb),0.14), rgba(var(--main-rgb),0.14)) no-repeat center; }
+  .cell.blank.sat { background: linear-gradient(rgba(var(--main-rgb),0.14), rgba(var(--main-rgb),0.14)) no-repeat center; background-size: calc(100% + 9px) calc(100% + 7px); }
+  .cell.sat.r0 { position: relative; }
+  .cell.sat.r0::before {
+    content: ''; position: absolute; pointer-events: none;
+    left: -4px; right: -4px; bottom: calc(100% + 4px); height: var(--dow-h, 44px);
+    background: rgba(var(--main-rgb),0.14);
+  }
+
+  /* --- SUNDAY as FIRST column --- */
+  .cell.sun0 { background: linear-gradient(rgba(var(--main-rgb),0.14), rgba(var(--main-rgb),0.14)) no-repeat center; }
+  .cell.blank.sun0 { background: linear-gradient(rgba(var(--main-rgb),0.14), rgba(var(--main-rgb),0.14)) no-repeat center; background-size: calc(100% + 9px) calc(100% + 7px); }
+  .cell.sun0.r0 { position: relative; }
+  .cell.sun0.r0::before {
+    content: ''; position: absolute; pointer-events: none;
+    left: -4px; right: -4px; bottom: calc(100% + 4px); height: var(--dow-h, 44px);
+    background: rgba(var(--main-rgb),0.14);
+  }
+
+  /* --- SUNDAY as LAST column --- */
+  .cell.sun6 { background: linear-gradient(rgba(var(--main-rgb),0.14), rgba(var(--main-rgb),0.14)) no-repeat center; }
+  .cell.blank.sun6 { background: linear-gradient(rgba(var(--main-rgb),0.14), rgba(var(--main-rgb),0.14)) no-repeat center; background-size: calc(100% + 9px) calc(100% + 7px); }
+  .cell.sun6.r0 { position: relative; }
+  .cell.sun6.r0::before {
+    content: ''; position: absolute; pointer-events: none;
+    left: 0; right: -4px; bottom: calc(100% + 4px); height: var(--dow-h, 44px);
+    background: rgba(var(--main-rgb),0.14);
+  }
+
+  /* ====== PER-SIZE OVERRIDES — tweak each size independently ======
+     The block above is the default (applies to SMALL). These scoped rules
+     override the tweakable bits (header-strip offsets + blank background-size)
+     for MEDIUM and LARGE. Higher specificity → they win when that size is on.
+     Pre-filled with the defaults; edit freely. */
+
+  /* ---- MEDIUM ---- */
+  .calendar-area.size-m .cell.blank.sat  { background-size: calc(100% + 9px) calc(100% + 7px); }
+  .calendar-area.size-m .cell.sat.r0::before  { left: -4px; right: -4px; bottom: calc(100% + 3px); }
+  .calendar-area.size-m .cell.blank.sun0 { background-size: calc(100% + 9px) calc(100% + 7px); }
+  .calendar-area.size-m .cell.sun0.r0::before { left: -4px; right: -4px; bottom: calc(100% + 3px); }
+  .calendar-area.size-m .cell.blank.sun6 { background-size: calc(100% + 9px) calc(100% + 7px); }
+  .calendar-area.size-m .cell.sun6.r0::before { left: 0; right: -4px; bottom: calc(100% + 3px); }
+
+  /* ---- LARGE ---- */
+  .calendar-area.size-l .cell.blank.sat  { background-size: calc(100% + 9px) calc(100% + 7px); }
+  .calendar-area.size-l .cell.sat.r0::before  { left: -4px; right: -4px; bottom: calc(100% + 3px); }
+  .calendar-area.size-l .cell.blank.sun0 { background-size: calc(100% + 9px) calc(100% + 7px); }
+  .calendar-area.size-l .cell.sun0.r0::before { left: -4px; right: -4px; bottom: calc(100% + 3px); }
+  .calendar-area.size-l .cell.blank.sun6 { background-size: calc(100% + 9px) calc(100% + 7px); }
+  .calendar-area.size-l .cell.sun6.r0::before { left: 0; right: -4px; bottom: calc(100% + 3px); }
+
+  .cell.blank { background: transparent; border-color: transparent; box-shadow: none; }
+  .cell .num {
+    font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: clamp(32px, 9vw, 60px);
+    line-height: 1; color: var(--accent); text-shadow: 0 0 8px rgba(var(--accent-rgb),0.5);
+  }
+
+  .hint { color: var(--dim); font-size: 11px; letter-spacing: 1px; margin-top: 14px; }
+  .toast {
+    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+    background: var(--panel); border: 1px solid var(--accent); color: var(--accent);
+    padding: 10px 18px; font-size: 12px; letter-spacing: 1px; opacity: 0; pointer-events: none;
+    transition: opacity .2s; z-index: 50;
+  }
+  .toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="logo">&gt; CHRONOS_</div>
+    <div class="tag"><span id="tagWord" class="glitchable">CALENDAR CONSTRUCTOR</span><span id="tagMeta" class="tag-meta"> // v<span id="tagVersion">1.0.0</span></span></div>
+  </header>
+
+  <div class="layout">
+  <aside class="sidebar">
+
+  <div class="palette-row" data-augmented-ui="tl-clip br-clip border">
+    <label class="fld">Main</label>
+    <div class="color-grid" id="mainPalette">
+      <div class="swatch" data-color="#fcee0a" style="background:#fcee0a; color:#fcee0a"></div>
+      <div class="swatch" data-color="#00f0ff" style="background:#00f0ff; color:#00f0ff"></div>
+      <div class="swatch" data-color="#ff003c" style="background:#ff003c; color:#ff003c"></div>
+      <div class="swatch" data-color="#39ff14" style="background:#39ff14; color:#39ff14"></div>
+      <div class="swatch" data-color="#ff8800" style="background:#ff8800; color:#ff8800"></div>
+      <div class="grid-break"></div>
+      <div class="swatch" data-color="#c800ff" style="background:#c800ff; color:#c800ff"></div>
+      <div class="swatch" data-color="#00ff9d" style="background:#00ff9d; color:#00ff9d"></div>
+      <div class="swatch" data-color="#ff10f0" style="background:#ff10f0; color:#ff10f0"></div>
+      <div class="custom-color-group" data-augmented-ui="tl-clip br-clip border">
+        <div class="swatch swatch-saved" data-saved-main data-augmented-ui="tl-clip border" hidden></div>
+        <label class="swatch-pick-btn" title="Pick any color" data-augmented-ui="br-clip border">
+          <input type="color" id="customMain" />
+          <svg class="pick-icon" viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M480-80q-82 0-155-31.5t-127.5-86Q143-252 111.5-325T80-480q0-83 32.5-156t88-127Q256-817 330-848.5T488-880q80 0 151 27.5t124.5 76q53.5 48.5 85 115T880-518q0 115-70 176.5T640-280h-74q-9 0-12.5 5t-3.5 11q0 12 15 34.5t15 51.5q0 50-27.5 74T480-80Zm0-400Zm-177 23q17-17 17-43t-17-43q-17-17-43-17t-43 17q-17 17-17 43t17 43q17 17 43 17t43-17Zm120-160q17-17 17-43t-17-43q-17-17-43-17t-43 17q-17 17-17 43t17 43q17 17 43 17t43-17Zm200 0q17-17 17-43t-17-43q-17-17-43-17t-43 17q-17 17-17 43t17 43q17 17 43 17t43-17Zm120 160q17-17 17-43t-17-43q-17-17-43-17t-43 17q-17 17-17 43t17 43q17 17 43 17t43-17ZM480-160q9 0 14.5-5t5.5-13q0-14-15-33t-15-57q0-42 29-67t71-25h70q66 0 113-38.5T800-518q0-121-92.5-201.5T488-800q-136 0-232 93t-96 227q0 133 93.5 226.5T480-160Z"/></svg>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div class="palette-row" data-augmented-ui="tl-clip br-clip border">
+    <label class="fld">Accent</label>
+    <div class="color-grid" id="accentPalette">
+      <div class="swatch" data-color="#fcee0a" style="background:#fcee0a; color:#fcee0a"></div>
+      <div class="swatch" data-color="#00f0ff" style="background:#00f0ff; color:#00f0ff"></div>
+      <div class="swatch" data-color="#ff003c" style="background:#ff003c; color:#ff003c"></div>
+      <div class="swatch" data-color="#39ff14" style="background:#39ff14; color:#39ff14"></div>
+      <div class="swatch" data-color="#ff8800" style="background:#ff8800; color:#ff8800"></div>
+      <div class="grid-break"></div>
+      <div class="swatch" data-color="#c800ff" style="background:#c800ff; color:#c800ff"></div>
+      <div class="swatch" data-color="#00ff9d" style="background:#00ff9d; color:#00ff9d"></div>
+      <div class="swatch" data-color="#ff10f0" style="background:#ff10f0; color:#ff10f0"></div>
+      <div class="custom-color-group" data-augmented-ui="tl-clip br-clip border">
+        <div class="swatch swatch-saved" data-saved-accent data-augmented-ui="tl-clip border" hidden></div>
+        <label class="swatch-pick-btn" title="Pick any color" data-augmented-ui="br-clip border">
+          <input type="color" id="customAccent" />
+          <svg class="pick-icon" viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M480-80q-82 0-155-31.5t-127.5-86Q143-252 111.5-325T80-480q0-83 32.5-156t88-127Q256-817 330-848.5T488-880q80 0 151 27.5t124.5 76q53.5 48.5 85 115T880-518q0 115-70 176.5T640-280h-74q-9 0-12.5 5t-3.5 11q0 12 15 34.5t15 51.5q0 50-27.5 74T480-80Zm0-400Zm-177 23q17-17 17-43t-17-43q-17-17-43-17t-43 17q-17 17-17 43t17 43q17 17 43 17t43-17Zm120-160q17-17 17-43t-17-43q-17-17-43-17t-43 17q-17 17-17 43t17 43q17 17 43 17t43-17Zm200 0q17-17 17-43t-17-43q-17-17-43-17t-43 17q-17 17-17 43t17 43q17 17 43 17t43-17Zm120 160q17-17 17-43t-17-43q-17-17-43-17t-43 17q-17 17-17 43t17 43q17 17 43 17t43-17ZM480-160q9 0 14.5-5t5.5-13q0-14-15-33t-15-57q0-42 29-67t71-25h70q66 0 113-38.5T800-518q0-121-92.5-201.5T488-800q-136 0-232 93t-96 227q0 133 93.5 226.5T480-160Z"/></svg>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div class="fx-toggle">
+    <span class="fx-label">// SIZE:</span>
+    <button class="side-switch fx tri" id="sizeToggle" type="button" data-pos="m" aria-label="calendar size">
+      <span class="thumb"></span>
+      <span class="lab s">S</span>
+      <span class="lab m">M</span>
+      <span class="lab l3">L</span>
+    </button>
+  </div>
+
+  <div class="fx-toggle">
+    <span class="fx-label">// FIRST WEEKDAY:</span>
+    <button class="side-switch fx" id="weekStartToggle" type="button" data-pos="left" aria-label="first weekday">
+      <span class="thumb"></span>
+      <span class="lab l">MON</span>
+      <span class="lab r">SUN</span>
+    </button>
+  </div>
+
+  <div class="fx-toggle">
+    <span class="fx-label">// HIGHLIGHT SATURDAY:</span>
+    <button class="side-switch fx" id="satToggle" type="button" data-pos="right" aria-label="highlight saturday">
+      <span class="thumb"></span>
+      <span class="lab l">NO</span>
+      <span class="lab r">YES</span>
+    </button>
+  </div>
+
+  <div class="fx-toggle">
+    <span class="fx-label">// HIGHLIGHT SUNDAY:</span>
+    <button class="side-switch fx" id="sunToggle" type="button" data-pos="right" aria-label="highlight sunday">
+      <span class="thumb"></span>
+      <span class="lab l">NO</span>
+      <span class="lab r">YES</span>
+    </button>
+  </div>
+
+  <div class="controls">
+    <div class="group">
+      <button class="nav-arrow" id="prevBtn" type="button" aria-label="previous month">&lt;</button>
+      <select id="monthSel" aria-label="month"></select>
+      <div class="year-wrap">
+        <input type="number" id="yearInp" min="0" max="9999" aria-label="year" />
+        <div class="year-spin">
+          <button class="year-btn" id="yearUp" type="button" aria-label="year up">▲</button>
+          <button class="year-btn" id="yearDown" type="button" aria-label="year down">▼</button>
+        </div>
+      </div>
+      <button class="nav-arrow" id="nextBtn" type="button" aria-label="next month">&gt;</button>
+    </div>
+  </div>
+
+  <button class="btn export-btn" data-augmented-ui="tl-clip br-clip both" id="exportBtn" type="button">⬇ SAVE PNG</button>
+
+  </aside><!-- /sidebar -->
+
+  <div class="calendar-area">
+    <div class="preview-row">
+      <div id="capture" data-augmented-ui="tl-clip tr-clip br-clip bl-clip border">
+        <div class="cal-head" id="calHead"></div>
+        <!-- same left padding as #grid so header columns align with day columns -->
+      <div class="grid" id="dowRow" style="padding:0 0 0 4px"></div>
+        <!-- padding (4px) offsets the cells' -4px overlap margin so the lattice
+             lines up with the weekday header; keep it equal to the cell line width.
+             No top gap, so the SAT/SUN header tint flows straight into the column. -->
+        <div class="grid" id="grid" style="margin-top:0; padding:4px 0 0 4px"></div>
+      </div>
+      <div class="preview-label" id="previewLabel"></div>
+    </div>
+    <div class="hint">// Pick a month and export.</div>
+  </div>
+
+  </div><!-- /layout -->
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  const MONTHS = ['JANUARY','FEBRUARY','MARCH','APRIL','MAY','JUNE','JULY','AUGUST','SEPTEMBER','OCTOBER','NOVEMBER','DECEMBER'];
+  const DOW_MON = ['MON','TUE','WED','THU','FRI','SAT','SUN'];
+  const DOW_SUN = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+  const DEFAULT_MAIN = '#00f0ff';
+  const DEFAULT_ACCENT = '#fcee0a';
+  const DEFAULT_CUSTOM_MAIN = '#1fd1a0';   // pre-loaded into the Main custom slot
+  const DEFAULT_CUSTOM_ACCENT = '#ff7b00'; // pre-loaded into the Accent custom slot
+  const LS_KEY = 'chronos.v1';
+  // Export scale per size: S/M are 1× (PNG matches on-screen); L renders at 2×.
+  const sizeRatio = () => (store.size === 'l' ? 2 : 1);
+
+  let store = {};
+  try { store = JSON.parse(localStorage.getItem(LS_KEY) || '{}'); } catch (e) { store = {}; }
+  if (!store.accent) store.accent = DEFAULT_ACCENT;
+  if (!store.main) store.main = DEFAULT_MAIN;
+  if (!store.customMain) store.customMain = DEFAULT_CUSTOM_MAIN;
+  if (!store.customAccent) store.customAccent = DEFAULT_CUSTOM_ACCENT;
+  if (store.weekStart !== 'sun') store.weekStart = 'mon'; // 'mon' | 'sun'
+  if (typeof store.hlSat !== 'boolean') store.hlSat = true; // highlight Saturday column
+  if (typeof store.hlSun !== 'boolean') store.hlSun = true; // highlight Sunday column
+  if (['s','m','l'].indexOf(store.size) < 0) store.size = 'm'; // calendar size
+
+  const now = new Date();
+  // Restore last-viewed month/year if saved, else default to the current date.
+  let year = (typeof store.year === 'number') ? store.year : now.getFullYear();
+  let month = (typeof store.month === 'number') ? store.month : now.getMonth(); // 0-indexed
+
+  const $ = (id) => document.getElementById(id);
+  const monthSel = $('monthSel'), yearInp = $('yearInp'), grid = $('grid'), dowRow = $('dowRow');
+  const calHead = $('calHead'), toast = $('toast');
+  const mainPalette = $('mainPalette'), accentPalette = $('accentPalette');
+  const customMain = $('customMain'), customAccent = $('customAccent');
+  const weekStartToggle = $('weekStartToggle');
+  const satToggle = $('satToggle'), sunToggle = $('sunToggle'), sizeToggle = $('sizeToggle');
+  const calendarArea = document.querySelector('.calendar-area');
+  const capture = $('capture'), previewLabel = $('previewLabel');
+
+  function save() { localStorage.setItem(LS_KEY, JSON.stringify(store)); }
+  // "#rrggbb" -> "r,g,b" for use inside rgba(var(--x-rgb), a)
+  function hexToRgb(hex) {
+    let h = (hex || '').replace('#', '');
+    if (h.length === 3) h = h.split('').map(c => c + c).join('');
+    const n = parseInt(h, 16);
+    return ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255);
+  }
+  // Mirror commlink: show the saved custom swatch when set, highlight the active swatch.
+  function refreshPalette(wrap, current, custom, savedSel, input) {
+    const saved = wrap.querySelector(savedSel);
+    if (saved) {
+      if (custom) {
+        saved.hidden = false;
+        saved.dataset.color = custom;
+        saved.style.background = custom;
+        saved.style.color = custom;
+      } else { saved.hidden = true; }
+    }
+    wrap.querySelectorAll('.swatch').forEach(sw => sw.classList.toggle('active', sw.dataset.color === current));
+    if (input && custom) input.value = custom;
+  }
+  function applyColors() {
+    const root = document.documentElement.style;
+    root.setProperty('--main', store.main);
+    root.setProperty('--main-rgb', hexToRgb(store.main));
+    root.setProperty('--accent', store.accent);
+    root.setProperty('--accent-rgb', hexToRgb(store.accent));
+    refreshPalette(mainPalette, store.main, store.customMain, '[data-saved-main]', customMain);
+    refreshPalette(accentPalette, store.accent, store.customAccent, '[data-saved-accent]', customAccent);
+  }
+  function showToast(msg) {
+    toast.textContent = msg; toast.classList.add('show');
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(() => toast.classList.remove('show'), 1800);
+  }
+
+  // Build static controls
+  MONTHS.forEach((m, i) => { const o = document.createElement('option'); o.value = i; o.textContent = m; monthSel.appendChild(o); });
+
+  // Palette clicks (preset + saved-custom swatches both carry data-color)
+  function wirePalette(wrap, set) {
+    wrap.addEventListener('click', (e) => {
+      const sw = e.target.closest('.swatch');
+      if (!sw || !sw.dataset.color) return;
+      set(sw.dataset.color); applyColors(); save();
+    });
+  }
+  wirePalette(mainPalette, v => { store.main = v; });
+  wirePalette(accentPalette, v => { store.accent = v; });
+  customMain.addEventListener('input', () => { store.main = customMain.value; store.customMain = customMain.value; applyColors(); save(); });
+  customAccent.addEventListener('input', () => { store.accent = customAccent.value; store.customAccent = customAccent.value; applyColors(); save(); });
+
+  function daysInMonth(y, m) { return new Date(y, m + 1, 0).getDate(); }
+  const sunStart = () => store.weekStart === 'sun';
+  function dowLabels() { return sunStart() ? DOW_SUN : DOW_MON; }
+  // Column offset of the 1st: getDay() is 0=Sun..6=Sat.
+  function firstOffset(y, m) {
+    const d = new Date(y, m, 1).getDay();
+    return sunStart() ? d : (d + 6) % 7;
+  }
+  // Which column is Sat / Sun, depending on week start.
+  function colIsSat(col) { return sunStart() ? col === 6 : col === 5; }
+  function colIsSun(col) { return sunStart() ? col === 0 : col === 6; }
+  // Position-specific weekend class so each can be styled independently:
+  //   .sat  = Saturday  |  .sun0 = Sunday as FIRST column  |  .sun6 = Sunday as LAST column
+  function weekendClass(col) {
+    if (colIsSat(col) && store.hlSat) return ' weekend sat';
+    if (colIsSun(col) && store.hlSun) return col === 0 ? ' weekend sun0' : ' weekend sun6';
+    return '';
+  }
+
+  // Scale the MONTH YEAR header so it fills the calendar width on one line.
+  // letter-spacing is in em, so text width is linear in font-size → one measure
+  // at a reference size gives the exact scale factor.
+  // Measure the weekday-header height into --dow-h (the first-row weekend strips
+  // use it). Header font-size differs per SIZE, so re-measure on size change too.
+  function measureDowH() {
+    document.documentElement.style.setProperty('--dow-h', dowRow.offsetHeight + 'px');
+  }
+  function fitHead() {
+    const REF = 100;
+    calHead.style.fontSize = REF + 'px';
+    const avail = calHead.clientWidth;        // content width = calendar width
+    const textW = calHead.scrollWidth;        // text width at REF px
+    if (textW > 0) calHead.style.fontSize = Math.floor(REF * avail / textW) + 'px';
+  }
+
+  // "// PREVIEW: NxMpx" — exported PNG size = on-screen px × export scale.
+  // Appends "@2x" when the current size renders at a higher scale.
+  function updatePreviewLabel() {
+    const r = sizeRatio();
+    const w = Math.round(capture.offsetWidth);   // on-screen / base px
+    const h = Math.round(capture.offsetHeight);
+    let txt = '// PREVIEW :: ' + w + ' x ' + h + ' px';
+    if (r > 1) txt += ' (x' + r + ' = ' + (w * r) + ' x ' + (h * r) + ')';
+    previewLabel.textContent = txt;
+  }
+
+  function render() {
+    monthSel.value = month;
+    yearInp.value = year;
+    calHead.textContent = MONTHS[month] + ' ' + year;
+    // Persist the current view so reloads restore month/year (accent saved separately).
+    store.year = year; store.month = month; save();
+
+    // weekday header row (no tint — the first day-row's weekend cells cover it)
+    dowRow.innerHTML = '';
+    dowLabels().forEach((d) => {
+      const c = document.createElement('div');
+      c.className = 'dow';
+      c.textContent = d; dowRow.appendChild(c);
+    });
+    measureDowH(); // expose header height so first-row cells can elongate the tint up
+
+    // day grid
+    grid.innerHTML = '';
+    const offset = firstOffset(year, month);
+    const total = daysInMonth(year, month);
+    const cells = Math.ceil((offset + total) / 7) * 7;
+
+    for (let i = 0; i < cells; i++) {
+      const dayNum = i - offset + 1;
+      const cell = document.createElement('div');
+      if (dayNum < 1 || dayNum > total) {
+        // Tint LEADING blank weekend cells (dayNum < 1) so the column wash stays
+        // continuous from the header down to the first day when a month starts
+        // mid-week. Trailing blanks (dayNum > total) stay clear — no tint below
+        // the last day.
+        const leading = dayNum < 1;
+        cell.className = 'cell blank' + (i < 7 ? ' r0' : '') + (leading ? weekendClass(i % 7) : '');
+        grid.appendChild(cell);
+        continue;
+      }
+      cell.className = 'cell' + (i < 7 ? ' r0' : '') + weekendClass(i % 7);
+      const num = document.createElement('div');
+      num.className = 'num'; num.textContent = dayNum;
+      cell.appendChild(num);
+      grid.appendChild(cell);
+    }
+
+    fitHead();
+    updatePreviewLabel();
+  }
+  // Re-fit the header + refresh the size label when the calendar width changes
+  window.addEventListener('resize', () => { measureDowH(); fitHead(); updatePreviewLabel(); });
+
+  // Navigation
+  function go(deltaMonths) {
+    month += deltaMonths;
+    while (month < 0) { month += 12; year--; }
+    while (month > 11) { month -= 12; year++; }
+    render();
+  }
+  $('prevBtn').addEventListener('click', () => go(-1));
+  $('nextBtn').addEventListener('click', () => go(1));
+
+  // First-weekday toggle (MON | SUN)
+  function syncWeekToggle() { weekStartToggle.dataset.pos = sunStart() ? 'right' : 'left'; }
+  weekStartToggle.addEventListener('click', () => {
+    store.weekStart = sunStart() ? 'mon' : 'sun';
+    syncWeekToggle(); render(); save();
+  });
+
+  // Boolean YES/NO toggles (data-pos right = YES) — used for SAT/SUN highlight
+  function wireBoolToggle(btn, key) {
+    const sync = () => { btn.dataset.pos = store[key] ? 'right' : 'left'; };
+    btn.addEventListener('click', () => { store[key] = !store[key]; sync(); render(); save(); });
+    return sync;
+  }
+  const syncSat = wireBoolToggle(satToggle, 'hlSat');
+  const syncSun = wireBoolToggle(sunToggle, 'hlSun');
+
+  // Size toggle (S | M | L) — caps the calendar width, then re-fits the header
+  function applySize() {
+    calendarArea.classList.remove('size-s', 'size-m', 'size-l');
+    calendarArea.classList.add('size-' + store.size);
+    sizeToggle.dataset.pos = store.size;
+    measureDowH(); // header font-size changed with the size → re-measure
+    fitHead();
+    updatePreviewLabel();
+  }
+  sizeToggle.addEventListener('click', () => {
+    const order = ['s', 'm', 'l'];
+    store.size = order[(order.indexOf(store.size) + 1) % 3];
+    applySize(); save();
+  });
+  monthSel.addEventListener('change', () => { month = parseInt(monthSel.value, 10); render(); });
+  yearInp.addEventListener('change', () => {
+    const y = parseInt(yearInp.value, 10);
+    if (!isNaN(y)) { year = Math.max(0, Math.min(9999, y)); render(); }
+  });
+  // Custom year stepper arrows
+  function stepYear(delta) { year = Math.max(0, Math.min(9999, year + delta)); render(); }
+  $('yearUp').addEventListener('click', () => stepYear(1));
+  $('yearDown').addEventListener('click', () => stepYear(-1));
+
+  // PNG export
+  $('exportBtn').addEventListener('click', async () => {
+    const node = $('capture');
+    try {
+      // No backgroundColor → transparent canvas, so the augmented-ui
+      // clipped corners stay transparent in the exported PNG.
+      const dataUrl = await htmlToImage.toPng(node, { pixelRatio: sizeRatio() });
+      const a = document.createElement('a');
+      a.download = 'chronos_' + year + '_' + String(month + 1).padStart(2, '0') + '_' + Date.now() + '.png';
+      a.href = dataUrl;
+      a.click();
+      showToast('PNG EXPORTED');
+    } catch (err) {
+      console.error(err);
+      showToast('EXPORT FAILED');
+    }
+  });
+
+  applyColors();
+  syncWeekToggle();
+  syncSat();
+  syncSun();
+  applySize();
+  render();
+
+  // ---- Header tag glitch (ported from commlink-ui effects.js) ----
+  // Periodically scrambles CALENDAR CONSTRUCTOR <-> BORROW YOUR TIME and back.
+  (function startTagGlitch() {
+    const el = $('tagWord');
+    if (!el) return;
+    const ORIGINAL = 'CALENDAR CONSTRUCTOR';
+    const TARGET = 'BORROW YOUR TIME';
+    const CHARS = '!@#$%&*<>{}[]/|01ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const maxLen = Math.max(ORIGINAL.length, TARGET.length);
+
+    function scrambleFrame(target, revealed) {
+      let out = '';
+      for (let i = 0; i < maxLen; i++) {
+        if (i >= target.length) { out += ' '; continue; }
+        if (i < revealed) { out += target[i]; continue; }
+        out += CHARS[Math.floor(Math.random() * CHARS.length)];
+      }
+      return out;
+    }
+    function runScramble(target, onDone) {
+      const steps = 8;
+      let step = 0;
+      const id = setInterval(() => {
+        step++;
+        const revealed = Math.floor((step / steps) * target.length);
+        el.textContent = scrambleFrame(target, revealed);
+        if (step >= steps) {
+          clearInterval(id);
+          el.textContent = target + ' '.repeat(maxLen - target.length);
+          onDone();
+        }
+      }, 40);
+    }
+    function runGlitch() {
+      el.classList.add('glitching');
+      runScramble(TARGET, () => {
+        setTimeout(() => {
+          runScramble(ORIGINAL, () => {
+            el.classList.remove('glitching');
+            el.textContent = ORIGINAL;
+            setTimeout(runGlitch, 14000 + Math.random() * 18000);
+          });
+        }, 700);
+      });
+    }
+    setTimeout(runGlitch, 8000 + Math.random() * 6000);
+  })();
+
+  // ---- Version hover-morph (ported from commlink-ui): hover " // vX" to
+  // scramble into " // changes: N" (N = GitHub commit count) and back. ----
+  (function setupVersionMorph() {
+    const meta = $('tagMeta');
+    if (!meta) return;
+    const GH_REPO = 'CyberDelaai/chronos-ui';
+    const VER = ' // v1.0.0';
+    const CHARS = '!@#$%&*<>{}[]/|01ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    let commitCount = '';
+
+    async function fetchCommitCount() {
+      const CK = 'chronos:commitCount', CA = 'chronos:commitCountAt', TTL = 3600000;
+      const cached = localStorage.getItem(CK);
+      const at = parseInt(localStorage.getItem(CA) || '0', 10);
+      if (cached && (Date.now() - at) < TTL) return cached;
+      try {
+        const r = await fetch('https://api.github.com/repos/' + GH_REPO + '/commits?per_page=1');
+        if (!r.ok) return cached || '';
+        const link = r.headers.get('Link');
+        const m = link && link.match(/<[^>]*[?&]page=(\d+)>;\s*rel="last"/);
+        let count = m ? m[1] : null;
+        if (!count) { const arr = await r.json().catch(() => null); if (Array.isArray(arr)) count = String(arr.length); }
+        if (count) { localStorage.setItem(CK, count); localStorage.setItem(CA, String(Date.now())); return count; }
+      } catch (e) { /* offline / blocked */ }
+      return cached || '';
+    }
+    fetchCommitCount().then(c => { if (c) commitCount = c; });
+
+    let timer = null;
+    function morphTo(target) {
+      if (timer) { clearInterval(timer); timer = null; }
+      const maxLen = Math.max(meta.textContent.length, target.length);
+      const steps = 7; let step = 0;
+      timer = setInterval(() => {
+        step++;
+        const revealed = Math.floor((step / steps) * target.length);
+        let out = '';
+        for (let i = 0; i < maxLen; i++) {
+          if (i >= target.length) { out += ' '; continue; }
+          out += i < revealed ? target[i] : CHARS[Math.floor(Math.random() * CHARS.length)];
+        }
+        meta.textContent = out;
+        if (step >= steps) { clearInterval(timer); timer = null; meta.textContent = target; }
+      }, 28);
+    }
+    meta.addEventListener('mouseenter', () => { if (commitCount) morphTo(' // changes: ' + commitCount); });
+    meta.addEventListener('mouseleave', () => morphTo(VER));
+  })();
+})();
+</script>
+</body>
+</html>
