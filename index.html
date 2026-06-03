@@ -1,4 +1,4 @@
-<!-- CHRONOS v1.0.3 -->
+<!-- CHRONOS v1.0.4 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -447,7 +447,7 @@
         <a class="app-menu-item current" href="https://cyberdeck.tools/chronos-ui/" aria-current="page">&gt; CHRONOS_</a>
       </nav>
     </div>
-    <div class="tag"><span id="tagWord" class="glitchable">CALENDAR CONSTRUCTOR</span><span id="tagMeta" class="tag-meta"> // v<span id="tagVersion">1.0.3</span></span></div>
+    <div class="tag"><span id="tagWord" class="glitchable">CALENDAR CONSTRUCTOR</span><span id="tagMeta" class="tag-meta"> // v<span id="tagVersion">1.0.4</span></span></div>
   </header>
 
   <div class="layout">
@@ -838,6 +838,14 @@
   applySize();
   render();
 
+  // The initial render() measures the header against whatever font is loaded;
+  // before the embedded JetBrains Mono swaps in that's a fallback with different
+  // metrics, so the fitted month/year can overflow the calendar borders. Re-fit
+  // once the real font is ready.
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(() => { measureDowH(); fitHead(); updatePreviewLabel(); });
+  }
+
   // ---- Logo tool-switcher dropdown ----
   (function setupAppMenu() {
     const btn = $('logoBtn');
@@ -910,7 +918,7 @@
     const meta = $('tagMeta');
     if (!meta) return;
     const GH_REPO = 'CyberDelaai/chronos-ui';
-    const VER = ' // v1.0.3';
+    const VER = ' // v1.0.4';
     const CHARS = '!@#$%&*<>{}[]/|01ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     let commitCount = '';
 

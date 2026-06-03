@@ -29,7 +29,7 @@ the colors and layout, then click **⬇ SAVE PNG**.
 
 ## Version
 
-`1.0.3`
+`1.0.4`
 
 ## License
 
