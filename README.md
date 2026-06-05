@@ -19,6 +19,9 @@ game masters and netrunner handouts.
   matches the on-screen `// PREVIEW: NxMpx` label (L renders at 2× for crisper output).
 - **First weekday toggle** — start the week on Monday or Sunday.
 - **Weekend highlighting** — independently highlight Saturday and/or Sunday.
+- **Custom background** — upload, paste, or drag-and-drop an image onto the
+  calendar; crop it to the calendar's aspect (with recrop), tune brightness,
+  and it exports with the PNG.
 - **Self-contained fonts** — JetBrains Mono is embedded as base64 `@font-face` rules,
   so the typeface renders correctly in the exported PNG without any external font fetch.
 
@@ -35,7 +38,7 @@ the colors and layout, then click **⬇ SAVE PNG**.
 
 ## Version
 
-`1.1.4`
+`1.1.5`
 
 ## License
 

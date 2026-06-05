@@ -1,4 +1,4 @@
-<!-- CHRONOS v1.1.4 -->
+<!-- CHRONOS v1.1.5 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -334,6 +334,7 @@
   /* ---- Capture frame ---- */
   #capture {
     position: relative;
+    z-index: 0; /* stacking context: #captureBg slots between gradient and content */
     --aug-border-all: 1px; --aug-border-bg: rgba(var(--main-rgb),0.5);
     --aug-tl: 18px; --aug-tr: 18px; --aug-br: 18px; --aug-bl: 18px;
     padding: 16px 18px 20px;
@@ -488,6 +489,59 @@
     transition: opacity .2s; z-index: 50;
   }
   .toast.show { opacity: 1; }
+
+  /* ---- Custom calendar background (ported from commlink-ui bg picker) ---- */
+  /* image layer between the capture gradient and the calendar content */
+  #captureBg {
+    position: absolute; inset: 0; z-index: -1;
+    background-size: cover; background-position: center;
+    pointer-events: none;
+  }
+  #captureBg[hidden] { display: none; }
+  #capture.bg-drop-target { outline: 2px dashed var(--main); outline-offset: -6px; }
+  .bg-field { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
+  .btn-row { display: flex; gap: 8px; align-items: center; }
+  .btn-row .btn { --btn-color: var(--main); flex: 1; padding: 0 8px; }
+  .btn-row .btn.danger { --btn-color: var(--magenta); flex: 0 0 36px; }
+  #bgFile { display: none; }
+  .brightness-row { display: flex; align-items: center; gap: 8px; }
+  .brightness-tag, .brightness-val { font-size: 10px; letter-spacing: 1px; color: var(--dim); }
+  .brightness-val { min-width: 34px; text-align: right; }
+  .brightness-row input[type="range"] { flex: 1; accent-color: var(--main); }
+
+  /* ---- Crop modal (ported from commlink-ui crop.js + base.css) ---- */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.75);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 200; backdrop-filter: blur(2px);
+  }
+  .modal-overlay[hidden] { display: none; }
+  .modal-content {
+    background: var(--panel); padding: 24px; width: 90%; max-width: 540px;
+    --aug-border-all: 1px; --aug-border-bg: rgba(var(--accent-rgb),0.45);
+    --aug-tl: 14px; --aug-tr: 14px; --aug-br: 14px; --aug-bl: 14px;
+  }
+  .modal-content h2 {
+    margin: 0 0 18px 0; color: var(--accent);
+    font-size: 13px; letter-spacing: 3px; text-transform: uppercase;
+  }
+  .crop-stage {
+    position: relative; width: 100%; height: 360px; background: #000;
+    border: 1px solid rgba(var(--main-rgb),0.25); overflow: hidden;
+    display: flex; align-items: center; justify-content: center; user-select: none;
+  }
+  .crop-stage img { max-width: 100%; max-height: 100%; display: block; pointer-events: none; -webkit-user-drag: none; }
+  .crop-frame {
+    position: absolute; border: 2px solid var(--main);
+    box-shadow: 0 0 0 9999px rgba(0,0,0,0.55), 0 0 12px rgba(var(--main-rgb),0.5);
+    cursor: move;
+  }
+  .crop-handle {
+    position: absolute; right: -7px; bottom: -7px; width: 14px; height: 14px;
+    background: var(--main); cursor: nwse-resize;
+  }
+  .crop-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 18px; }
+  .crop-actions #cropMax { margin-right: auto; }
   /* Fixed license stamp pinned to the bottom of the viewport (sits behind
      content, never enters #capture so it stays out of exported PNGs). */
   .footer-stamp {
@@ -518,7 +572,7 @@
         <a class="app-menu-item current" href="https://cyberdeck.tools/chronos-ui/" aria-current="page">&gt; CHRONOS_</a>
       </nav>
     </div>
-    <div class="tag"><span id="tagWord" class="glitchable">CALENDAR CONSTRUCTOR</span><span id="tagMeta" class="tag-meta"> // v<span id="tagVersion">1.1.4</span></span></div>
+    <div class="tag"><span id="tagWord" class="glitchable">CALENDAR CONSTRUCTOR</span><span id="tagMeta" class="tag-meta"> // v<span id="tagVersion">1.1.5</span></span></div>
   </header>
 
   <div class="layout">
@@ -648,6 +702,22 @@
     </button>
   </div>
 
+  <div class="bg-field">
+    <span class="fx-label">// BACKGROUND:</span>
+    <div class="btn-row">
+      <label class="btn" data-augmented-ui="tl-clip br-clip border" for="bgFile">UPLOAD</label>
+      <input type="file" id="bgFile" accept="image/*" />
+      <button class="btn" data-augmented-ui="tl-clip br-clip border" id="pasteBg" type="button" title="Paste from clipboard">PASTE</button>
+      <button class="btn" data-augmented-ui="tl-clip br-clip border" id="recropBg" type="button" title="Recrop current background">RECROP</button>
+      <button class="btn danger" data-augmented-ui="tl-clip br-clip border" id="clearBg" type="button" aria-label="clear background">✕</button>
+    </div>
+    <div class="brightness-row">
+      <span class="brightness-tag">BRIGHT</span>
+      <input type="range" id="bgBrightness" min="0" max="1.5" step="0.05" value="0.55" />
+      <span class="brightness-val" id="bgBrightnessVal">55%</span>
+    </div>
+  </div>
+
   <div class="controls">
     <div class="group">
       <button class="nav-arrow" id="prevBtn" type="button" aria-label="previous month">&lt;</button>
@@ -670,6 +740,7 @@
   <div class="calendar-area">
     <div class="preview-row">
       <div id="capture" data-augmented-ui="tl-clip tr-clip br-clip bl-clip border">
+        <div id="captureBg" hidden></div>
         <div class="cal-head" id="calHead"></div>
         <!-- same left padding as #grid so header columns align with day columns -->
       <div class="grid" id="dowRow" style="padding:0 0 0 4px"></div>
@@ -689,6 +760,23 @@
   </div><!-- /layout -->
 </div>
 <div class="toast" id="toast"></div>
+<div class="modal-overlay" id="cropModal" hidden>
+  <div class="modal-content" data-augmented-ui="tl-clip tr-clip br-clip bl-clip border">
+    <h2>// CROP BACKGROUND</h2>
+    <div class="crop-stage" id="cropStage">
+      <img id="cropImg" alt="crop source" />
+      <div class="crop-frame" id="cropFrame">
+        <div class="crop-handle" id="cropHandle"></div>
+      </div>
+    </div>
+    <div class="crop-actions">
+      <button class="btn" data-augmented-ui="tl-clip br-clip border" id="cropMax" type="button" title="Select whole image">MAX</button>
+      <button class="btn" data-augmented-ui="tl-clip br-clip border" id="cropConfirm" type="button">USE</button>
+      <button class="btn danger" data-augmented-ui="tl-clip br-clip border" id="cropCancel" type="button">CANCEL</button>
+    </div>
+  </div>
+</div>
+
 <div class="footer-stamp" aria-hidden="true">CHRONOS_CALENDAR_CONSTRUCTOR (c) // 2026 // CYBERDELAAI // MIT</div>
 
 <script>
@@ -718,6 +806,9 @@
   if (store.view !== 'year') store.view = 'month'; // 'month' | 'year' construction
   if (store.yearLayout !== '3x4') store.yearLayout = '4x3'; // year mini-month lattice
   if (typeof store.marks !== 'object' || store.marks === null) store.marks = {}; // 'Y-M-D' -> color index
+  if (typeof store.bg !== 'string') store.bg = '';                 // cropped capture background (data URL)
+  if (typeof store.bgOriginal !== 'string') store.bgOriginal = ''; // pre-crop original, kept for RECROP
+  if (typeof store.bgBrightness !== 'number') store.bgBrightness = 0.55;
 
   const now = new Date();
   // Restore last-viewed month/year if saved, else default to the current date.
@@ -736,6 +827,8 @@
   const satToggle = $('satToggle'), sunToggle = $('sunToggle'), sizeToggle = $('sizeToggle');
   const calendarArea = document.querySelector('.calendar-area');
   const capture = $('capture'), previewLabel = $('previewLabel');
+  const captureBg = $('captureBg'), bgFileInput = $('bgFile');
+  const bgBrightnessInput = $('bgBrightness'), bgBrightnessVal = $('bgBrightnessVal');
 
   function save() { localStorage.setItem(LS_KEY, JSON.stringify(store)); }
   // "#rrggbb" -> "r,g,b" for use inside rgba(var(--x-rgb), a)
@@ -1070,6 +1163,266 @@
   $('yearUp').addEventListener('click', () => stepYear(1));
   $('yearDown').addEventListener('click', () => stepYear(-1));
 
+  // ---- Crop modal (ported from commlink-ui js/crop.js) ----
+  const cropModal = $('cropModal'), cropImg = $('cropImg'), cropStage = $('cropStage');
+  const cropFrame = $('cropFrame'), cropHandle = $('cropHandle');
+  let cropOnConfirm = null;
+  let cropAspect = 1;     // width / height
+  let cropOutW = 256, cropOutH = 256;
+  let cropMime = 'image/png', cropQuality = 0.92;
+
+  function openCrop(dataUrl, onConfirm, opts) {
+    opts = opts || {};
+    cropAspect = opts.aspect || 1;
+    cropOutW = opts.outWidth || 256;
+    cropOutH = opts.outHeight || 256;
+    cropMime = opts.mime || 'image/png';
+    cropQuality = typeof opts.quality === 'number' ? opts.quality : 0.92;
+    cropOnConfirm = onConfirm;
+    cropImg.onload = () => {
+      requestAnimationFrame(() => {
+        const stageRect = cropStage.getBoundingClientRect();
+        const imgRect = cropImg.getBoundingClientRect();
+        const sx = imgRect.left - stageRect.left;
+        const sy = imgRect.top - stageRect.top;
+        let w, h;
+        if (imgRect.width / imgRect.height > cropAspect) {
+          h = imgRect.height * 0.6; w = h * cropAspect;
+        } else {
+          w = imgRect.width * 0.6; h = w / cropAspect;
+        }
+        cropFrame.style.width = w + 'px';
+        cropFrame.style.height = h + 'px';
+        cropFrame.style.left = (sx + (imgRect.width - w) / 2) + 'px';
+        cropFrame.style.top = (sy + (imgRect.height - h) / 2) + 'px';
+      });
+    };
+    cropImg.src = dataUrl;
+    cropModal.hidden = false;
+  }
+  function closeCrop() {
+    cropModal.hidden = true;
+    cropOnConfirm = null;
+    cropImg.src = '';
+  }
+  function doCrop() {
+    const imgRect = cropImg.getBoundingClientRect();
+    const frameRect = cropFrame.getBoundingClientRect();
+    const scaleX = cropImg.naturalWidth / imgRect.width;
+    const scaleY = cropImg.naturalHeight / imgRect.height;
+    // 2px border drawn inside (border-box) → selection is inset by it
+    const B = 2;
+    const sx = Math.max(0, (frameRect.left + B - imgRect.left) * scaleX);
+    const sy = Math.max(0, (frameRect.top + B - imgRect.top) * scaleY);
+    let sw = Math.max(1, (frameRect.width - 2 * B) * scaleX);
+    let sh = Math.max(1, (frameRect.height - 2 * B) * scaleY);
+    sw = Math.min(cropImg.naturalWidth - sx, sw);
+    sh = Math.min(cropImg.naturalHeight - sy, sh);
+    const c = document.createElement('canvas');
+    c.width = cropOutW; c.height = cropOutH;
+    c.getContext('2d').drawImage(cropImg, sx, sy, sw, sh, 0, 0, cropOutW, cropOutH);
+    return c.toDataURL(cropMime, cropQuality);
+  }
+  $('cropConfirm').addEventListener('click', () => {
+    const result = doCrop();
+    const cb = cropOnConfirm;
+    closeCrop();
+    if (cb) cb(result);
+  });
+  $('cropCancel').addEventListener('click', closeCrop);
+  $('cropMax').addEventListener('click', () => {
+    const stageRect = cropStage.getBoundingClientRect();
+    const imgRect = cropImg.getBoundingClientRect();
+    const sx = imgRect.left - stageRect.left;
+    const sy = imgRect.top - stageRect.top;
+    let w, h;
+    if (imgRect.width / Math.max(1, imgRect.height) > cropAspect) {
+      h = imgRect.height; w = h * cropAspect;
+    } else {
+      w = imgRect.width; h = w / cropAspect;
+    }
+    cropFrame.style.width = w + 'px';
+    cropFrame.style.height = h + 'px';
+    cropFrame.style.left = (sx + (imgRect.width - w) / 2) + 'px';
+    cropFrame.style.top = (sy + (imgRect.height - h) / 2) + 'px';
+  });
+  cropModal.addEventListener('click', (e) => { if (e.target === cropModal) closeCrop(); });
+
+  // Drag + resize for the crop frame
+  let cropDrag = null;
+  cropFrame.addEventListener('mousedown', (e) => {
+    cropDrag = {
+      mode: e.target === cropHandle ? 'resize' : 'move',
+      x: e.clientX, y: e.clientY,
+      left: cropFrame.offsetLeft, top: cropFrame.offsetTop,
+      w: cropFrame.offsetWidth, h: cropFrame.offsetHeight
+    };
+    e.preventDefault();
+  });
+  document.addEventListener('mousemove', (e) => {
+    if (!cropDrag) return;
+    const dx = e.clientX - cropDrag.x;
+    const dy = e.clientY - cropDrag.y;
+    const stageRect = cropStage.getBoundingClientRect();
+    const imgRect = cropImg.getBoundingClientRect();
+    const imgX0 = imgRect.left - stageRect.left;
+    const imgY0 = imgRect.top - stageRect.top;
+    const imgX1 = imgX0 + imgRect.width;
+    const imgY1 = imgY0 + imgRect.height;
+    if (cropDrag.mode === 'move') {
+      let l = cropDrag.left + dx;
+      let t = cropDrag.top + dy;
+      l = Math.max(imgX0, Math.min(imgX1 - cropFrame.offsetWidth, l));
+      t = Math.max(imgY0, Math.min(imgY1 - cropFrame.offsetHeight, t));
+      cropFrame.style.left = l + 'px';
+      cropFrame.style.top = t + 'px';
+    } else {
+      // resize preserving cropAspect (width / height)
+      const delta = Math.max(dx, dy * cropAspect);
+      const newW = Math.max(32, cropDrag.w + delta);
+      const maxW = imgX1 - cropDrag.left;
+      const maxH = imgY1 - cropDrag.top;
+      let finalW = Math.min(newW, maxW);
+      let finalH = finalW / cropAspect;
+      if (finalH > maxH) { finalH = maxH; finalW = finalH * cropAspect; }
+      cropFrame.style.width = finalW + 'px';
+      cropFrame.style.height = finalH + 'px';
+    }
+  });
+  document.addEventListener('mouseup', () => { cropDrag = null; });
+
+  async function tryPasteImage(onLoad) {
+    try {
+      const items = await navigator.clipboard.read();
+      for (const item of items) {
+        for (const type of item.types) {
+          if (type.startsWith('image/')) {
+            const blob = await item.getType(type);
+            const reader = new FileReader();
+            reader.onload = (e) => onLoad(e.target.result);
+            reader.readAsDataURL(blob);
+            return;
+          }
+        }
+      }
+      showToast('NO IMAGE IN CLIPBOARD');
+    } catch (err) {
+      console.warn(err);
+      showToast('CLIPBOARD BLOCKED');
+    }
+  }
+
+  // ---- Custom capture background (ported from commlink-ui bg picker) ----
+  // Unlike commlink there is no IndexedDB layer here: both the cropped bg and
+  // the recrop original live in localStorage, so images are downscaled and
+  // JPEG-compressed to respect the quota.
+  function applyCaptureBg() {
+    if (store.bg) {
+      captureBg.style.backgroundImage = 'url("' + store.bg + '")';
+      captureBg.style.filter = 'brightness(' + store.bgBrightness + ') contrast(1.05) saturate(1.1)';
+      captureBg.hidden = false;
+    } else {
+      captureBg.hidden = true;
+      captureBg.style.backgroundImage = '';
+    }
+  }
+  function saveBg() {
+    try { save(); }
+    catch (e) { console.warn(e); showToast('STORAGE FULL — IMAGE NOT SAVED'); }
+  }
+  // Crop frame matches the live capture aspect; output is capped so the
+  // data URL stays localStorage-friendly while covering a 2× export.
+  function bgCropOptions() {
+    const r = capture.getBoundingClientRect();
+    const aspect = r.width / Math.max(1, r.height);
+    const MAX = 2000;
+    let outW = Math.round(r.width * sizeRatio());
+    let outH = Math.round(outW / aspect);
+    if (Math.max(outW, outH) > MAX) {
+      const s = MAX / Math.max(outW, outH);
+      outW = Math.round(outW * s); outH = Math.round(outH * s);
+    }
+    return { aspect, outWidth: outW, outHeight: outH, mime: 'image/jpeg', quality: 0.9 };
+  }
+  function shrinkDataUrl(dataUrl, maxEdge, cb) {
+    const img = new Image();
+    img.onload = () => {
+      const scale = Math.min(1, maxEdge / Math.max(img.width, img.height));
+      const c = document.createElement('canvas');
+      c.width = Math.max(1, Math.round(img.width * scale));
+      c.height = Math.max(1, Math.round(img.height * scale));
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      cb(c.toDataURL('image/jpeg', 0.9));
+    };
+    img.src = dataUrl;
+  }
+  function applyBg(dataUrl) {
+    store.bg = dataUrl;
+    applyCaptureBg(); saveBg();
+    showToast('IMAGE LOADED');
+  }
+  function loadBgFromDataUrl(dataUrl) {
+    shrinkDataUrl(dataUrl, 2000, (small) => {
+      store.bgOriginal = small;
+      saveBg();
+      openCrop(small, applyBg, bgCropOptions());
+    });
+  }
+  bgFileInput.addEventListener('change', (e) => {
+    const f = e.target.files && e.target.files[0];
+    if (!f) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => loadBgFromDataUrl(ev.target.result);
+    reader.readAsDataURL(f);
+    bgFileInput.value = '';
+  });
+  $('pasteBg').addEventListener('click', () => tryPasteImage(loadBgFromDataUrl));
+  $('recropBg').addEventListener('click', () => {
+    const src = store.bgOriginal || store.bg;
+    if (!src) { showToast('NO BACKGROUND YET'); return; }
+    openCrop(src, applyBg, bgCropOptions());
+  });
+  $('clearBg').addEventListener('click', () => {
+    store.bg = ''; store.bgOriginal = '';
+    bgFileInput.value = '';
+    applyCaptureBg(); save();
+  });
+  bgBrightnessInput.addEventListener('input', () => {
+    const val = parseFloat(bgBrightnessInput.value);
+    store.bgBrightness = isNaN(val) ? 0.55 : val;
+    bgBrightnessVal.textContent = Math.round(store.bgBrightness * 100) + '%';
+    applyCaptureBg(); save();
+  });
+  // Drag-and-drop an image onto the calendar to set it as the bg (counter so
+  // nested dragenter/dragleave on children don't strobe the highlight).
+  let bgDragDepth = 0;
+  capture.addEventListener('dragenter', (e) => {
+    if (!e.dataTransfer || !Array.from(e.dataTransfer.types || []).includes('Files')) return;
+    e.preventDefault();
+    bgDragDepth++;
+    capture.classList.add('bg-drop-target');
+  });
+  capture.addEventListener('dragover', (e) => {
+    if (!e.dataTransfer || !Array.from(e.dataTransfer.types || []).includes('Files')) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'copy';
+  });
+  capture.addEventListener('dragleave', () => {
+    bgDragDepth = Math.max(0, bgDragDepth - 1);
+    if (bgDragDepth === 0) capture.classList.remove('bg-drop-target');
+  });
+  capture.addEventListener('drop', (e) => {
+    bgDragDepth = 0;
+    capture.classList.remove('bg-drop-target');
+    if (!e.dataTransfer || !e.dataTransfer.files || !e.dataTransfer.files.length) return;
+    e.preventDefault();
+    const f = e.dataTransfer.files[0];
+    if (!f.type || f.type.indexOf('image/') !== 0) { showToast('NOT AN IMAGE'); return; }
+    const reader = new FileReader();
+    reader.onload = (ev) => loadBgFromDataUrl(ev.target.result);
+    reader.readAsDataURL(f);
+  });
+
   // PNG export
   $('exportBtn').addEventListener('click', async () => {
     const node = $('capture');
@@ -1092,6 +1445,9 @@
   });
 
   applyColors();
+  bgBrightnessInput.value = store.bgBrightness;
+  bgBrightnessVal.textContent = Math.round(store.bgBrightness * 100) + '%';
+  applyCaptureBg();
   syncView();
   syncLayout();
   syncWeekToggle();
@@ -1180,7 +1536,7 @@
     const meta = $('tagMeta');
     if (!meta) return;
     const GH_REPO = 'CyberDelaai/chronos-ui';
-    const VER = ' // v1.1.4';
+    const VER = ' // v1.1.5';
     const CHARS = '!@#$%&*<>{}[]/|01ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     let commitCount = '';
 
