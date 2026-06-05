@@ -4,9 +4,9 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>CHRONOS — Cyberpunk Monthly Calendar Constructor</title>
-<meta name="description" content="CHRONOS is a free in-browser cyberpunk monthly calendar generator. Pick a month and export a clean Cyberpunk 2077-styled calendar PNG — great for TTRPG game masters and netrunner handouts." />
-<meta name="keywords" content="cyberpunk, calendar, calendar generator, monthly calendar, cyberpunk 2077, shadowrun, ttrpg, gm tools, png export, netrunner" />
+<title>CHRONOS — Cyberpunk Monthly &amp; Yearly Calendar Constructor</title>
+<meta name="description" content="CHRONOS is a free in-browser cyberpunk calendar generator. Build a Cyberpunk 2077-styled monthly calendar or full-year poster, highlight days in 5 colors, and export a clean PNG — great for TTRPG game masters and netrunner handouts." />
+<meta name="keywords" content="cyberpunk, calendar, calendar generator, monthly calendar, yearly calendar, year planner, annual calendar, calendar maker, cyberpunk 2077, shadowrun, ttrpg, gm tools, png export, netrunner" />
 <meta name="author" content="CyberDelaai" />
 <meta name="robots" content="index, follow" />
 <meta name="theme-color" content="#050507" />
@@ -16,8 +16,8 @@
 <!-- Open Graph / Twitter -->
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="CHRONOS" />
-<meta property="og:title" content="CHRONOS — Cyberpunk Monthly Calendar Constructor" />
-<meta property="og:description" content="Build a Cyberpunk 2077-styled monthly calendar in your browser and export it as a PNG. Perfect for TTRPG handouts." />
+<meta property="og:title" content="CHRONOS — Cyberpunk Monthly &amp; Yearly Calendar Constructor" />
+<meta property="og:description" content="Build a Cyberpunk 2077-styled monthly calendar or full-year poster in your browser and export it as a PNG. Perfect for TTRPG handouts." />
 <meta property="og:url" content="https://cyberdeck.tools/chronos-ui/" />
 <meta property="og:image" content="https://cyberdeck.tools/chronos-ui/og-preview.png" />
 <meta property="og:image:type" content="image/png" />
@@ -25,9 +25,37 @@
 <meta property="og:image:height" content="630" />
 <meta property="og:image:alt" content="CHRONOS — cyberpunk monthly calendar constructor preview" />
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="CHRONOS — Cyberpunk Monthly Calendar Constructor" />
-<meta name="twitter:description" content="Build a cyberpunk monthly calendar and export it as a PNG." />
+<meta name="twitter:title" content="CHRONOS — Cyberpunk Monthly &amp; Yearly Calendar Constructor" />
+<meta name="twitter:description" content="Build a cyberpunk monthly or full-year calendar and export it as a PNG." />
 <meta name="twitter:image" content="https://cyberdeck.tools/chronos-ui/og-preview.png" />
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "CHRONOS",
+  "alternateName": "CHRONOS Calendar Constructor",
+  "description": "Cyberpunk Calendar Constructor — build Cyberpunk 2077-styled monthly calendars and full-year posters in the browser. Useful for TTRPG game masters running Shadowrun, Cyberpunk 2020, or Cyberpunk RED who need styled calendar handouts. Color themes, weekend highlighting, per-day color marks, PNG export.",
+  "applicationCategory": "DesignApplication",
+  "applicationSubCategory": "Calendar Generator",
+  "operatingSystem": "Any (browser-based)",
+  "browserRequirements": "Modern desktop browser",
+  "url": "https://cyberdeck.tools/chronos-ui/",
+  "image": "https://raw.githubusercontent.com/CyberDelaai/chronos-ui/main/og-preview.png",
+  "keywords": "cyberpunk, calendar generator, monthly calendar, yearly calendar, year planner, cyberpunk 2077, shadowrun, ttrpg, game master tools, png export, netrunner",
+  "author": {
+    "@type": "Person",
+    "name": "CyberDelaai"
+  },
+  "license": "https://opensource.org/licenses/MIT",
+  "inLanguage": "en",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
 
 <link rel="stylesheet" href="https://unpkg.com/augmented-ui@2/augmented-ui.min.css" />
 <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.js"></script>
@@ -68,6 +96,8 @@
     --wash: rgba(var(--main-rgb),0.14); /* weekend column tint (month + year views) */
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  /* visually hidden, crawler/screen-reader visible */
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   body {
     background: var(--bg);
     color: var(--text);
@@ -474,6 +504,7 @@
 <body>
 <div class="app">
   <header class="top">
+    <h1 class="sr-only">CHRONOS — cyberpunk monthly &amp; yearly calendar generator with PNG export</h1>
     <div class="logo-menu">
       <button class="logo" id="logoBtn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="appMenu"><span class="chev" aria-hidden="true">&gt;</span> CHRONOS_</button>
       <nav class="app-menu" id="appMenu" data-augmented-ui="tl-clip br-clip border" aria-label="cyberdeck.tools navigation" hidden>
