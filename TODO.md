@@ -9,5 +9,5 @@ Pending issues, features, and ideas for CHRONOS. Items are removed from the list
 
 ## SMALL (Z version bump)
 
-1. Add donate button 
-2. Add svg export
+1. Add svg export
+2. Add more colors

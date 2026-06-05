@@ -172,6 +172,9 @@
   input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
   /* custom year stepper */
   .year-wrap { display: flex; align-items: stretch; }
+  /* Year mode: with the month chooser hidden, the year picker fills the row */
+  body.view-year .year-wrap { flex: 1; }
+  body.view-year .year-wrap input[type="number"] { flex: 1; width: auto; min-width: 0; }
   .year-wrap input[type="number"] { border-right: none; }
   .year-spin { display: flex; flex-direction: column; }
   .year-btn {
@@ -258,6 +261,7 @@
 
   /* ---- Sliding toggle (ported from commlink-ui .side-switch / .fx) ---- */
   .fx-toggle { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; justify-content: space-between; }
+  .fx-toggle[hidden] { display: none; } /* display:flex would otherwise override the hidden attribute */
   .fx-label { font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 1.5px; color: var(--main); text-transform: uppercase; }
   .side-switch {
     position: relative; height: 32px; width: 96px; background: var(--panel);
@@ -409,6 +413,45 @@
     line-height: 1; color: var(--accent); text-shadow: 0 0 8px rgba(var(--accent-rgb),0.5);
   }
 
+  /* ============================================================
+     YEAR VIEW — 12 mini-months in a 4×3 lattice. Mirrors the month
+     view at small scale: accent names/numbers, main-color grid lines
+     (same shared-border collapse trick as .cell, scaled 4px → 1px),
+     weekend tints via the same sat/sun0/sun6 classes weekendClass()
+     emits. Toggled by .view-year on .calendar-area.
+     ============================================================ */
+  #yearGrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px 24px; }
+  .calendar-area.layout-3x4 #yearGrid { grid-template-columns: repeat(3, 1fr); }
+  .calendar-area:not(.view-year) #yearGrid { display: none; }
+  .calendar-area.view-year #dowRow, .calendar-area.view-year #grid { display: none; }
+  .calendar-area.view-year .cal-head { margin-bottom: 18px; }
+  .mini-name {
+    font-family: 'JetBrains Mono', monospace; font-weight: 700;
+    color: var(--accent); text-transform: uppercase; text-align: center;
+    font-size: clamp(11px, 1.6vw, 22px); letter-spacing: 2px; margin-bottom: 4px;
+    text-shadow: 0 0 6px rgba(var(--accent-rgb),0.5);
+  }
+  .mini-dow { display: grid; grid-template-columns: repeat(7, 1fr); padding: 0 0 0 1px; }
+  .mini-dow .md {
+    text-align: center; font-size: clamp(7px, 1vw, 13px); font-weight: 700;
+    color: var(--accent); text-transform: uppercase; padding: 1px 0 3px;
+    text-shadow: 0 0 5px rgba(var(--accent-rgb),0.4);
+  }
+  /* lattice: border 1px / margin -1px / wrapper padding 1px — keep in sync */
+  .mini-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0; padding: 1px 0 0 1px; }
+  .mini-cell {
+    aspect-ratio: 1 / 1; display: flex; align-items: center; justify-content: center;
+    border: 1px solid rgb(var(--main-rgb));
+    box-shadow: inset 0 0 4px rgba(var(--main-rgb),0.12);
+    margin: -1px 0 0 -1px;
+    font-family: 'JetBrains Mono', monospace; font-weight: 700;
+    font-size: clamp(7px, 0.95vw, 13px); line-height: 1;
+    color: var(--accent); text-shadow: 0 0 4px rgba(var(--accent-rgb),0.45);
+  }
+  .mini-cell.blank { border-color: transparent; box-shadow: none; }
+  /* weekend column tint — flat wash (no header strips at mini scale) */
+  .mini-cell.weekend, .mini-dow .md.weekend { background: rgba(var(--main-rgb),0.14); }
+
   .hint { color: var(--dim); font-size: 11px; letter-spacing: 1px; margin-top: 14px; }
   .toast {
     position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
@@ -498,12 +541,31 @@
   </div>
 
   <div class="fx-toggle">
+    <span class="fx-label">// VIEW:</span>
+    <button class="side-switch fx" id="viewToggle" type="button" data-pos="left" aria-label="calendar view">
+      <span class="thumb"></span>
+      <span class="lab l">MONTH</span>
+      <span class="lab r">YEAR</span>
+    </button>
+  </div>
+
+  <div class="fx-toggle" id="sizeRow">
     <span class="fx-label">// SIZE:</span>
     <button class="side-switch fx tri" id="sizeToggle" type="button" data-pos="m" aria-label="calendar size">
       <span class="thumb"></span>
       <span class="lab s">S</span>
       <span class="lab m">M</span>
       <span class="lab l3">L</span>
+    </button>
+  </div>
+
+  <!-- Year mode swaps SIZE for the mini-month lattice layout -->
+  <div class="fx-toggle" id="layoutRow" hidden>
+    <span class="fx-label">// LAYOUT:</span>
+    <button class="side-switch fx" id="layoutToggle" type="button" data-pos="left" aria-label="year layout">
+      <span class="thumb"></span>
+      <span class="lab l">4X3</span>
+      <span class="lab r">3X4</span>
     </button>
   </div>
 
@@ -563,10 +625,11 @@
              lines up with the weekday header; keep it equal to the cell line width.
              No top gap, so the SAT/SUN header tint flows straight into the column. -->
         <div class="grid" id="grid" style="margin-top:0; padding:4px 0 0 4px"></div>
+        <div id="yearGrid"></div>
       </div>
       <div class="preview-label" id="previewLabel"></div>
     </div>
-    <div class="hint">// Pick a month and export.</div>
+    <div class="hint" id="hint">// Pick a month and export.</div>
   </div>
 
   </div><!-- /layout -->
@@ -597,6 +660,8 @@
   if (typeof store.hlSat !== 'boolean') store.hlSat = true; // highlight Saturday column
   if (typeof store.hlSun !== 'boolean') store.hlSun = true; // highlight Sunday column
   if (['s','m','l'].indexOf(store.size) < 0) store.size = 'm'; // calendar size
+  if (store.view !== 'year') store.view = 'month'; // 'month' | 'year' construction
+  if (store.yearLayout !== '3x4') store.yearLayout = '4x3'; // year mini-month lattice
 
   const now = new Date();
   // Restore last-viewed month/year if saved, else default to the current date.
@@ -605,7 +670,10 @@
 
   const $ = (id) => document.getElementById(id);
   const monthSel = $('monthSel'), yearInp = $('yearInp'), grid = $('grid'), dowRow = $('dowRow');
-  const calHead = $('calHead'), toast = $('toast');
+  const calHead = $('calHead'), toast = $('toast'), yearGrid = $('yearGrid');
+  const viewToggle = $('viewToggle');
+  const layoutToggle = $('layoutToggle'), sizeRow = $('sizeRow'), layoutRow = $('layoutRow');
+  const yearView = () => store.view === 'year';
   const mainPalette = $('mainPalette'), accentPalette = $('accentPalette');
   const customMain = $('customMain'), customAccent = $('customAccent');
   const weekStartToggle = $('weekStartToggle');
@@ -715,10 +783,15 @@
   function render() {
     monthSel.value = month;
     yearInp.value = year;
-    calHead.textContent = MONTHS[month] + ' ' + year;
     // Persist the current view so reloads restore month/year (accent saved separately).
     store.year = year; store.month = month; save();
+    calHead.textContent = yearView() ? String(year) : (MONTHS[month] + ' ' + year);
+    if (yearView()) renderYear(); else renderMonth();
+    fitHead();
+    updatePreviewLabel();
+  }
 
+  function renderMonth() {
     // weekday header row (no tint — the first day-row's weekend cells cover it)
     dowRow.innerHTML = '';
     dowLabels().forEach((d) => {
@@ -753,9 +826,51 @@
       cell.appendChild(num);
       grid.appendChild(cell);
     }
+  }
 
-    fitHead();
-    updatePreviewLabel();
+  // Year view: 12 mini-months, each padded to 6 weeks (42 cells) so every
+  // mini-month is the same height and the 4×3 lattice rows align.
+  function renderYear() {
+    yearGrid.innerHTML = '';
+    const letters = dowLabels().map(d => d[0]);
+    for (let m = 0; m < 12; m++) {
+      const box = document.createElement('div');
+      box.className = 'mini-month';
+
+      const name = document.createElement('div');
+      name.className = 'mini-name';
+      name.textContent = MONTHS[m];
+      box.appendChild(name);
+
+      const dow = document.createElement('div');
+      dow.className = 'mini-dow';
+      letters.forEach((ch, col) => {
+        const c = document.createElement('div');
+        c.className = 'md' + weekendClass(col);
+        c.textContent = ch;
+        dow.appendChild(c);
+      });
+      box.appendChild(dow);
+
+      const mg = document.createElement('div');
+      mg.className = 'mini-grid';
+      const offset = firstOffset(year, m);
+      const total = daysInMonth(year, m);
+      for (let i = 0; i < 42; i++) {
+        const dayNum = i - offset + 1;
+        const cell = document.createElement('div');
+        if (dayNum < 1 || dayNum > total) {
+          // tint LEADING weekend blanks only, mirroring the month view
+          cell.className = 'mini-cell blank' + (dayNum < 1 ? weekendClass(i % 7) : '');
+        } else {
+          cell.className = 'mini-cell' + weekendClass(i % 7);
+          cell.textContent = dayNum;
+        }
+        mg.appendChild(cell);
+      }
+      box.appendChild(mg);
+      yearGrid.appendChild(box);
+    }
   }
   // Re-fit the header + refresh the size label when the calendar width changes
   window.addEventListener('resize', () => { measureDowH(); fitHead(); updatePreviewLabel(); });
@@ -767,8 +882,38 @@
     while (month > 11) { month -= 12; year++; }
     render();
   }
-  $('prevBtn').addEventListener('click', () => go(-1));
-  $('nextBtn').addEventListener('click', () => go(1));
+  // In year view the < > arrows step the year; in month view, the month.
+  $('prevBtn').addEventListener('click', () => yearView() ? stepYear(-1) : go(-1));
+  $('nextBtn').addEventListener('click', () => yearView() ? stepYear(1) : go(1));
+
+  // View toggle (MONTH | YEAR) — flips the capture between the single-month
+  // grid and the 12-mini-month year lattice. The month selector is meaningless
+  // in year view, so it hides (the < > arrows step the year instead).
+  function syncView() {
+    viewToggle.dataset.pos = yearView() ? 'right' : 'left';
+    calendarArea.classList.toggle('view-year', yearView());
+    document.body.classList.toggle('view-year', yearView()); // sidebar styling hook
+    monthSel.style.display = yearView() ? 'none' : '';
+    // Year mode swaps the SIZE toggle for the 4X3 | 3X4 lattice layout toggle
+    sizeRow.hidden = yearView();
+    layoutRow.hidden = !yearView();
+    $('hint').textContent = yearView() ? '// Pick a year and export.' : '// Pick a month and export.';
+  }
+  viewToggle.addEventListener('click', () => {
+    store.view = yearView() ? 'month' : 'year';
+    syncView(); render(); save();
+  });
+
+  // Year lattice layout toggle (4X3 | 3X4) — pure CSS re-flow, no re-render;
+  // only the capture height changes, so just refresh the preview label.
+  function syncLayout() {
+    layoutToggle.dataset.pos = store.yearLayout === '3x4' ? 'right' : 'left';
+    calendarArea.classList.toggle('layout-3x4', store.yearLayout === '3x4');
+  }
+  layoutToggle.addEventListener('click', () => {
+    store.yearLayout = store.yearLayout === '3x4' ? '4x3' : '3x4';
+    syncLayout(); updatePreviewLabel(); save();
+  });
 
   // First-weekday toggle (MON | SUN)
   function syncWeekToggle() { weekStartToggle.dataset.pos = sunStart() ? 'right' : 'left'; }
@@ -821,7 +966,7 @@
       // clipped corners stay transparent in the exported PNG.
       const dataUrl = await htmlToImage.toPng(node, { pixelRatio: sizeRatio() });
       const a = document.createElement('a');
-      a.download = 'chronos_' + year + '_' + String(month + 1).padStart(2, '0') + '_' + Date.now() + '.png';
+      a.download = 'chronos_' + year + '_' + (yearView() ? 'full' : String(month + 1).padStart(2, '0')) + '_' + Date.now() + '.png';
       a.href = dataUrl;
       a.click();
       showToast('PNG EXPORTED');
@@ -832,6 +977,8 @@
   });
 
   applyColors();
+  syncView();
+  syncLayout();
   syncWeekToggle();
   syncSat();
   syncSun();
