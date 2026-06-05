@@ -1,6 +1,7 @@
 # TODO
 
-Pending issues, features, and ideas for CHRONOS. Items are removed from the list once they are implemented / resolved (no archive section).
+Pending issues, features, and ideas for CHRONOS. 
+Items are removed from the list once they are implemented / resolved (no archive section).
 
 ## BIG (Y version bump)
 
@@ -8,6 +9,4 @@ Pending issues, features, and ideas for CHRONOS. Items are removed from the list
 
 ## SMALL (Z version bump)
 
-1. Add svg export
-2. Add different languages
-3. Update seo png
+1. Update seo png

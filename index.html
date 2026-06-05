@@ -1,4 +1,4 @@
-<!-- CHRONOS v1.1.5 -->
+<!-- CHRONOS v1.1.6 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -48,7 +48,7 @@
     "name": "CyberDelaai"
   },
   "license": "https://opensource.org/licenses/MIT",
-  "inLanguage": "en",
+  "inLanguage": ["en", "ru", "fr", "de", "es", "it", "ja", "zh"],
   "offers": {
     "@type": "Offer",
     "price": "0",
@@ -63,6 +63,15 @@
   /* JetBrains Mono (variable, wght 100-800) embedded as base64 so the font
      travels inside the document — required for correct PNG export, since
      html-to-image cannot reliably fetch remote Google Fonts at capture time. */
+  @font-face {
+    font-family: 'JetBrains Mono';
+    font-style: normal;
+    font-weight: 100 800;
+    font-display: swap;
+    /* cyrillic — RU calendar text must render in exports */
+    src: url(data:font/woff2;base64,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) format('woff2');
+    unicode-range: U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116;
+  }
   @font-face {
     font-family: 'JetBrains Mono';
     font-style: normal;
@@ -109,7 +118,7 @@
   .app { max-width: 1560px; margin: 0 auto; }
   /* Controls sidebar on the left, calendar on the right */
   .layout { display: flex; gap: 28px; align-items: stretch; flex-wrap: wrap; }
-  .sidebar { display: flex; flex-direction: column; gap: 12px; width: 320px; flex-shrink: 0; }
+  .sidebar { display: flex; flex-direction: column; gap: 10px; width: 320px; flex-shrink: 0; }
   .calendar-area { flex: 1; min-width: 320px; }
   /* capture + vertical preview label sit side by side, left-packed */
   .preview-row { display: flex; align-items: stretch; gap: 10px; }
@@ -158,6 +167,15 @@
     border-left: 1px solid var(--dim); padding-left: 18px;
   }
   .tag .tag-meta { cursor: default; color: var(--cyan); }
+  /* language dropdowns (pattern ported from commlink-ui) */
+  .lang-select {
+    background: var(--panel); color: var(--main);
+    border: 1px solid rgba(var(--main-rgb),0.4);
+    padding: 6px 10px; font-family: 'JetBrains Mono', monospace;
+    font-size: 12px; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; cursor: pointer;
+  }
+  header.top .lang-select { margin-left: auto; }
   /* Tool-switcher dropdown anchored under the logo */
   .app-menu {
     position: absolute; top: calc(100% + 12px); left: 0; z-index: 30;
@@ -190,7 +208,7 @@
     75% { transform: translate(-1px, -1px); }
   }
 
-  .controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 20px; }
+  .controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
   .controls .group { display: flex; gap: 6px; align-items: center; width: 100%; }
   .controls #monthSel { flex: 1; min-width: 0; } /* month chooser fills the row */
   label.fld { color: var(--dim); font-size: 11px; letter-spacing: 1px; text-transform: uppercase; }
@@ -224,7 +242,7 @@
   .year-wrap :focus { outline: none; }
   .year-wrap:focus-within { outline: 2px solid var(--accent); outline-offset: 0px; }
   /* same highlight on all toggles + buttons (year arrows excluded) */
-  .btn:focus, .nav-arrow:focus, .side-switch:focus, #monthSel:focus {
+  .btn:focus, .nav-arrow:focus, .side-switch:focus, #monthSel:focus, .lang-select:focus {
     outline: 2px solid var(--accent); outline-offset: 0px;
   }
   .year-btn:focus { outline: none; }
@@ -259,6 +277,11 @@
      along its left edge — same idiom as the // PREVIEW label */
   .palette-wrap { display: flex; align-items: stretch; gap: 8px; }
   .palette-wrap > label.fld { writing-mode: sideways-lr; text-align: center; font-size: 14px; letter-spacing: 2px; }
+  /* CJK UI languages: vertical text flows top→bottom with upright glyphs
+     (no rotation) — proper CJK vertical typesetting */
+  .palette-wrap > label.fld:lang(ja), .palette-wrap > label.fld:lang(zh) {
+    writing-mode: vertical-rl; text-orientation: upright;
+  }
   .palette-wrap > .palette-row { flex: 1; }
   .color-grid { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; justify-content: center; }
   .swatch { width: 28px; height: 28px; border: 1px solid var(--dim); cursor: pointer; transition: transform .1s, border-color .1s; }
@@ -298,7 +321,7 @@
   .nav-arrow:hover { background: var(--main); color: var(--bg); border-color: var(--main); }
 
   /* ---- Sliding toggle (ported from commlink-ui .side-switch / .fx) ---- */
-  .fx-toggle { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; justify-content: space-between; }
+  .fx-toggle { display: flex; align-items: center; gap: 8px; justify-content: space-between; }
   .fx-toggle[hidden] { display: none; } /* display:flex would otherwise override the hidden attribute */
   .fx-label { font-size: 12px; letter-spacing: 1.5px; color: var(--main); text-transform: uppercase; }
   .side-switch {
@@ -499,7 +522,7 @@
   }
   #captureBg[hidden] { display: none; }
   #capture.bg-drop-target { outline: 2px dashed var(--main); outline-offset: -6px; }
-  .bg-field { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
+  .bg-field { display: flex; flex-direction: column; gap: 10px; }
   .btn-row { display: flex; gap: 8px; align-items: center; }
   .btn-row .btn { --btn-color: var(--main); flex: 1; padding: 0 8px; }
   .btn-row .btn.danger { --btn-color: var(--magenta); flex: 0 0 36px; }
@@ -572,14 +595,15 @@
         <a class="app-menu-item current" href="https://cyberdeck.tools/chronos-ui/" aria-current="page">&gt; CHRONOS_</a>
       </nav>
     </div>
-    <div class="tag"><span id="tagWord" class="glitchable">CALENDAR CONSTRUCTOR</span><span id="tagMeta" class="tag-meta"> // v<span id="tagVersion">1.1.5</span></span></div>
+    <div class="tag"><span id="tagWord" class="glitchable">CALENDAR CONSTRUCTOR</span><span id="tagMeta" class="tag-meta"> // v<span id="tagVersion">1.1.6</span></span></div>
+    <select class="lang-select" id="uiLangSel" aria-label="interface language"><option value="en">EN</option><option value="ru">RU</option><option value="fr">FR</option><option value="de">DE</option><option value="es">ES</option><option value="it">IT</option><option value="ja">JP</option><option value="zh">CN</option></select>
   </header>
 
   <div class="layout">
   <aside class="sidebar">
 
   <div class="palette-wrap">
-  <label class="fld">Main</label>
+  <label class="fld" data-i18n="field.main">Main</label>
   <div class="palette-row" data-augmented-ui="tl-clip br-clip border">
     <div class="color-grid" id="mainPalette">
       <div class="swatch" data-color="#fcee0a" style="background:#fcee0a; color:#fcee0a"></div>
@@ -613,7 +637,7 @@
   </div>
 
   <div class="palette-wrap">
-  <label class="fld">Accent</label>
+  <label class="fld" data-i18n="field.accent">Accent</label>
   <div class="palette-row" data-augmented-ui="tl-clip br-clip border">
     <div class="color-grid" id="accentPalette">
       <div class="swatch" data-color="#fcee0a" style="background:#fcee0a; color:#fcee0a"></div>
@@ -647,16 +671,16 @@
   </div>
 
   <div class="fx-toggle">
-    <span class="fx-label">// VIEW:</span>
+    <span class="fx-label" data-i18n="field.view">// VIEW:</span>
     <button class="side-switch fx" id="viewToggle" type="button" data-pos="left" aria-label="calendar view">
       <span class="thumb"></span>
-      <span class="lab l">MONTH</span>
-      <span class="lab r">YEAR</span>
+      <span class="lab l" data-i18n="lab.month">MONTH</span>
+      <span class="lab r" data-i18n="lab.year">YEAR</span>
     </button>
   </div>
 
   <div class="fx-toggle" id="sizeRow">
-    <span class="fx-label">// SIZE:</span>
+    <span class="fx-label" data-i18n="field.size">// SIZE:</span>
     <button class="side-switch fx tri" id="sizeToggle" type="button" data-pos="m" aria-label="calendar size">
       <span class="thumb"></span>
       <span class="lab s">S</span>
@@ -667,7 +691,7 @@
 
   <!-- Year mode swaps SIZE for the mini-month lattice layout -->
   <div class="fx-toggle" id="layoutRow" hidden>
-    <span class="fx-label">// LAYOUT:</span>
+    <span class="fx-label" data-i18n="field.layout">// LAYOUT:</span>
     <button class="side-switch fx" id="layoutToggle" type="button" data-pos="left" aria-label="year layout">
       <span class="thumb"></span>
       <span class="lab l">4X3</span>
@@ -676,43 +700,48 @@
   </div>
 
   <div class="fx-toggle">
-    <span class="fx-label">// FIRST WEEKDAY:</span>
+    <span class="fx-label" data-i18n="field.firstDay">// FIRST WEEKDAY:</span>
     <button class="side-switch fx" id="weekStartToggle" type="button" data-pos="left" aria-label="first weekday">
       <span class="thumb"></span>
-      <span class="lab l">MON</span>
-      <span class="lab r">SUN</span>
+      <span class="lab l" data-i18n="lab.mon">MON</span>
+      <span class="lab r" data-i18n="lab.sun">SUN</span>
     </button>
   </div>
 
   <div class="fx-toggle">
-    <span class="fx-label">// HIGHLIGHT SATURDAY:</span>
+    <span class="fx-label" data-i18n="field.hlSat">// HIGHLIGHT SATURDAY:</span>
     <button class="side-switch fx" id="satToggle" type="button" data-pos="right" aria-label="highlight saturday">
       <span class="thumb"></span>
-      <span class="lab l">NO</span>
-      <span class="lab r">YES</span>
+      <span class="lab l" data-i18n="lab.no">NO</span>
+      <span class="lab r" data-i18n="lab.yes">YES</span>
     </button>
   </div>
 
   <div class="fx-toggle">
-    <span class="fx-label">// HIGHLIGHT SUNDAY:</span>
+    <span class="fx-label" data-i18n="field.hlSun">// HIGHLIGHT SUNDAY:</span>
     <button class="side-switch fx" id="sunToggle" type="button" data-pos="right" aria-label="highlight sunday">
       <span class="thumb"></span>
-      <span class="lab l">NO</span>
-      <span class="lab r">YES</span>
+      <span class="lab l" data-i18n="lab.no">NO</span>
+      <span class="lab r" data-i18n="lab.yes">YES</span>
     </button>
+  </div>
+
+  <div class="fx-toggle">
+    <span class="fx-label" data-i18n="field.calLang">// CALENDAR LANG:</span>
+    <select class="lang-select" id="calLangSel" aria-label="calendar language"><option value="en">EN</option><option value="ru">RU</option><option value="fr">FR</option><option value="de">DE</option><option value="es">ES</option><option value="it">IT</option><option value="ja">JP</option><option value="zh">CN</option></select>
   </div>
 
   <div class="bg-field">
-    <span class="fx-label">// BACKGROUND:</span>
+    <span class="fx-label" data-i18n="field.bg">// BACKGROUND:</span>
     <div class="btn-row">
-      <label class="btn" data-augmented-ui="tl-clip br-clip border" for="bgFile">UPLOAD</label>
+      <label class="btn" data-augmented-ui="tl-clip br-clip border" for="bgFile" data-i18n="btn.upload">UPLOAD</label>
       <input type="file" id="bgFile" accept="image/*" />
-      <button class="btn" data-augmented-ui="tl-clip br-clip border" id="pasteBg" type="button" title="Paste from clipboard">PASTE</button>
-      <button class="btn" data-augmented-ui="tl-clip br-clip border" id="recropBg" type="button" title="Recrop current background">RECROP</button>
+      <button class="btn" data-augmented-ui="tl-clip br-clip border" id="pasteBg" type="button" title="Paste from clipboard" data-i18n="btn.paste">PASTE</button>
+      <button class="btn" data-augmented-ui="tl-clip br-clip border" id="recropBg" type="button" title="Recrop current background" data-i18n="btn.recrop">RECROP</button>
       <button class="btn danger" data-augmented-ui="tl-clip br-clip border" id="clearBg" type="button" aria-label="clear background">✕</button>
     </div>
     <div class="brightness-row">
-      <span class="brightness-tag">BRIGHT</span>
+      <span class="brightness-tag" data-i18n="field.bright">BRIGHT</span>
       <input type="range" id="bgBrightness" min="0" max="1.5" step="0.05" value="0.55" />
       <span class="brightness-val" id="bgBrightnessVal">55%</span>
     </div>
@@ -733,7 +762,7 @@
     </div>
   </div>
 
-  <button class="btn export-btn" data-augmented-ui="tl-clip br-clip both" id="exportBtn" type="button">⬇ SAVE PNG</button>
+  <button class="btn export-btn" data-augmented-ui="tl-clip br-clip both" id="exportBtn" type="button" data-i18n="btn.savePng">⬇ SAVE PNG</button>
 
   </aside><!-- /sidebar -->
 
@@ -753,8 +782,8 @@
       <div class="preview-label" id="previewLabel"></div>
     </div>
     <div class="hint" id="hint">// Pick a month and export.</div>
-    <div class="hint" style="margin-top: 4px">// Click a day to cycle highlight colors, ctrl+click to repeat the last color.</div>
-    <div class="hint" style="margin-top: 4px">// Right-click to clear, ctrl+right-click to clear all.</div>
+    <div class="hint" style="margin-top: 4px" data-i18n="hint.marks1">// Click a day to cycle highlight colors, ctrl+click to repeat the last color.</div>
+    <div class="hint" style="margin-top: 4px" data-i18n="hint.marks2">// Right-click to clear, ctrl+right-click to clear all.</div>
   </div>
 
   </div><!-- /layout -->
@@ -762,7 +791,7 @@
 <div class="toast" id="toast"></div>
 <div class="modal-overlay" id="cropModal" hidden>
   <div class="modal-content" data-augmented-ui="tl-clip tr-clip br-clip bl-clip border">
-    <h2>// CROP BACKGROUND</h2>
+    <h2 data-i18n="crop.title">// CROP BACKGROUND</h2>
     <div class="crop-stage" id="cropStage">
       <img id="cropImg" alt="crop source" />
       <div class="crop-frame" id="cropFrame">
@@ -771,8 +800,8 @@
     </div>
     <div class="crop-actions">
       <button class="btn" data-augmented-ui="tl-clip br-clip border" id="cropMax" type="button" title="Select whole image">MAX</button>
-      <button class="btn" data-augmented-ui="tl-clip br-clip border" id="cropConfirm" type="button">USE</button>
-      <button class="btn danger" data-augmented-ui="tl-clip br-clip border" id="cropCancel" type="button">CANCEL</button>
+      <button class="btn" data-augmented-ui="tl-clip br-clip border" id="cropConfirm" type="button" data-i18n="crop.use">USE</button>
+      <button class="btn danger" data-augmented-ui="tl-clip br-clip border" id="cropCancel" type="button" data-i18n="crop.cancel">CANCEL</button>
     </div>
   </div>
 </div>
@@ -781,9 +810,31 @@
 
 <script>
 (function () {
-  const MONTHS = ['JANUARY','FEBRUARY','MARCH','APRIL','MAY','JUNE','JULY','AUGUST','SEPTEMBER','OCTOBER','NOVEMBER','DECEMBER'];
-  const DOW_MON = ['MON','TUE','WED','THU','FRI','SAT','SUN'];
-  const DOW_SUN = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+  // Calendar text (months / weekdays) comes from the browser's Intl API in
+  // the selected calendar language — no translation tables to maintain.
+  // NB: the embedded JetBrains Mono covers latin + latin-ext + cyrillic;
+  // ja/zh exports fall back to a system font.
+  const LANGS = ['en', 'ru', 'fr', 'de', 'es', 'it', 'ja', 'zh'];
+  const LOCALES = { en: 'en-US', ru: 'ru-RU', fr: 'fr-FR', de: 'de-DE', es: 'es-ES', it: 'it-IT', ja: 'ja-JP', zh: 'zh-CN' };
+  const _calNameCache = {};
+  function calNames(lang) {
+    lang = lang || store.calLang;
+    if (_calNameCache[lang]) return _calNameCache[lang];
+    const loc = LOCALES[lang] || 'en-US';
+    const clean = (s) => s.replace(/\.$/, '').toLocaleUpperCase(loc);
+    const mFmt = new Intl.DateTimeFormat(loc, { month: 'long' });
+    const dFmt = new Intl.DateTimeFormat(loc, { weekday: 'short' });
+    const nFmt = new Intl.DateTimeFormat(loc, { weekday: 'narrow' });
+    const months = Array.from({ length: 12 }, (_, m) => clean(mFmt.format(new Date(2024, m, 1))));
+    // 2024-01-01..07 is a Monday→Sunday week
+    const monFirst = Array.from({ length: 7 }, (_, i) => clean(dFmt.format(new Date(2024, 0, 1 + i))));
+    const monFirstNarrow = Array.from({ length: 7 }, (_, i) => clean(nFmt.format(new Date(2024, 0, 1 + i))));
+    return (_calNameCache[lang] = {
+      months,
+      monFirst, sunFirst: [monFirst[6]].concat(monFirst.slice(0, 6)),
+      monFirstNarrow, sunFirstNarrow: [monFirstNarrow[6]].concat(monFirstNarrow.slice(0, 6))
+    });
+  }
   const DEFAULT_MAIN = '#00f0ff';
   const DEFAULT_ACCENT = '#fcee0a';
   const DEFAULT_CUSTOM_MAIN = '#1fd1a0';   // pre-loaded into the Main custom slot
@@ -809,6 +860,11 @@
   if (typeof store.bg !== 'string') store.bg = '';                 // cropped capture background (data URL)
   if (typeof store.bgOriginal !== 'string') store.bgOriginal = ''; // pre-crop original, kept for RECROP
   if (typeof store.bgBrightness !== 'number') store.bgBrightness = 0.55;
+  if (LANGS.indexOf(store.calLang) < 0) store.calLang = 'en'; // calendar month/weekday language
+  if (LANGS.indexOf(store.uiLang) < 0) {
+    const browser = (navigator.language || 'en').slice(0, 2).toLowerCase();
+    store.uiLang = LANGS.indexOf(browser) >= 0 ? browser : 'en'; // UI labels language
+  }
 
   const now = new Date();
   // Restore last-viewed month/year if saved, else default to the current date.
@@ -829,6 +885,110 @@
   const capture = $('capture'), previewLabel = $('previewLabel');
   const captureBg = $('captureBg'), bgFileInput = $('bgFile');
   const bgBrightnessInput = $('bgBrightness'), bgBrightnessVal = $('bgBrightnessVal');
+  const uiLangSel = $('uiLangSel'), calLangSel = $('calLangSel');
+
+
+  // ---- UI i18n (pattern ported from commlink-ui js/i18n.js; shared strings
+  // reuse commlink's translations). Calendar text is separate — see calNames().
+  const I18N = {
+    en: {
+      tag: { app: 'CALENDAR CONSTRUCTOR', glitch: 'BORROW YOUR TIME' },
+      field: { view: '// VIEW:', size: '// SIZE:', layout: '// LAYOUT:', firstDay: '// FIRST WEEKDAY:', hlSat: '// HIGHLIGHT SATURDAY:', hlSun: '// HIGHLIGHT SUNDAY:', bg: '// BACKGROUND:', calLang: '// CALENDAR LANG:', main: 'Main', accent: 'Accent', bright: 'BRIGHT' },
+      lab: { month: 'MONTH', year: 'YEAR', mon: 'MON', sun: 'SUN', no: 'NO', yes: 'YES' },
+      btn: { upload: 'UPLOAD', paste: 'PASTE', recrop: 'RECROP', savePng: '⬇ SAVE PNG' },
+      crop: { title: '// CROP BACKGROUND', use: 'USE', cancel: 'CANCEL' },
+      hint: { pickMonth: '// Pick a month and export.', pickYear: '// Pick a year and export.', marks1: '// Click a day to cycle highlight colors, ctrl+click to repeat the last color.', marks2: '// Right-click to clear, ctrl+right-click to clear all.' },
+      preview: 'PREVIEW',
+      toast: { pngExported: 'PNG EXPORTED', exportFailed: 'EXPORT FAILED', imgLoaded: 'IMG LOADED', noImageClipboard: 'NO IMAGE IN CLIPBOARD', clipboardBlocked: 'CLIPBOARD BLOCKED', noBgYet: 'NO BG YET', storageFull: 'STORAGE FULL', highlightsCleared: 'HIGHLIGHTS CLEARED', notAnImage: 'NOT AN IMAGE' }
+    },
+    ru: {
+      tag: { app: 'КОНСТРУКТОР КАЛЕНДАРЯ', glitch: 'ВРЕМЯ ВЗАЙМЫ' },
+      field: { view: '// ВИД:', size: '// РАЗМЕР:', layout: '// СЕТКА:', firstDay: '// ПЕРВЫЙ ДЕНЬ:', hlSat: '// ВЫДЕЛИТЬ СУББОТУ:', hlSun: '// ВЫДЕЛИТЬ ВОСКРЕСЕНЬЕ:', bg: '// ФОН:', calLang: '// ЯЗЫК КАЛЕНДАРЯ:', main: 'Основной', accent: 'Акцент', bright: 'ЯРКОСТЬ' },
+      lab: { month: 'МЕСЯЦ', year: 'ГОД', mon: 'ПН', sun: 'ВС', no: 'НЕТ', yes: 'ДА' },
+      btn: { upload: 'ЗАГРУЗ.', paste: 'ВСТАВ.', recrop: 'ОБРЕЗАТЬ', savePng: '⬇ СОХРАНИТЬ PNG' },
+      crop: { title: '// ОБРЕЗКА ФОНА', use: 'ПРИМЕНИТЬ', cancel: 'ОТМЕНА' },
+      hint: { pickMonth: '// Выберите месяц и экспортируйте.', pickYear: '// Выберите год и экспортируйте.', marks1: '// Клик по дню — смена цвета подсветки, ctrl+клик — повтор последнего цвета.', marks2: '// Правый клик — убрать, ctrl+правый клик — убрать всё.' },
+      preview: 'ПРЕВЬЮ',
+      toast: { pngExported: 'PNG ЭКСПОРТИРОВАН', exportFailed: 'ОШИБКА ЭКСПОРТА', imgLoaded: 'ИЗО. ЗАГРУЖЕНО', noImageClipboard: 'НЕТ ИЗОБРАЖЕНИЯ В БУФЕРЕ', clipboardBlocked: 'БУФЕР ЗАБЛОКИРОВАН', noBgYet: 'НЕТ ФОНА', storageFull: 'ХРАНИЛИЩЕ ПЕРЕПОЛНЕНО', highlightsCleared: 'ПОДСВЕТКА ОЧИЩЕНА', notAnImage: 'НЕ ИЗОБРАЖЕНИЕ' }
+    },
+    fr: {
+      tag: { app: 'CONSTRUCTEUR DE CALENDRIER', glitch: 'EMPRUNTE TON TEMPS' },
+      field: { view: '// VUE:', size: '// TAILLE:', layout: '// GRILLE:', firstDay: '// 1ER JOUR:', hlSat: '// SURLIGNER SAMEDI:', hlSun: '// SURLIGNER DIMANCHE:', bg: '// FOND:', calLang: '// LANGUE CALENDRIER:', main: 'Principal', accent: 'Accent', bright: 'LUM.' },
+      lab: { month: 'MOIS', year: 'ANNÉE', mon: 'LUN', sun: 'DIM', no: 'NON', yes: 'OUI' },
+      btn: { upload: 'IMPORTER', paste: 'COLLER', recrop: 'RECADRER', savePng: '⬇ ENREGISTRER PNG' },
+      crop: { title: '// RECADRER LE FOND', use: 'UTILISER', cancel: 'ANNULER' },
+      hint: { pickMonth: '// Choisissez un mois et exportez.', pickYear: '// Choisissez une année et exportez.', marks1: '// Clic sur un jour : couleurs de surbrillance, ctrl+clic : répéter la dernière.', marks2: '// Clic droit : effacer, ctrl+clic droit : tout effacer.' },
+      preview: 'APERÇU',
+      toast: { pngExported: 'PNG EXPORTÉ', exportFailed: 'ÉCHEC EXPORT', imgLoaded: 'IMG CHARGÉE', noImageClipboard: 'AUCUNE IMG DANS LE PRESSE-PAPIERS', clipboardBlocked: 'PRESSE-PAPIERS BLOQUÉ', noBgYet: 'PAS DE FOND', storageFull: 'STOCKAGE PLEIN', highlightsCleared: 'SURBRILLANCES EFFACÉES', notAnImage: 'PAS UNE IMAGE' }
+    },
+    de: {
+      tag: { app: 'KALENDER-KONSTRUKTOR', glitch: 'ZEIT AUF PUMP' },
+      field: { view: '// ANSICHT:', size: '// GRÖSSE:', layout: '// RASTER:', firstDay: '// WOCHENSTART:', hlSat: '// SAMSTAG MARKIEREN:', hlSun: '// SONNTAG MARKIEREN:', bg: '// HINTERGRUND:', calLang: '// KALENDERSPRACHE:', main: 'Haupt', accent: 'Akzent', bright: 'HELL.' },
+      lab: { month: 'MONAT', year: 'JAHR', mon: 'MO', sun: 'SO', no: 'NEIN', yes: 'JA' },
+      btn: { upload: 'HOCHLADEN', paste: 'EINFÜGEN', recrop: 'NEU ZUSCHN.', savePng: '⬇ PNG SPEICHERN' },
+      crop: { title: '// HINTERGRUND ZUSCHNEIDEN', use: 'VERWENDEN', cancel: 'ABBRECHEN' },
+      hint: { pickMonth: '// Monat wählen und exportieren.', pickYear: '// Jahr wählen und exportieren.', marks1: '// Klick auf einen Tag wechselt die Markierungsfarbe, Strg+Klick wiederholt die letzte.', marks2: '// Rechtsklick löscht, Strg+Rechtsklick löscht alles.' },
+      preview: 'VORSCHAU',
+      toast: { pngExported: 'PNG EXPORTIERT', exportFailed: 'EXPORT FEHLGESCHL.', imgLoaded: 'BILD GELADEN', noImageClipboard: 'KEIN BILD IN ZWISCHENABLAGE', clipboardBlocked: 'ZWISCHENABLAGE BLOCKIERT', noBgYet: 'KEIN HINTERGRUND', storageFull: 'SPEICHER VOLL', highlightsCleared: 'MARKIERUNGEN GELÖSCHT', notAnImage: 'KEIN BILD' }
+    },
+    es: {
+      tag: { app: 'CONSTRUCTOR DE CALENDARIO', glitch: 'TIEMPO PRESTADO' },
+      field: { view: '// VISTA:', size: '// TAMAÑO:', layout: '// REJILLA:', firstDay: '// PRIMER DÍA:', hlSat: '// RESALTAR SÁBADO:', hlSun: '// RESALTAR DOMINGO:', bg: '// FONDO:', calLang: '// IDIOMA CALENDARIO:', main: 'Principal', accent: 'Acento', bright: 'BRILLO' },
+      lab: { month: 'MES', year: 'AÑO', mon: 'LUN', sun: 'DOM', no: 'NO', yes: 'SÍ' },
+      btn: { upload: 'SUBIR', paste: 'PEGAR', recrop: 'RECORTAR', savePng: '⬇ GUARDAR PNG' },
+      crop: { title: '// RECORTAR FONDO', use: 'USAR', cancel: 'CANCELAR' },
+      hint: { pickMonth: '// Elige un mes y exporta.', pickYear: '// Elige un año y exporta.', marks1: '// Clic en un día cambia el color, ctrl+clic repite el último color.', marks2: '// Clic derecho borra, ctrl+clic derecho borra todo.' },
+      preview: 'VISTA PREVIA',
+      toast: { pngExported: 'PNG EXPORTADO', exportFailed: 'EXPORT FALLÓ', imgLoaded: 'IMG CARGADA', noImageClipboard: 'SIN IMG EN PORTAPAPELES', clipboardBlocked: 'PORTAPAPELES BLOQUEADO', noBgYet: 'SIN FONDO', storageFull: 'ALMACÉN LLENO', highlightsCleared: 'RESALTADOS BORRADOS', notAnImage: 'NO ES IMAGEN' }
+    },
+    it: {
+      tag: { app: 'COSTRUTTORE DI CALENDARIO', glitch: 'TEMPO IN PRESTITO' },
+      field: { view: '// VISTA:', size: '// DIMENSIONE:', layout: '// GRIGLIA:', firstDay: '// PRIMO GIORNO:', hlSat: '// EVIDENZIA SABATO:', hlSun: '// EVIDENZIA DOMENICA:', bg: '// SFONDO:', calLang: '// LINGUA CALENDARIO:', main: 'Principale', accent: 'Accento', bright: 'LUM.' },
+      lab: { month: 'MESE', year: 'ANNO', mon: 'LUN', sun: 'DOM', no: 'NO', yes: 'SÌ' },
+      btn: { upload: 'CARICA', paste: 'INCOLLA', recrop: 'RITAGLIA', savePng: '⬇ SALVA PNG' },
+      crop: { title: '// RITAGLIA SFONDO', use: 'USA', cancel: 'ANNULLA' },
+      hint: { pickMonth: '// Scegli un mese ed esporta.', pickYear: '// Scegli un anno ed esporta.', marks1: '// Clic su un giorno cambia colore, ctrl+clic ripete l\'ultimo colore.', marks2: '// Clic destro cancella, ctrl+clic destro cancella tutto.' },
+      preview: 'ANTEPRIMA',
+      toast: { pngExported: 'PNG ESPORTATO', exportFailed: 'EXPORT FALLITO', imgLoaded: 'IMG CARICATA', noImageClipboard: 'NESSUNA IMG NEGLI APPUNTI', clipboardBlocked: 'APPUNTI BLOCCATI', noBgYet: 'NESSUNO SFONDO', storageFull: 'ARCHIVIO PIENO', highlightsCleared: 'EVIDENZIAZIONI RIMOSSE', notAnImage: 'NON È IMG' }
+    },
+    ja: {
+      tag: { app: 'カレンダー・コンストラクタ', glitch: '時間を借りる' },
+      field: { view: '// 表示:', size: '// サイズ:', layout: '// 配置:', firstDay: '// 週の始まり:', hlSat: '// 土曜を強調:', hlSun: '// 日曜を強調:', bg: '// 背景:', calLang: '// カレンダー言語:', main: 'メイン', accent: 'アクセント', bright: '明るさ' },
+      lab: { month: '月', year: '年', mon: '月', sun: '日', no: 'いいえ', yes: 'はい' },
+      btn: { upload: 'アップロード', paste: 'ペースト', recrop: '再切抜', savePng: '⬇ PNG保存' },
+      crop: { title: '// 背景を切り抜く', use: '使用', cancel: 'キャンセル' },
+      hint: { pickMonth: '// 月を選んでエクスポート。', pickYear: '// 年を選んでエクスポート。', marks1: '// 日をクリックで色切替、ctrl+クリックで直前の色。', marks2: '// 右クリックで解除、ctrl+右クリックで全解除。' },
+      preview: 'プレビュー',
+      toast: { pngExported: 'PNG出力完了', exportFailed: 'エクスポート失敗', imgLoaded: '画像読込完了', noImageClipboard: 'クリップボードに画像なし', clipboardBlocked: 'クリップボードブロック', noBgYet: '背景未設定', storageFull: 'ストレージ満杯', highlightsCleared: 'ハイライト消去', notAnImage: '画像ではない' }
+    },
+    zh: {
+      tag: { app: '日历构建器', glitch: '借来的时间' },
+      field: { view: '// 视图:', size: '// 尺寸:', layout: '// 布局:', firstDay: '// 每周开始:', hlSat: '// 高亮周六:', hlSun: '// 高亮周日:', bg: '// 背景:', calLang: '// 日历语言:', main: '主色', accent: '强调色', bright: '亮度' },
+      lab: { month: '月', year: '年', mon: '一', sun: '日', no: '否', yes: '是' },
+      btn: { upload: '上传', paste: '粘贴', recrop: '重剪', savePng: '⬇ 保存PNG' },
+      crop: { title: '// 裁剪背景', use: '使用', cancel: '取消' },
+      hint: { pickMonth: '// 选择月份并导出。', pickYear: '// 选择年份并导出。', marks1: '// 点击日期切换高亮颜色，ctrl+点击重复上次颜色。', marks2: '// 右键清除，ctrl+右键全部清除。' },
+      preview: '预览',
+      toast: { pngExported: 'PNG导出完成', exportFailed: '导出失败', imgLoaded: '图片已加载', noImageClipboard: '剪贴板无图片', clipboardBlocked: '剪贴板被屏蔽', noBgYet: '无背景', storageFull: '存储已满', highlightsCleared: '高亮已清除', notAnImage: '不是图片' }
+    }
+  };
+  function t(key) {
+    const parts = key.split('.');
+    const lookup = (dict) => {
+      let v = dict;
+      for (const p of parts) { if (v && typeof v === 'object') v = v[p]; else return undefined; }
+      return typeof v === 'string' ? v : undefined;
+    };
+    let v = lookup(I18N[store.uiLang]);
+    if (v === undefined) v = lookup(I18N.en);
+    return v === undefined ? key : v;
+  }
+  function applyI18n() {
+    document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.getAttribute('data-i18n')); });
+    const tw = $('tagWord');
+    if (tw) tw.textContent = t('tag.app');
+    document.documentElement.lang = store.uiLang;
+  }
 
   function save() { localStorage.setItem(LS_KEY, JSON.stringify(store)); }
   // "#rrggbb" -> "r,g,b" for use inside rgba(var(--x-rgb), a)
@@ -881,7 +1041,7 @@
         // ctrl/cmd+right-click: wipe every mark (all dates, both views)
         store.marks = {};
         save(); render();
-        showToast('HIGHLIGHTS CLEARED');
+        showToast(t('toast.highlightsCleared'));
         return;
       }
       delete store.marks[markKey(year, getMonth(cell), +cell.dataset.d)];
@@ -918,8 +1078,14 @@
     showToast._t = setTimeout(() => toast.classList.remove('show'), 1800);
   }
 
-  // Build static controls
-  MONTHS.forEach((m, i) => { const o = document.createElement('option'); o.value = i; o.textContent = m; monthSel.appendChild(o); });
+  // Build the month chooser in the UI language (it's chrome, not calendar
+  // content) — rebuilt when the top-right language changes
+  function buildMonthOptions() {
+    monthSel.innerHTML = '';
+    calNames(store.uiLang).months.forEach((m, i) => { const o = document.createElement('option'); o.value = i; o.textContent = m; monthSel.appendChild(o); });
+    monthSel.value = month;
+  }
+  buildMonthOptions();
 
   // Palette clicks (preset + saved-custom swatches both carry data-color)
   function wirePalette(wrap, set) {
@@ -936,7 +1102,8 @@
 
   function daysInMonth(y, m) { return new Date(y, m + 1, 0).getDate(); }
   const sunStart = () => store.weekStart === 'sun';
-  function dowLabels() { return sunStart() ? DOW_SUN : DOW_MON; }
+  function dowLabels() { const n = calNames(); return sunStart() ? n.sunFirst : n.monFirst; }
+  function dowLabelsNarrow() { const n = calNames(); return sunStart() ? n.sunFirstNarrow : n.monFirstNarrow; }
   // Column offset of the 1st: getDay() is 0=Sun..6=Sat.
   function firstOffset(y, m) {
     const d = new Date(y, m, 1).getDay();
@@ -975,7 +1142,7 @@
     const r = sizeRatio();
     const w = Math.round(capture.offsetWidth);   // on-screen / base px
     const h = Math.round(capture.offsetHeight);
-    let txt = '// PREVIEW :: ' + w + ' x ' + h + ' px';
+    let txt = '// ' + t('preview') + ' :: ' + w + ' x ' + h + ' px';
     if (r > 1) txt += ' (x' + r + ' = ' + (w * r) + ' x ' + (h * r) + ')';
     previewLabel.textContent = txt;
   }
@@ -985,7 +1152,7 @@
     yearInp.value = year;
     // Persist the current view so reloads restore month/year (accent saved separately).
     store.year = year; store.month = month; save();
-    calHead.textContent = yearView() ? String(year) : (MONTHS[month] + ' ' + year);
+    calHead.textContent = yearView() ? String(year) : (calNames().months[month] + ' ' + year);
     if (yearView()) renderYear(); else renderMonth();
     fitHead();
     updatePreviewLabel();
@@ -1034,14 +1201,14 @@
   // mini-month is the same height and the 4×3 lattice rows align.
   function renderYear() {
     yearGrid.innerHTML = '';
-    const letters = dowLabels().map(d => d[0]);
+    const letters = dowLabelsNarrow();
     for (let m = 0; m < 12; m++) {
       const box = document.createElement('div');
       box.className = 'mini-month';
 
       const name = document.createElement('div');
       name.className = 'mini-name';
-      name.textContent = MONTHS[m];
+      name.textContent = calNames().months[m];
       box.appendChild(name);
 
       const dow = document.createElement('div');
@@ -1090,6 +1257,16 @@
   $('prevBtn').addEventListener('click', () => yearView() ? stepYear(-1) : go(-1));
   $('nextBtn').addEventListener('click', () => yearView() ? stepYear(1) : go(1));
 
+  // Language switchers: UI labels (top-right) and calendar text (config)
+  uiLangSel.addEventListener('change', () => {
+    store.uiLang = uiLangSel.value;
+    applyI18n(); buildMonthOptions(); syncView(); updatePreviewLabel(); save();
+  });
+  calLangSel.addEventListener('change', () => {
+    store.calLang = calLangSel.value;
+    render(); save();
+  });
+
   // Day-mark click handling (delegated; cells re-render freely)
   wireMarks(grid, '.cell', () => month, 18);
   wireMarks(yearGrid, '.mini-cell', c => +c.dataset.m, 6);
@@ -1105,7 +1282,7 @@
     // Year mode swaps the SIZE toggle for the 4X3 | 3X4 lattice layout toggle
     sizeRow.hidden = yearView();
     layoutRow.hidden = !yearView();
-    $('hint').textContent = yearView() ? '// Pick a year and export.' : '// Pick a month and export.';
+    $('hint').textContent = t(yearView() ? 'hint.pickYear' : 'hint.pickMonth');
   }
   viewToggle.addEventListener('click', () => {
     store.view = yearView() ? 'month' : 'year';
@@ -1305,10 +1482,10 @@
           }
         }
       }
-      showToast('NO IMAGE IN CLIPBOARD');
+      showToast(t('toast.noImageClipboard'));
     } catch (err) {
       console.warn(err);
-      showToast('CLIPBOARD BLOCKED');
+      showToast(t('toast.clipboardBlocked'));
     }
   }
 
@@ -1328,7 +1505,7 @@
   }
   function saveBg() {
     try { save(); }
-    catch (e) { console.warn(e); showToast('STORAGE FULL — IMAGE NOT SAVED'); }
+    catch (e) { console.warn(e); showToast(t('toast.storageFull')); }
   }
   // Crop frame matches the live capture aspect; output is capped so the
   // data URL stays localStorage-friendly while covering a 2× export.
@@ -1359,7 +1536,7 @@
   function applyBg(dataUrl) {
     store.bg = dataUrl;
     applyCaptureBg(); saveBg();
-    showToast('IMAGE LOADED');
+    showToast(t('toast.imgLoaded'));
   }
   function loadBgFromDataUrl(dataUrl) {
     shrinkDataUrl(dataUrl, 2000, (small) => {
@@ -1379,7 +1556,7 @@
   $('pasteBg').addEventListener('click', () => tryPasteImage(loadBgFromDataUrl));
   $('recropBg').addEventListener('click', () => {
     const src = store.bgOriginal || store.bg;
-    if (!src) { showToast('NO BACKGROUND YET'); return; }
+    if (!src) { showToast(t('toast.noBgYet')); return; }
     openCrop(src, applyBg, bgCropOptions());
   });
   $('clearBg').addEventListener('click', () => {
@@ -1417,7 +1594,7 @@
     if (!e.dataTransfer || !e.dataTransfer.files || !e.dataTransfer.files.length) return;
     e.preventDefault();
     const f = e.dataTransfer.files[0];
-    if (!f.type || f.type.indexOf('image/') !== 0) { showToast('NOT AN IMAGE'); return; }
+    if (!f.type || f.type.indexOf('image/') !== 0) { showToast(t('toast.notAnImage')); return; }
     const reader = new FileReader();
     reader.onload = (ev) => loadBgFromDataUrl(ev.target.result);
     reader.readAsDataURL(f);
@@ -1437,13 +1614,16 @@
       a.download = 'chronos_' + year + '_' + (yearView() ? 'full' : String(month + 1).padStart(2, '0')) + '_' + Date.now() + '.png';
       a.href = dataUrl;
       a.click();
-      showToast('PNG EXPORTED');
+      showToast(t('toast.pngExported'));
     } catch (err) {
       console.error(err);
-      showToast('EXPORT FAILED');
+      showToast(t('toast.exportFailed'));
     }
   });
 
+  uiLangSel.value = store.uiLang;
+  calLangSel.value = store.calLang;
+  applyI18n();
   applyColors();
   bgBrightnessInput.value = store.bgBrightness;
   bgBrightnessVal.textContent = Math.round(store.bgBrightness * 100) + '%';
@@ -1487,14 +1667,14 @@
   (function startTagGlitch() {
     const el = $('tagWord');
     if (!el) return;
-    const ORIGINAL = 'CALENDAR CONSTRUCTOR';
-    const TARGET = 'BORROW YOUR TIME';
+    const ORIGINAL = () => t('tag.app');
+    const TARGET = () => t('tag.glitch');
     const CHARS = '!@#$%&*<>{}[]/|01ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    const maxLen = Math.max(ORIGINAL.length, TARGET.length);
+    const maxLen = () => Math.max(ORIGINAL().length, TARGET().length);
 
     function scrambleFrame(target, revealed) {
       let out = '';
-      for (let i = 0; i < maxLen; i++) {
+      for (let i = 0; i < maxLen(); i++) {
         if (i >= target.length) { out += ' '; continue; }
         if (i < revealed) { out += target[i]; continue; }
         out += CHARS[Math.floor(Math.random() * CHARS.length)];
@@ -1510,18 +1690,18 @@
         el.textContent = scrambleFrame(target, revealed);
         if (step >= steps) {
           clearInterval(id);
-          el.textContent = target + ' '.repeat(maxLen - target.length);
+          el.textContent = target + ' '.repeat(maxLen() - target.length);
           onDone();
         }
       }, 40);
     }
     function runGlitch() {
       el.classList.add('glitching');
-      runScramble(TARGET, () => {
+      runScramble(TARGET(), () => {
         setTimeout(() => {
-          runScramble(ORIGINAL, () => {
+          runScramble(ORIGINAL(), () => {
             el.classList.remove('glitching');
-            el.textContent = ORIGINAL;
+            el.textContent = ORIGINAL();
             setTimeout(runGlitch, 14000 + Math.random() * 18000);
           });
         }, 700);
@@ -1536,7 +1716,7 @@
     const meta = $('tagMeta');
     if (!meta) return;
     const GH_REPO = 'CyberDelaai/chronos-ui';
-    const VER = ' // v1.1.5';
+    const VER = ' // v1.1.6';
     const CHARS = '!@#$%&*<>{}[]/|01ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     let commitCount = '';
 
