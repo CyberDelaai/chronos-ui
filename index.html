@@ -1,4 +1,4 @@
-<!-- CHRONOS v1.0.4 -->
+<!-- CHRONOS v1.1.0 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -87,6 +87,9 @@
   .calendar-area.size-s #capture { max-width: 504px; }
   .calendar-area.size-m #capture { max-width: 1100px; }
   .calendar-area.size-l #capture { max-width: none; }
+  /* YEAR mode ignores the S/M/L choice entirely — always renders at L
+     (keep after the size caps so it wins the equal-specificity tie) */
+  .calendar-area.view-year #capture { max-width: none; }
   /* Small size: shrink weekday labels + day numbers (vw-based defaults don't
      track the capped calendar width) */
   .calendar-area.size-s .dow { font-size: 22px; }
@@ -451,6 +454,12 @@
   .mini-cell.blank { border-color: transparent; box-shadow: none; }
   /* weekend column tint — flat wash (no header strips at mini scale) */
   .mini-cell.weekend, .mini-dow .md.weekend { background: rgba(var(--main-rgb),0.14); }
+  /* widen the header tint 1px to the LEFT so it lines up with the day-column
+     wash below (day cells are pulled left by their -1px lattice margin) —
+     except when the previous header cell is tinted too (MON-start puts SAT+SUN
+     side by side; the extra px would double-tint the shared seam) */
+  .mini-dow .md.weekend { margin-left: -1px; }
+  .mini-dow .md.weekend + .md.weekend { margin-left: 0; }
 
   .hint { color: var(--dim); font-size: 11px; letter-spacing: 1px; margin-top: 14px; }
   .toast {
@@ -490,7 +499,7 @@
         <a class="app-menu-item current" href="https://cyberdeck.tools/chronos-ui/" aria-current="page">&gt; CHRONOS_</a>
       </nav>
     </div>
-    <div class="tag"><span id="tagWord" class="glitchable">CALENDAR CONSTRUCTOR</span><span id="tagMeta" class="tag-meta"> // v<span id="tagVersion">1.0.4</span></span></div>
+    <div class="tag"><span id="tagWord" class="glitchable">CALENDAR CONSTRUCTOR</span><span id="tagMeta" class="tag-meta"> // v<span id="tagVersion">1.1.0</span></span></div>
   </header>
 
   <div class="layout">
@@ -648,7 +657,8 @@
   const DEFAULT_CUSTOM_ACCENT = '#ff7b00'; // pre-loaded into the Accent custom slot
   const LS_KEY = 'chronos.v1';
   // Export scale per size: S/M are 1× (PNG matches on-screen); L renders at 2×.
-  const sizeRatio = () => (store.size === 'l' ? 2 : 1);
+  // YEAR mode always uses L regardless of the (hidden) size toggle.
+  const sizeRatio = () => (store.view === 'year' || store.size === 'l' ? 2 : 1);
 
   let store = {};
   try { store = JSON.parse(localStorage.getItem(LS_KEY) || '{}'); } catch (e) { store = {}; }
@@ -1065,7 +1075,7 @@
     const meta = $('tagMeta');
     if (!meta) return;
     const GH_REPO = 'CyberDelaai/chronos-ui';
-    const VER = ' // v1.0.4';
+    const VER = ' // v1.1.0';
     const CHARS = '!@#$%&*<>{}[]/|01ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     let commitCount = '';
 

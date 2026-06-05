@@ -7,6 +7,8 @@ game masters and netrunner handouts.
 ## Features
 
 - **Pick any month / year** and render a styled monthly grid.
+- **Year mode** — switch the VIEW toggle to YEAR for a full-year poster of 12
+  mini-months, in a 4×3 or 3×4 lattice (always rendered at L size, 2× export).
 - **PNG export** — one click saves the calendar as a transparent-corner PNG.
 - **Color controls** — set the **Main** (grid/frame) and **Accent** (text/glow) colors.
 - **Size presets** — `S` / `M` / `L` cap the calendar width; the exported PNG width
@@ -29,7 +31,7 @@ the colors and layout, then click **⬇ SAVE PNG**.
 
 ## Version
 
-`1.0.4`
+`1.1.0`
 
 ## License
 

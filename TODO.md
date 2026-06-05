@@ -5,7 +5,6 @@ Pending issues, features, and ideas for CHRONOS. Items are removed from the list
 ## BIG (Y version bump)
 
 1. Add themes
-2. Add year calendar
 
 ## SMALL (Z version bump)
 
