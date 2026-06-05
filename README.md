@@ -42,7 +42,7 @@ the colors and layout, then click **⬇ SAVE PNG**.
 
 ## Version
 
-`1.1.7`
+`1.1.8`
 
 ## License
 
