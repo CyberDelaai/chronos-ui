@@ -1,4 +1,4 @@
-<!-- CHRONOS v1.1.6 -->
+<!-- CHRONOS v1.1.7 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -521,6 +521,21 @@
     pointer-events: none;
   }
   #captureBg[hidden] { display: none; }
+  /* scanlines FX overlay (ported from commlink-ui) — a real DOM layer, not a
+     ::before, because augmented-ui owns the pseudos on #capture; sits above
+     the calendar content and exports with the PNG */
+  #scanlines {
+    position: absolute; inset: 0; pointer-events: none; z-index: 2;
+    display: none;
+    background: repeating-linear-gradient(
+      0deg,
+      rgba(0, 0, 0, 0.18) 0px,
+      rgba(0, 0, 0, 0.18) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+  }
+  #capture.scanlines #scanlines { display: block; }
   #capture.bg-drop-target { outline: 2px dashed var(--main); outline-offset: -6px; }
   .bg-field { display: flex; flex-direction: column; gap: 10px; }
   .btn-row { display: flex; gap: 8px; align-items: center; }
@@ -595,7 +610,7 @@
         <a class="app-menu-item current" href="https://cyberdeck.tools/chronos-ui/" aria-current="page">&gt; CHRONOS_</a>
       </nav>
     </div>
-    <div class="tag"><span id="tagWord" class="glitchable">CALENDAR CONSTRUCTOR</span><span id="tagMeta" class="tag-meta"> // v<span id="tagVersion">1.1.6</span></span></div>
+    <div class="tag"><span id="tagWord" class="glitchable">CALENDAR CONSTRUCTOR</span><span id="tagMeta" class="tag-meta"> // v<span id="tagVersion">1.1.7</span></span></div>
     <select class="lang-select" id="uiLangSel" aria-label="interface language"><option value="en">EN</option><option value="ru">RU</option><option value="fr">FR</option><option value="de">DE</option><option value="es">ES</option><option value="it">IT</option><option value="ja">JP</option><option value="zh">CN</option></select>
   </header>
 
@@ -727,6 +742,15 @@
   </div>
 
   <div class="fx-toggle">
+    <span class="fx-label" data-i18n="field.scanlines">// SCANLINES:</span>
+    <button class="side-switch fx" id="scanToggle" type="button" data-pos="left" aria-label="scanlines">
+      <span class="thumb"></span>
+      <span class="lab l">OFF</span>
+      <span class="lab r">ON</span>
+    </button>
+  </div>
+
+  <div class="fx-toggle">
     <span class="fx-label" data-i18n="field.calLang">// CALENDAR LANG:</span>
     <select class="lang-select" id="calLangSel" aria-label="calendar language"><option value="en">EN</option><option value="ru">RU</option><option value="fr">FR</option><option value="de">DE</option><option value="es">ES</option><option value="it">IT</option><option value="ja">JP</option><option value="zh">CN</option></select>
   </div>
@@ -778,6 +802,7 @@
              No top gap, so the SAT/SUN header tint flows straight into the column. -->
         <div class="grid" id="grid" style="margin-top:0; padding:4px 0 0 4px"></div>
         <div id="yearGrid"></div>
+        <div id="scanlines" aria-hidden="true"></div>
       </div>
       <div class="preview-label" id="previewLabel"></div>
     </div>
@@ -860,6 +885,7 @@
   if (typeof store.bg !== 'string') store.bg = '';                 // cropped capture background (data URL)
   if (typeof store.bgOriginal !== 'string') store.bgOriginal = ''; // pre-crop original, kept for RECROP
   if (typeof store.bgBrightness !== 'number') store.bgBrightness = 0.55;
+  if (typeof store.scanlines !== 'boolean') store.scanlines = false; // scanline FX overlay
   if (LANGS.indexOf(store.calLang) < 0) store.calLang = 'en'; // calendar month/weekday language
   if (LANGS.indexOf(store.uiLang) < 0) {
     const browser = (navigator.language || 'en').slice(0, 2).toLowerCase();
@@ -886,6 +912,7 @@
   const captureBg = $('captureBg'), bgFileInput = $('bgFile');
   const bgBrightnessInput = $('bgBrightness'), bgBrightnessVal = $('bgBrightnessVal');
   const uiLangSel = $('uiLangSel'), calLangSel = $('calLangSel');
+  const scanToggle = $('scanToggle');
 
 
   // ---- UI i18n (pattern ported from commlink-ui js/i18n.js; shared strings
@@ -893,7 +920,7 @@
   const I18N = {
     en: {
       tag: { app: 'CALENDAR CONSTRUCTOR', glitch: 'BORROW YOUR TIME' },
-      field: { view: '// VIEW:', size: '// SIZE:', layout: '// LAYOUT:', firstDay: '// FIRST WEEKDAY:', hlSat: '// HIGHLIGHT SATURDAY:', hlSun: '// HIGHLIGHT SUNDAY:', bg: '// BACKGROUND:', calLang: '// CALENDAR LANG:', main: 'Main', accent: 'Accent', bright: 'BRIGHT' },
+      field: { view: '// VIEW:', size: '// SIZE:', layout: '// LAYOUT:', firstDay: '// FIRST WEEKDAY:', hlSat: '// HIGHLIGHT SATURDAY:', hlSun: '// HIGHLIGHT SUNDAY:', bg: '// BACKGROUND:', calLang: '// CALENDAR LANG:', main: 'Main', accent: 'Accent', scanlines: '// SCANLINES:', bright: 'BRIGHT' },
       lab: { month: 'MONTH', year: 'YEAR', mon: 'MON', sun: 'SUN', no: 'NO', yes: 'YES' },
       btn: { upload: 'UPLOAD', paste: 'PASTE', recrop: 'RECROP', savePng: '⬇ SAVE PNG' },
       crop: { title: '// CROP BACKGROUND', use: 'USE', cancel: 'CANCEL' },
@@ -903,7 +930,7 @@
     },
     ru: {
       tag: { app: 'КОНСТРУКТОР КАЛЕНДАРЯ', glitch: 'ВРЕМЯ ВЗАЙМЫ' },
-      field: { view: '// ВИД:', size: '// РАЗМЕР:', layout: '// СЕТКА:', firstDay: '// ПЕРВЫЙ ДЕНЬ:', hlSat: '// ВЫДЕЛИТЬ СУББОТУ:', hlSun: '// ВЫДЕЛИТЬ ВОСКРЕСЕНЬЕ:', bg: '// ФОН:', calLang: '// ЯЗЫК КАЛЕНДАРЯ:', main: 'Основной', accent: 'Акцент', bright: 'ЯРКОСТЬ' },
+      field: { view: '// ВИД:', size: '// РАЗМЕР:', layout: '// СЕТКА:', firstDay: '// ПЕРВЫЙ ДЕНЬ:', hlSat: '// ВЫДЕЛИТЬ СУББОТУ:', hlSun: '// ВЫДЕЛИТЬ ВОСКРЕСЕНЬЕ:', bg: '// ФОН:', calLang: '// ЯЗЫК КАЛЕНДАРЯ:', main: 'Основной', accent: 'Акцент', scanlines: '// ПОЛОСЫ:', bright: 'ЯРКОСТЬ' },
       lab: { month: 'МЕСЯЦ', year: 'ГОД', mon: 'ПН', sun: 'ВС', no: 'НЕТ', yes: 'ДА' },
       btn: { upload: 'ЗАГРУЗ.', paste: 'ВСТАВ.', recrop: 'ОБРЕЗАТЬ', savePng: '⬇ СОХРАНИТЬ PNG' },
       crop: { title: '// ОБРЕЗКА ФОНА', use: 'ПРИМЕНИТЬ', cancel: 'ОТМЕНА' },
@@ -913,7 +940,7 @@
     },
     fr: {
       tag: { app: 'CONSTRUCTEUR DE CALENDRIER', glitch: 'EMPRUNTE TON TEMPS' },
-      field: { view: '// VUE:', size: '// TAILLE:', layout: '// GRILLE:', firstDay: '// 1ER JOUR:', hlSat: '// SURLIGNER SAMEDI:', hlSun: '// SURLIGNER DIMANCHE:', bg: '// FOND:', calLang: '// LANGUE CALENDRIER:', main: 'Principal', accent: 'Accent', bright: 'LUM.' },
+      field: { view: '// VUE:', size: '// TAILLE:', layout: '// GRILLE:', firstDay: '// 1ER JOUR:', hlSat: '// SURLIGNER SAMEDI:', hlSun: '// SURLIGNER DIMANCHE:', bg: '// FOND:', calLang: '// LANGUE CALENDRIER:', main: 'Principal', accent: 'Accent', scanlines: '// SCANLINES:', bright: 'LUM.' },
       lab: { month: 'MOIS', year: 'ANNÉE', mon: 'LUN', sun: 'DIM', no: 'NON', yes: 'OUI' },
       btn: { upload: 'IMPORTER', paste: 'COLLER', recrop: 'RECADRER', savePng: '⬇ ENREGISTRER PNG' },
       crop: { title: '// RECADRER LE FOND', use: 'UTILISER', cancel: 'ANNULER' },
@@ -923,7 +950,7 @@
     },
     de: {
       tag: { app: 'KALENDER-KONSTRUKTOR', glitch: 'ZEIT AUF PUMP' },
-      field: { view: '// ANSICHT:', size: '// GRÖSSE:', layout: '// RASTER:', firstDay: '// WOCHENSTART:', hlSat: '// SAMSTAG MARKIEREN:', hlSun: '// SONNTAG MARKIEREN:', bg: '// HINTERGRUND:', calLang: '// KALENDERSPRACHE:', main: 'Haupt', accent: 'Akzent', bright: 'HELL.' },
+      field: { view: '// ANSICHT:', size: '// GRÖSSE:', layout: '// RASTER:', firstDay: '// WOCHENSTART:', hlSat: '// SAMSTAG MARKIEREN:', hlSun: '// SONNTAG MARKIEREN:', bg: '// HINTERGRUND:', calLang: '// KALENDERSPRACHE:', main: 'Haupt', accent: 'Akzent', scanlines: '// SCANLINES:', bright: 'HELL.' },
       lab: { month: 'MONAT', year: 'JAHR', mon: 'MO', sun: 'SO', no: 'NEIN', yes: 'JA' },
       btn: { upload: 'HOCHLADEN', paste: 'EINFÜGEN', recrop: 'NEU ZUSCHN.', savePng: '⬇ PNG SPEICHERN' },
       crop: { title: '// HINTERGRUND ZUSCHNEIDEN', use: 'VERWENDEN', cancel: 'ABBRECHEN' },
@@ -933,7 +960,7 @@
     },
     es: {
       tag: { app: 'CONSTRUCTOR DE CALENDARIO', glitch: 'TIEMPO PRESTADO' },
-      field: { view: '// VISTA:', size: '// TAMAÑO:', layout: '// REJILLA:', firstDay: '// PRIMER DÍA:', hlSat: '// RESALTAR SÁBADO:', hlSun: '// RESALTAR DOMINGO:', bg: '// FONDO:', calLang: '// IDIOMA CALENDARIO:', main: 'Principal', accent: 'Acento', bright: 'BRILLO' },
+      field: { view: '// VISTA:', size: '// TAMAÑO:', layout: '// REJILLA:', firstDay: '// PRIMER DÍA:', hlSat: '// RESALTAR SÁBADO:', hlSun: '// RESALTAR DOMINGO:', bg: '// FONDO:', calLang: '// IDIOMA CALENDARIO:', main: 'Principal', accent: 'Acento', scanlines: '// LÍNEAS:', bright: 'BRILLO' },
       lab: { month: 'MES', year: 'AÑO', mon: 'LUN', sun: 'DOM', no: 'NO', yes: 'SÍ' },
       btn: { upload: 'SUBIR', paste: 'PEGAR', recrop: 'RECORTAR', savePng: '⬇ GUARDAR PNG' },
       crop: { title: '// RECORTAR FONDO', use: 'USAR', cancel: 'CANCELAR' },
@@ -943,7 +970,7 @@
     },
     it: {
       tag: { app: 'COSTRUTTORE DI CALENDARIO', glitch: 'TEMPO IN PRESTITO' },
-      field: { view: '// VISTA:', size: '// DIMENSIONE:', layout: '// GRIGLIA:', firstDay: '// PRIMO GIORNO:', hlSat: '// EVIDENZIA SABATO:', hlSun: '// EVIDENZIA DOMENICA:', bg: '// SFONDO:', calLang: '// LINGUA CALENDARIO:', main: 'Principale', accent: 'Accento', bright: 'LUM.' },
+      field: { view: '// VISTA:', size: '// DIMENSIONE:', layout: '// GRIGLIA:', firstDay: '// PRIMO GIORNO:', hlSat: '// EVIDENZIA SABATO:', hlSun: '// EVIDENZIA DOMENICA:', bg: '// SFONDO:', calLang: '// LINGUA CALENDARIO:', main: 'Principale', accent: 'Accento', scanlines: '// SCANLINES:', bright: 'LUM.' },
       lab: { month: 'MESE', year: 'ANNO', mon: 'LUN', sun: 'DOM', no: 'NO', yes: 'SÌ' },
       btn: { upload: 'CARICA', paste: 'INCOLLA', recrop: 'RITAGLIA', savePng: '⬇ SALVA PNG' },
       crop: { title: '// RITAGLIA SFONDO', use: 'USA', cancel: 'ANNULLA' },
@@ -953,7 +980,7 @@
     },
     ja: {
       tag: { app: 'カレンダー・コンストラクタ', glitch: '時間を借りる' },
-      field: { view: '// 表示:', size: '// サイズ:', layout: '// 配置:', firstDay: '// 週の始まり:', hlSat: '// 土曜を強調:', hlSun: '// 日曜を強調:', bg: '// 背景:', calLang: '// カレンダー言語:', main: 'メイン', accent: 'アクセント', bright: '明るさ' },
+      field: { view: '// 表示:', size: '// サイズ:', layout: '// 配置:', firstDay: '// 週の始まり:', hlSat: '// 土曜を強調:', hlSun: '// 日曜を強調:', bg: '// 背景:', calLang: '// カレンダー言語:', main: 'メイン', accent: 'アクセント', scanlines: '// スキャンライン:', bright: '明るさ' },
       lab: { month: '月', year: '年', mon: '月', sun: '日', no: 'いいえ', yes: 'はい' },
       btn: { upload: 'アップロード', paste: 'ペースト', recrop: '再切抜', savePng: '⬇ PNG保存' },
       crop: { title: '// 背景を切り抜く', use: '使用', cancel: 'キャンセル' },
@@ -963,7 +990,7 @@
     },
     zh: {
       tag: { app: '日历构建器', glitch: '借来的时间' },
-      field: { view: '// 视图:', size: '// 尺寸:', layout: '// 布局:', firstDay: '// 每周开始:', hlSat: '// 高亮周六:', hlSun: '// 高亮周日:', bg: '// 背景:', calLang: '// 日历语言:', main: '主色', accent: '强调色', bright: '亮度' },
+      field: { view: '// 视图:', size: '// 尺寸:', layout: '// 布局:', firstDay: '// 每周开始:', hlSat: '// 高亮周六:', hlSun: '// 高亮周日:', bg: '// 背景:', calLang: '// 日历语言:', main: '主色', accent: '强调色', scanlines: '// 扫描线:', bright: '亮度' },
       lab: { month: '月', year: '年', mon: '一', sun: '日', no: '否', yes: '是' },
       btn: { upload: '上传', paste: '粘贴', recrop: '重剪', savePng: '⬇ 保存PNG' },
       crop: { title: '// 裁剪背景', use: '使用', cancel: '取消' },
@@ -1316,6 +1343,13 @@
   const syncSat = wireBoolToggle(satToggle, 'hlSat');
   const syncSun = wireBoolToggle(sunToggle, 'hlSun');
 
+  // Scanlines FX (OFF | ON) — pure class flip on the capture, no re-render
+  function syncScan() {
+    scanToggle.dataset.pos = store.scanlines ? 'right' : 'left';
+    capture.classList.toggle('scanlines', store.scanlines);
+  }
+  scanToggle.addEventListener('click', () => { store.scanlines = !store.scanlines; syncScan(); save(); });
+
   // Size toggle (S | M | L) — caps the calendar width, then re-fits the header
   function applySize() {
     calendarArea.classList.remove('size-s', 'size-m', 'size-l');
@@ -1633,6 +1667,7 @@
   syncWeekToggle();
   syncSat();
   syncSun();
+  syncScan();
   applySize();
   render();
 
@@ -1716,7 +1751,7 @@
     const meta = $('tagMeta');
     if (!meta) return;
     const GH_REPO = 'CyberDelaai/chronos-ui';
-    const VER = ' // v1.1.6';
+    const VER = ' // v1.1.7';
     const CHARS = '!@#$%&*<>{}[]/|01ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     let commitCount = '';
 
