@@ -10,7 +10,11 @@ game masters and netrunner handouts.
 - **Year mode** — switch the VIEW toggle to YEAR for a full-year poster of 12
   mini-months, in a 4×3 or 3×4 lattice (always rendered at L size, 2× export).
 - **PNG export** — one click saves the calendar as a transparent-corner PNG.
-- **Color controls** — set the **Main** (grid/frame) and **Accent** (text/glow) colors.
+- **Color controls** — set the **Main** (grid/frame) and **Accent** (text/glow) colors
+  from 19 preset swatches per palette, or pick any custom color.
+- **Day highlights** — click a day to cycle a highlight through 5 colors,
+  ctrl+click to stamp the last color, right-click to clear, ctrl+right-click to
+  clear all; marks persist per date and export with the PNG.
 - **Size presets** — `S` / `M` / `L` cap the calendar width; the exported PNG width
   matches the on-screen `// PREVIEW: NxMpx` label (L renders at 2× for crisper output).
 - **First weekday toggle** — start the week on Monday or Sunday.
@@ -31,7 +35,7 @@ the colors and layout, then click **⬇ SAVE PNG**.
 
 ## Version
 
-`1.1.2`
+`1.1.3`
 
 ## License
 
