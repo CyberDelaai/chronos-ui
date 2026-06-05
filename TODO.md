@@ -10,6 +10,5 @@ Pending issues, features, and ideas for CHRONOS. Items are removed from the list
 
 1. Add svg export
 2. Add different languages
-3. Fix color of gradient
-4. Add custom bg import
-5. Update seo png
+3. Add custom bg import
+4. Update seo png

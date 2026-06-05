@@ -35,7 +35,7 @@ the colors and layout, then click **⬇ SAVE PNG**.
 
 ## Version
 
-`1.1.3`
+`1.1.4`
 
 ## License
 
