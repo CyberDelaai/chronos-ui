@@ -1,4 +1,4 @@
-<!-- CHRONOS v1.1.1 -->
+<!-- CHRONOS v1.1.2 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -386,6 +386,8 @@
   .calendar-area.size-m, .calendar-area.size-l { --strip-gap: 3px; }
 
   .cell.blank { border-color: transparent; box-shadow: none; }
+  /* day cells are clickable (mark cycling) */
+  .cell:not(.blank), .mini-cell:not(.blank) { cursor: pointer; }
   .cell .num {
     font-weight: 700; font-size: clamp(32px, 9vw, 60px);
     line-height: 1; color: var(--accent); text-shadow: 0 0 8px rgba(var(--accent-rgb),0.5);
@@ -473,7 +475,7 @@
         <a class="app-menu-item current" href="https://cyberdeck.tools/chronos-ui/" aria-current="page">&gt; CHRONOS_</a>
       </nav>
     </div>
-    <div class="tag"><span id="tagWord" class="glitchable">CALENDAR CONSTRUCTOR</span><span id="tagMeta" class="tag-meta"> // v<span id="tagVersion">1.1.1</span></span></div>
+    <div class="tag"><span id="tagWord" class="glitchable">CALENDAR CONSTRUCTOR</span><span id="tagMeta" class="tag-meta"> // v<span id="tagVersion">1.1.2</span></span></div>
   </header>
 
   <div class="layout">
@@ -613,6 +615,8 @@
       <div class="preview-label" id="previewLabel"></div>
     </div>
     <div class="hint" id="hint">// Pick a month and export.</div>
+    <div class="hint" style="margin-top: 4px">// Click a day to cycle highlight colors, ctrl+click to repeat the last color.</div>
+    <div class="hint" style="margin-top: 4px">// Right-click to clear, ctrl+right-click to clear all.</div>
   </div>
 
   </div><!-- /layout -->
@@ -646,6 +650,7 @@
   if (['s','m','l'].indexOf(store.size) < 0) store.size = 'm'; // calendar size
   if (store.view !== 'year') store.view = 'month'; // 'month' | 'year' construction
   if (store.yearLayout !== '3x4') store.yearLayout = '4x3'; // year mini-month lattice
+  if (typeof store.marks !== 'object' || store.marks === null) store.marks = {}; // 'Y-M-D' -> color index
 
   const now = new Date();
   // Restore last-viewed month/year if saved, else default to the current date.
@@ -673,6 +678,57 @@
     const n = parseInt(h, 16);
     return ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255);
   }
+  // ---- Day marks: click a day cell to cycle a highlight color, right-click
+  // to clear. Keyed by absolute date so marks survive navigation and show in
+  // both views; persisted in store.marks. ----
+  const MARK_COLORS = ['#ff003c', '#fcee0a', '#00f0ff', '#39ff14', '#ff10f0'];
+  // Last color applied by cycling — ctrl/cmd+click stamps it directly.
+  if (MARK_COLORS[store.lastMark] == null) store.lastMark = 0;
+  function markKey(y, m, d) { return y + '-' + (m + 1) + '-' + d; }
+  // Inline styles override the stylesheet (weekend wash, lattice glow) while
+  // marked, and clearing them restores the stylesheet values.
+  function applyMark(cell, idx, glow) {
+    if (idx == null) { cell.style.background = ''; cell.style.boxShadow = ''; return; }
+    const rgb = hexToRgb(MARK_COLORS[idx]);
+    cell.style.background = 'rgba(' + rgb + ',0.25)';
+    cell.style.boxShadow = 'inset 0 0 ' + glow + 'px rgba(' + rgb + ',0.5)';
+  }
+  // Shared wiring for both views: container delegates clicks to its day cells
+  // (cells carry data-d, and data-m in the year view).
+  function wireMarks(container, cellSel, getMonth, glow) {
+    const dayCell = (e) => {
+      const cell = e.target.closest(cellSel);
+      return (cell && cell.dataset.d) ? cell : null;
+    };
+    container.addEventListener('click', (e) => {
+      const cell = dayCell(e);
+      if (!cell) return;
+      const k = markKey(year, getMonth(cell), +cell.dataset.d);
+      if (e.ctrlKey || e.metaKey) {
+        // ctrl/cmd+click: stamp the last cycled color directly
+        store.marks[k] = store.lastMark;
+      } else {
+        store.marks[k] = (store.marks[k] == null) ? 0 : (store.marks[k] + 1) % MARK_COLORS.length;
+        store.lastMark = store.marks[k];
+      }
+      applyMark(cell, store.marks[k], glow); save();
+    });
+    container.addEventListener('contextmenu', (e) => {
+      const cell = dayCell(e);
+      if (!cell) return;
+      e.preventDefault();
+      if (e.ctrlKey || e.metaKey) {
+        // ctrl/cmd+right-click: wipe every mark (all dates, both views)
+        store.marks = {};
+        save(); render();
+        showToast('HIGHLIGHTS CLEARED');
+        return;
+      }
+      delete store.marks[markKey(year, getMonth(cell), +cell.dataset.d)];
+      applyMark(cell, null, glow); save();
+    });
+  }
+
   // Mirror commlink: show the saved custom swatch when set, highlight the active swatch.
   function refreshPalette(wrap, current, custom, savedSel, input) {
     const saved = wrap.querySelector(savedSel);
@@ -805,6 +861,8 @@
         continue;
       }
       cell.className = 'cell' + (i < 7 ? ' r0' : '') + weekendClass(i % 7);
+      cell.dataset.d = dayNum;
+      if (store.marks[markKey(year, month, dayNum)] != null) applyMark(cell, store.marks[markKey(year, month, dayNum)], 18);
       const num = document.createElement('div');
       num.className = 'num'; num.textContent = dayNum;
       cell.appendChild(num);
@@ -848,6 +906,8 @@
           cell.className = 'mini-cell blank' + (dayNum < 1 ? weekendClass(i % 7) : '');
         } else {
           cell.className = 'mini-cell' + weekendClass(i % 7);
+          cell.dataset.m = m; cell.dataset.d = dayNum;
+          if (store.marks[markKey(year, m, dayNum)] != null) applyMark(cell, store.marks[markKey(year, m, dayNum)], 6);
           cell.textContent = dayNum;
         }
         mg.appendChild(cell);
@@ -869,6 +929,10 @@
   // In year view the < > arrows step the year; in month view, the month.
   $('prevBtn').addEventListener('click', () => yearView() ? stepYear(-1) : go(-1));
   $('nextBtn').addEventListener('click', () => yearView() ? stepYear(1) : go(1));
+
+  // Day-mark click handling (delegated; cells re-render freely)
+  wireMarks(grid, '.cell', () => month, 18);
+  wireMarks(yearGrid, '.mini-cell', c => +c.dataset.m, 6);
 
   // View toggle (MONTH | YEAR) — flips the capture between the single-month
   // grid and the 12-mini-month year lattice. The month selector is meaningless
@@ -1049,7 +1113,7 @@
     const meta = $('tagMeta');
     if (!meta) return;
     const GH_REPO = 'CyberDelaai/chronos-ui';
-    const VER = ' // v1.1.1';
+    const VER = ' // v1.1.2';
     const CHARS = '!@#$%&*<>{}[]/|01ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     let commitCount = '';
 
