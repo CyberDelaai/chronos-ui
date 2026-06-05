@@ -1,4 +1,4 @@
-<!-- CHRONOS v1.1.0 -->
+<!-- CHRONOS v1.1.1 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -65,6 +65,7 @@
     --accent-rgb: 252,238,10;
     --main: #00f0ff;          /* bg gradient, grid lines, frame */
     --main-rgb: 0,240,255;
+    --wash: rgba(var(--main-rgb),0.14); /* weekend column tint (month + year views) */
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -94,12 +95,11 @@
      track the capped calendar width) */
   .calendar-area.size-s .dow { font-size: 22px; }
   .calendar-area.size-s .cell .num { font-size: 31px; }
-  #capture { flex: 0 1 auto; }
   /* Vertical "// PREVIEW: NxMpx" label running top→bottom, right of the calendar
      (mirrors commlink-ui's vertical channel label) */
   .preview-label {
     writing-mode: vertical-rl;
-    font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 2px;
+    font-size: 11px; letter-spacing: 2px;
     color: var(--dim); text-transform: uppercase; white-space: nowrap;
     align-self: flex-start; user-select: none;
   }
@@ -114,7 +114,7 @@
   .logo {
     font-family: 'JetBrains Mono', monospace;
     color: var(--yellow); font-size: 22px; letter-spacing: 2px;
-    background: none; border: none; padding: 0; cursor: pointer;
+    background: none; border: none; cursor: pointer;
     transition: filter .15s;
   }
   .logo:hover { filter: drop-shadow(0 0 6px rgba(var(--accent-rgb),0.6)); }
@@ -123,7 +123,7 @@
   .logo[aria-expanded="true"] .chev { transform: rotate(90deg); }
   /* tag (ported from commlink-ui) — border-left acts as the delimiter after the logo */
   .tag {
-    font-family: 'JetBrains Mono', monospace; color: var(--cyan);
+    color: var(--cyan);
     font-size: 12px; letter-spacing: 1px;
     border-left: 1px solid var(--dim); padding-left: 18px;
   }
@@ -139,7 +139,7 @@
   }
   .app-menu[hidden] { display: none; }
   .app-menu-item {
-    font-family: 'JetBrains Mono', monospace; font-size: 16px; letter-spacing: 2px;
+    font-size: 16px; letter-spacing: 2px;
     color: var(--yellow); text-decoration: none; white-space: nowrap;
     padding: 6px 8px; transition: color .12s, background .12s;
   }
@@ -181,7 +181,7 @@
   .year-wrap input[type="number"] { border-right: none; }
   .year-spin { display: flex; flex-direction: column; }
   .year-btn {
-    flex: 1; width: 22px; padding: 0; cursor: pointer; line-height: 1;
+    flex: 1; width: 22px; cursor: pointer; line-height: 1;
     background: var(--panel); color: var(--dim);
     border: 1px solid rgba(var(--main-rgb),0.4); font-size: 8px;
     display: flex; align-items: center; justify-content: center;
@@ -203,11 +203,11 @@
     --btn-color: var(--yellow);
     display: inline-flex; align-items: center; justify-content: center; gap: 8px;
     background: transparent; color: var(--btn-color);
-    height: 32px; padding: 0 16px; box-sizing: border-box;
+    height: 32px; padding: 0 16px;
     font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 1; letter-spacing: 2px;
     cursor: pointer; text-transform: uppercase;
     transition: background 0.15s, color 0.15s, box-shadow 0.15s;
-    border: none; margin: 0; vertical-align: middle;
+    border: none;
     --aug-border-all: 1px; --aug-border-bg: var(--btn-color);
     --aug-inlay-all: 0px; --aug-inlay-bg: transparent;
     --aug-tl: 8px; --aug-br: 8px;
@@ -216,12 +216,11 @@
     background: color-mix(in srgb, var(--btn-color) 22%, transparent);
     box-shadow: 0 0 12px color-mix(in srgb, var(--btn-color) 45%, transparent);
   }
-  .btn.cyan { --btn-color: var(--cyan); }
   .btn.export-btn { height: 44px; font-size: 14px; letter-spacing: 3px; --aug-tl: 12px; --aug-br: 12px; }
 
   /* ---- Color palettes (pattern copied from commlink-ui) ---- */
   .palette-row {
-    display: flex; align-items: center; gap: 10px; margin: 0;
+    display: flex; align-items: center; gap: 10px;
     padding: 12px 14px;
     --aug-border-all: 1px; --aug-border-bg: rgba(var(--main-rgb),0.4);
     --aug-tl: 10px; --aug-br: 10px;
@@ -234,7 +233,6 @@
   .swatch.active { border-color: #fff; box-shadow: 0 0 8px currentColor; }
   .custom-color-group {
     display: inline-flex; align-items: center; justify-content: center; gap: 4px; padding: 4px;
-    background: transparent;
     --aug-border-all: 1px; --aug-border-bg: rgba(var(--main-rgb),0.45);
     --aug-tl: 8px; --aug-br: 8px;
   }
@@ -244,13 +242,13 @@
   }
   .swatch-saved.active { --aug-border-bg: #fff; }
   .swatch-pick-btn {
-    position: relative; width: 28px; height: 28px; margin: 0; padding: 0;
-    color: var(--main); cursor: pointer; display: inline-block; background: transparent;
+    position: relative; width: 28px; height: 28px;
+    color: var(--main); cursor: pointer; display: inline-block;
     transition: background .15s; border: none;
     --aug-border-all: 1px; --aug-border-bg: var(--main); --aug-br: 7px;
   }
   .swatch-pick-btn .pick-icon { position: absolute; inset: 0; margin: auto; width: 18px; height: 18px; pointer-events: none; }
-  .swatch-pick-btn input[type="color"] { position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer; border: none; padding: 0; }
+  .swatch-pick-btn input[type="color"] { position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer; border: none; }
 
   /* ---- Month nav arrows (look ported from commlink-ui .side-switch labels) ---- */
   .nav-arrow {
@@ -265,10 +263,10 @@
   /* ---- Sliding toggle (ported from commlink-ui .side-switch / .fx) ---- */
   .fx-toggle { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; justify-content: space-between; }
   .fx-toggle[hidden] { display: none; } /* display:flex would otherwise override the hidden attribute */
-  .fx-label { font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 1.5px; color: var(--main); text-transform: uppercase; }
+  .fx-label { font-size: 12px; letter-spacing: 1.5px; color: var(--main); text-transform: uppercase; }
   .side-switch {
     position: relative; height: 32px; width: 96px; background: var(--panel);
-    border: 1px solid rgba(var(--main-rgb),0.3); cursor: pointer; padding: 0; margin: 0;
+    border: 1px solid rgba(var(--main-rgb),0.3); cursor: pointer;
     display: flex; align-items: stretch; overflow: hidden; flex-shrink: 0;
     font-family: 'JetBrains Mono', monospace; transition: border-color .15s;
   }
@@ -311,7 +309,7 @@
       linear-gradient(155deg, #05100c 0%, #07140f 55%, #081a13 100%);
   }
   .cal-head {
-    font-family: 'JetBrains Mono', monospace; font-weight: 700;
+    font-weight: 700;
     /* font-size is set by JS (fitHead) to fill the calendar width on one line.
        letter-spacing is in em so width scales linearly with font-size. */
     font-size: 80px; letter-spacing: 0.06em; color: var(--accent);
@@ -319,10 +317,10 @@
     white-space: nowrap;
     text-shadow: 0 0 8px rgba(var(--accent-rgb),0.55), 0 0 22px rgba(var(--accent-rgb),0.35);
   }
-  .grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0; }
+  .grid { display: grid; grid-template-columns: repeat(7, 1fr); }
   .dow {
     text-align: center; padding: 2px 0 8px; font-size: clamp(22px, 5vw, 36px); letter-spacing: 4px; font-weight: 700;
-    color: var(--accent); background: transparent; text-transform: uppercase;
+    color: var(--accent); text-transform: uppercase;
     text-shadow: 0 0 7px rgba(var(--accent-rgb),0.55), 0 0 18px rgba(var(--accent-rgb),0.3);
     /* match the day cells' horizontal box geometry so each label centers over
        its column (same 4px transparent border + -4px overlap as .cell) */
@@ -331,7 +329,7 @@
     text-indent: 4px;
   }
   .cell {
-    aspect-ratio: 1 / 1; background: transparent;
+    aspect-ratio: 1 / 1;
     border: 4px solid rgb(var(--main-rgb)); /* one consistent, opaque line color */
     box-shadow: inset 0 0 12px rgba(var(--main-rgb),0.12);
     display: flex; align-items: center; justify-content: center;
@@ -348,71 +346,48 @@
   }
 
   /* ============================================================
-     WEEKEND COLUMN TINT — three INDEPENDENT classes so each can be
-     tuned on its own:
-       .sat   = Saturday (either week-start)
-       .sun0  = Sunday as the FIRST column (Sun-start)
-       .sun6  = Sunday as the LAST column  (Mon-start)
-     Each has: (a) the day-cell tint, (b) the blank-cell tint, and
-     (c) the first-row (.r0) ::before strip that extends the tint UP
-     over the untinted header (--dow-h = measured header height).
+     WEEKEND COLUMN TINT — render() marks weekend cells with .weekend
+     plus a position class (.sat / .sun0 / .sun6, kept for one-off
+     tweaks). The wash color lives in --wash; one shared rule-set
+     covers all columns:
+       (a) day-cell tint,
+       (b) blank-cell tint (oversized so it covers the lattice seams),
+       (c) the first-row (.r0) ::before strip that extends the tint UP
+           over the untinted weekday header (--dow-h = measured header
+           height; --strip-gap = per-size space above the cells).
+     A tinted column sitting directly right of another tinted column
+     (MON-start SAT+SUN) starts its strip at the shared lattice line
+     instead of overhanging left — no double-tinted seam.
      ============================================================ */
-
-  /* --- SATURDAY --- */
-  .cell.sat { background: linear-gradient(rgba(var(--main-rgb),0.14), rgba(var(--main-rgb),0.14)) no-repeat center; }
-  .cell.blank.sat { background: linear-gradient(rgba(var(--main-rgb),0.14), rgba(var(--main-rgb),0.14)) no-repeat center; background-size: calc(100% + 9px) calc(100% + 7px); }
-  .cell.sat.r0 { position: relative; }
-  .cell.sat.r0::before {
+  .cell.weekend { background: var(--wash); }
+  .cell.blank.weekend { background: linear-gradient(var(--wash), var(--wash)) no-repeat center; background-size: calc(100% + 9px) calc(100% + 7px); }
+  .cell.weekend.r0 { position: relative; }
+  .cell.weekend.r0::before {
     content: ''; position: absolute; pointer-events: none;
-    left: -4px; right: -4px; bottom: calc(100% + 4px); height: var(--dow-h, 44px);
-    background: rgba(var(--main-rgb),0.14);
+    /* -1px: dip under the cell's top lattice line so fractional track heights
+       can't round the seam into an uncovered hairline */
+    left: -4px; right: -4px; bottom: calc(100% + var(--strip-gap, 4px) - 1px); height: var(--dow-h, 44px);
+    background: var(--wash);
   }
-
-  /* --- SUNDAY as FIRST column --- */
-  .cell.sun0 { background: linear-gradient(rgba(var(--main-rgb),0.14), rgba(var(--main-rgb),0.14)) no-repeat center; }
-  .cell.blank.sun0 { background: linear-gradient(rgba(var(--main-rgb),0.14), rgba(var(--main-rgb),0.14)) no-repeat center; background-size: calc(100% + 9px) calc(100% + 7px); }
-  .cell.sun0.r0 { position: relative; }
-  .cell.sun0.r0::before {
-    content: ''; position: absolute; pointer-events: none;
-    left: -4px; right: -4px; bottom: calc(100% + 4px); height: var(--dow-h, 44px);
-    background: rgba(var(--main-rgb),0.14);
+  .cell.weekend.r0 + .cell.weekend.r0::before { left: 0; }
+  /* A LEADING BLANK weekend cell in the first row would get both the header
+     strip (::before) and its own oversized wash; the strip's 1px lattice dip
+     overlaps the wash and — with the blank's transparent border, no opaque
+     lattice line hides it — the seam shows as a brighter double-tinted line.
+     Merge the two: drop the cell wash and stretch the strip into ONE
+     continuous rect covering the header and the whole blank cell. */
+  .cell.blank.weekend.r0 { background: none; }
+  .cell.blank.weekend.r0::before {
+    height: auto; /* span via top+bottom instead of the --dow-h height */
+    top: calc(-1 * (var(--dow-h, 44px) + var(--strip-gap, 4px) - 1px));
+    bottom: -3.5px; /* same bottom overhang the oversized wash had */
   }
+  /* per-size strip gap (default 4px = SMALL) */
+  .calendar-area.size-m, .calendar-area.size-l { --strip-gap: 3px; }
 
-  /* --- SUNDAY as LAST column --- */
-  .cell.sun6 { background: linear-gradient(rgba(var(--main-rgb),0.14), rgba(var(--main-rgb),0.14)) no-repeat center; }
-  .cell.blank.sun6 { background: linear-gradient(rgba(var(--main-rgb),0.14), rgba(var(--main-rgb),0.14)) no-repeat center; background-size: calc(100% + 9px) calc(100% + 7px); }
-  .cell.sun6.r0 { position: relative; }
-  .cell.sun6.r0::before {
-    content: ''; position: absolute; pointer-events: none;
-    left: 0; right: -4px; bottom: calc(100% + 4px); height: var(--dow-h, 44px);
-    background: rgba(var(--main-rgb),0.14);
-  }
-
-  /* ====== PER-SIZE OVERRIDES — tweak each size independently ======
-     The block above is the default (applies to SMALL). These scoped rules
-     override the tweakable bits (header-strip offsets + blank background-size)
-     for MEDIUM and LARGE. Higher specificity → they win when that size is on.
-     Pre-filled with the defaults; edit freely. */
-
-  /* ---- MEDIUM ---- */
-  .calendar-area.size-m .cell.blank.sat  { background-size: calc(100% + 9px) calc(100% + 7px); }
-  .calendar-area.size-m .cell.sat.r0::before  { left: -4px; right: -4px; bottom: calc(100% + 3px); }
-  .calendar-area.size-m .cell.blank.sun0 { background-size: calc(100% + 9px) calc(100% + 7px); }
-  .calendar-area.size-m .cell.sun0.r0::before { left: -4px; right: -4px; bottom: calc(100% + 3px); }
-  .calendar-area.size-m .cell.blank.sun6 { background-size: calc(100% + 9px) calc(100% + 7px); }
-  .calendar-area.size-m .cell.sun6.r0::before { left: 0; right: -4px; bottom: calc(100% + 3px); }
-
-  /* ---- LARGE ---- */
-  .calendar-area.size-l .cell.blank.sat  { background-size: calc(100% + 9px) calc(100% + 7px); }
-  .calendar-area.size-l .cell.sat.r0::before  { left: -4px; right: -4px; bottom: calc(100% + 3px); }
-  .calendar-area.size-l .cell.blank.sun0 { background-size: calc(100% + 9px) calc(100% + 7px); }
-  .calendar-area.size-l .cell.sun0.r0::before { left: -4px; right: -4px; bottom: calc(100% + 3px); }
-  .calendar-area.size-l .cell.blank.sun6 { background-size: calc(100% + 9px) calc(100% + 7px); }
-  .calendar-area.size-l .cell.sun6.r0::before { left: 0; right: -4px; bottom: calc(100% + 3px); }
-
-  .cell.blank { background: transparent; border-color: transparent; box-shadow: none; }
+  .cell.blank { border-color: transparent; box-shadow: none; }
   .cell .num {
-    font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: clamp(32px, 9vw, 60px);
+    font-weight: 700; font-size: clamp(32px, 9vw, 60px);
     line-height: 1; color: var(--accent); text-shadow: 0 0 8px rgba(var(--accent-rgb),0.5);
   }
 
@@ -429,7 +404,7 @@
   .calendar-area.view-year #dowRow, .calendar-area.view-year #grid { display: none; }
   .calendar-area.view-year .cal-head { margin-bottom: 18px; }
   .mini-name {
-    font-family: 'JetBrains Mono', monospace; font-weight: 700;
+    font-weight: 700;
     color: var(--accent); text-transform: uppercase; text-align: center;
     font-size: clamp(11px, 1.6vw, 22px); letter-spacing: 2px; margin-bottom: 4px;
     text-shadow: 0 0 6px rgba(var(--accent-rgb),0.5);
@@ -441,19 +416,19 @@
     text-shadow: 0 0 5px rgba(var(--accent-rgb),0.4);
   }
   /* lattice: border 1px / margin -1px / wrapper padding 1px — keep in sync */
-  .mini-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0; padding: 1px 0 0 1px; }
+  .mini-grid { display: grid; grid-template-columns: repeat(7, 1fr); padding: 1px 0 0 1px; }
   .mini-cell {
     aspect-ratio: 1 / 1; display: flex; align-items: center; justify-content: center;
     border: 1px solid rgb(var(--main-rgb));
     box-shadow: inset 0 0 4px rgba(var(--main-rgb),0.12);
     margin: -1px 0 0 -1px;
-    font-family: 'JetBrains Mono', monospace; font-weight: 700;
+    font-weight: 700;
     font-size: clamp(7px, 0.95vw, 13px); line-height: 1;
     color: var(--accent); text-shadow: 0 0 4px rgba(var(--accent-rgb),0.45);
   }
   .mini-cell.blank { border-color: transparent; box-shadow: none; }
   /* weekend column tint — flat wash (no header strips at mini scale) */
-  .mini-cell.weekend, .mini-dow .md.weekend { background: rgba(var(--main-rgb),0.14); }
+  .mini-cell.weekend, .mini-dow .md.weekend { background: var(--wash); }
   /* widen the header tint 1px to the LEFT so it lines up with the day-column
      wash below (day cells are pulled left by their -1px lattice margin) —
      except when the previous header cell is tinted too (MON-start puts SAT+SUN
@@ -478,7 +453,6 @@
     bottom: 6px;
     z-index: 0;
     text-align: center;
-    font-family: 'JetBrains Mono', monospace;
     font-size: 10px;
     letter-spacing: 2px;
     text-transform: uppercase;
@@ -499,7 +473,7 @@
         <a class="app-menu-item current" href="https://cyberdeck.tools/chronos-ui/" aria-current="page">&gt; CHRONOS_</a>
       </nav>
     </div>
-    <div class="tag"><span id="tagWord" class="glitchable">CALENDAR CONSTRUCTOR</span><span id="tagMeta" class="tag-meta"> // v<span id="tagVersion">1.1.0</span></span></div>
+    <div class="tag"><span id="tagWord" class="glitchable">CALENDAR CONSTRUCTOR</span><span id="tagMeta" class="tag-meta"> // v<span id="tagVersion">1.1.1</span></span></div>
   </header>
 
   <div class="layout">
@@ -1075,7 +1049,7 @@
     const meta = $('tagMeta');
     if (!meta) return;
     const GH_REPO = 'CyberDelaai/chronos-ui';
-    const VER = ' // v1.1.0';
+    const VER = ' // v1.1.1';
     const CHARS = '!@#$%&*<>{}[]/|01ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     let commitCount = '';
 

@@ -10,3 +10,4 @@ Pending issues, features, and ideas for CHRONOS. Items are removed from the list
 
 1. Add svg export
 2. Add more colors
+3. Add different languages
