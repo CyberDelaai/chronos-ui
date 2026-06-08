@@ -22,6 +22,10 @@ game masters and netrunner handouts.
 - **Custom background** — upload, paste, or drag-and-drop an image onto the
   calendar; crop it to the calendar's aspect (with recrop), tune brightness,
   and it exports with the PNG.
+- **Themes** — collapsible left **THEMES** drawer with live hover-preview;
+  ships DEFAULT and a Y2K **BUBBLEGUM** theme (glossy candy bubble cells,
+  scoop-free round frame, gradient day numbers). Each theme keeps its own
+  Main/Accent color memory.
 - **8 languages** — separate UI language (top-right) and calendar language
   (config panel): EN, RU, FR, DE, ES, IT, JA, ZH. Calendar month/weekday names
   come from the browser's Intl API.
@@ -42,7 +46,7 @@ the colors and layout, then click **⬇ SAVE PNG**.
 
 ## Version
 
-`1.1.8`
+`1.2.0`
 
 ## License
 

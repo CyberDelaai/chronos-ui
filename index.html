@@ -1,4 +1,4 @@
-<!-- CHRONOS v1.1.8 -->
+<!-- CHRONOS v1.2.0 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -103,6 +103,7 @@
     --main: #00f0ff;          /* bg gradient, grid lines, frame */
     --main-rgb: 0,240,255;
     --wash: rgba(var(--main-rgb),0.14); /* weekend column tint (month + year views) */
+    --panel-2: #14141c;       /* slightly lighter panel (theme list rows) */
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   /* visually hidden, crawler/screen-reader visible */
@@ -582,6 +583,120 @@
   .crop-actions #cropMax { margin-right: auto; }
   /* Fixed license stamp pinned to the bottom of the viewport (sits behind
      content, never enters #capture so it stays out of exported PNGs). */
+  /* ============================================================
+     Collapsible left THEMES drawer (ported from commlink-ui) — a fixed
+     off-screen panel with a vertical tab that slides in on click.
+     ============================================================ */
+  .side-panel {
+    position: fixed; top: 0; left: 0; width: 300px; height: 100vh;
+    background: var(--panel); border-right: 1px solid rgba(var(--accent-rgb),0.35);
+    transform: translateX(-100%); transition: transform 0.28s ease; z-index: 60;
+    display: flex; flex-direction: column;
+  }
+  .side-panel.open { transform: translateX(0); box-shadow: 0 0 30px rgba(0,0,0,0.6); }
+  .side-toggle {
+    position: absolute; left: 100%; top: 100px; width: 32px; height: 140px;
+    background: var(--panel); color: var(--accent); border: none; cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;
+    padding: 14px 0; font-family: 'JetBrains Mono', monospace;
+    --aug-border-all: 1px; --aug-border-bg: rgba(var(--accent-rgb),0.45);
+    --aug-inlay-all: 0px; --aug-inlay-bg: var(--panel);
+    --aug-tr: 10px; --aug-br: 10px;
+    transition: color 0.15s, box-shadow 0.15s;
+  }
+  .side-toggle:hover { color: var(--main); box-shadow: 8px 0 18px rgba(var(--accent-rgb),0.2); }
+  .side-toggle .label {
+    writing-mode: vertical-rl; transform: rotate(180deg);
+    font-size: 14px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase;
+  }
+  /* CJK reads top→bottom natively in vertical-rl — drop the 180° flip */
+  html[lang="ja"] .side-toggle .label, html[lang="zh"] .side-toggle .label { transform: none; }
+  .side-toggle .arrow { font-size: 16px; line-height: 1; transition: transform .28s ease; }
+  .side-panel.open .side-toggle .arrow { transform: rotate(180deg); }
+  .side-inner { padding: 22px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; }
+  .theme-list { display: flex; flex-direction: column; gap: 8px; }
+  .theme-item {
+    display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+    background: var(--panel-2); border-left: 2px solid var(--dim); cursor: pointer;
+    font-family: 'JetBrains Mono', monospace; font-size: 13px; letter-spacing: 1.5px;
+    text-transform: uppercase; color: var(--text);
+    transition: border-color .15s, color .15s, background .15s;
+  }
+  .theme-item:hover { border-left-color: var(--main); color: var(--main); background: color-mix(in srgb, var(--main) 8%, var(--panel-2)); }
+  .theme-item.active { border-left-color: var(--accent); color: var(--accent); }
+  .theme-item .theme-pip { width: 12px; height: 12px; border: 1px solid var(--main); flex-shrink: 0; }
+  .themes-coming {
+    flex: 1; display: flex; align-items: center; justify-content: center; text-align: center;
+    font-size: 12px; letter-spacing: 2px; color: var(--dim); text-transform: uppercase; margin-top: 16px;
+  }
+
+  /* ============================================================
+     BUBBLEGUM theme — Y2K hot-pink + baby-blue chrome. The palette
+     (--main / --accent) is forced by applyColors() while active; this
+     block layers the glossy candy treatment. Scoped to data-theme so
+     it only diverges the calendar, never the cyberpunk chrome around it.
+     ============================================================ */
+  :root[data-theme="bubblegum"] #capture {
+    --aug-tl: 30px; --aug-tr: 30px; --aug-br: 30px; --aug-bl: 30px;
+    --aug-border-all: 2px; --aug-border-bg: var(--accent);
+    background:
+      radial-gradient(80% 55% at 50% -12%, rgba(255,255,255,0.40), transparent 60%),
+      linear-gradient(150deg,
+        color-mix(in srgb, var(--accent) 24%, #170a18) 0%,
+        #160a18 46%,
+        color-mix(in srgb, var(--main) 26%, #0b1222) 100%);
+  }
+  /* glossy gradient (pink→blue) clipped to header + day-number text */
+  :root[data-theme="bubblegum"] .cal-head,
+  :root[data-theme="bubblegum"] .cell .num,
+  :root[data-theme="bubblegum"] .mini-name {
+    background: linear-gradient(180deg, #ffd6ee 0%, var(--accent) 48%, var(--main) 100%);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent; color: transparent;
+    text-shadow: none; filter: drop-shadow(0 1px 1px rgba(0,0,0,0.45));
+  }
+  /* day numbers: brighter white→accent gradient + tight dark contour so they
+     stay legible on the glossy candy cells */
+  :root[data-theme="bubblegum"] .cell .num {
+    background: linear-gradient(180deg, #ffffff 0%, #ffe0f1 42%, var(--accent) 100%);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent; color: transparent;
+    filter:
+      drop-shadow(0 0 1px rgba(0,0,0,0.95))
+      drop-shadow(0 1px 1px rgba(0,0,0,0.7));
+  }
+  :root[data-theme="bubblegum"] .dow,
+  :root[data-theme="bubblegum"] .mini-dow .md {
+    color: #fff; text-shadow: 0 0 6px color-mix(in srgb, var(--accent) 70%, transparent);
+  }
+  /* no weekend tint on the year-view weekday header letters */
+  :root[data-theme="bubblegum"] .mini-dow .md.weekend { background: none; }
+  /* candy bubble cells — rounded, gapped, glossy (override the lattice) */
+  :root[data-theme="bubblegum"] .grid { gap: 6px; padding: 4px !important; }
+  :root[data-theme="bubblegum"] .cell {
+    margin: 0; border: 2px solid color-mix(in srgb, var(--main) 65%, transparent); border-radius: 16px;
+    background: linear-gradient(160deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.04) 38%, color-mix(in srgb, var(--accent) 12%, transparent) 100%);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3), inset 0 2px 0 rgba(255,255,255,0.6);
+  }
+  :root[data-theme="bubblegum"] .cell.blank,
+  :root[data-theme="bubblegum"] .cell.blank.weekend { background: none; border-color: transparent; box-shadow: none; }
+  :root[data-theme="bubblegum"] .cell.weekend {
+    background: linear-gradient(160deg, rgba(255,255,255,0.30), color-mix(in srgb, var(--accent) 55%, transparent));
+  }
+  :root[data-theme="bubblegum"] .cell.weekend.r0::before { display: none; }
+  /* year-view mini cells — smaller bubbles */
+  :root[data-theme="bubblegum"] .mini-grid { gap: 2px; padding: 0; }
+  :root[data-theme="bubblegum"] .mini-cell {
+    margin: 0; border-radius: 6px; color: #fff;
+    border: 1px solid color-mix(in srgb, var(--main) 55%, transparent);
+    background: linear-gradient(160deg, rgba(255,255,255,0.16), color-mix(in srgb, var(--accent) 10%, transparent));
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.5);
+    text-shadow: 0 0 4px color-mix(in srgb, var(--accent) 55%, transparent);
+  }
+  :root[data-theme="bubblegum"] .mini-cell.blank,
+  :root[data-theme="bubblegum"] .mini-cell.blank.weekend { background: none; border-color: transparent; box-shadow: none; }
+  :root[data-theme="bubblegum"] .mini-cell.weekend { background: linear-gradient(160deg, rgba(255,255,255,0.26), color-mix(in srgb, var(--accent) 50%, transparent)); }
+
   .footer-stamp {
     position: fixed;
     left: 0;
@@ -599,6 +714,16 @@
 </style>
 </head>
 <body>
+<aside class="side-panel" id="sideThemes" data-name="themes">
+  <button class="side-toggle" id="themesToggle" type="button" aria-label="toggle themes" data-augmented-ui="tr-clip br-clip border">
+    <span class="label" data-i18n="panel.themes">THEMES</span>
+    <span class="arrow" id="themesArrow">&gt;</span>
+  </button>
+  <div class="side-inner">
+    <div class="theme-list" id="themeList"></div>
+    <div class="themes-coming" data-i18n="theme.moreToCome">// MORE TO COME</div>
+  </div>
+</aside>
 <div class="app">
   <header class="top">
     <h1 class="sr-only">CHRONOS — cyberpunk monthly &amp; yearly calendar generator with PNG export</h1>
@@ -610,7 +735,7 @@
         <a class="app-menu-item current" href="https://cyberdeck.tools/chronos-ui/" aria-current="page">&gt; CHRONOS_</a>
       </nav>
     </div>
-    <div class="tag"><span id="tagWord" class="glitchable">CALENDAR CONSTRUCTOR</span><span id="tagMeta" class="tag-meta"> // v<span id="tagVersion">1.1.8</span></span></div>
+    <div class="tag"><span id="tagWord" class="glitchable">CALENDAR CONSTRUCTOR</span><span id="tagMeta" class="tag-meta"> // v<span id="tagVersion">1.2.0</span></span></div>
     <select class="lang-select" id="uiLangSel" aria-label="interface language"><option value="en">EN</option><option value="ru">RU</option><option value="fr">FR</option><option value="de">DE</option><option value="es">ES</option><option value="it">IT</option><option value="ja">JP</option><option value="zh">CN</option></select>
   </header>
 
@@ -871,10 +996,28 @@
 
   let store = {};
   try { store = JSON.parse(localStorage.getItem(LS_KEY) || '{}'); } catch (e) { store = {}; }
-  if (!store.accent) store.accent = DEFAULT_ACCENT;
-  if (!store.main) store.main = DEFAULT_MAIN;
-  if (!store.customMain) store.customMain = DEFAULT_CUSTOM_MAIN;
-  if (!store.customAccent) store.customAccent = DEFAULT_CUSTOM_ACCENT;
+  // Per-theme color memory: each theme keeps its own main/accent + custom slots.
+  // bubblegum seeds with the Y2K pink/blue, then is user-editable like any theme.
+  const THEME_SEED = {
+    default:   { main: DEFAULT_MAIN, accent: DEFAULT_ACCENT, customMain: DEFAULT_CUSTOM_MAIN, customAccent: DEFAULT_CUSTOM_ACCENT },
+    bubblegum: { main: '#8fd3ff', accent: '#ff4fa3', customMain: '#a0e9ff', customAccent: '#ff8fc7' }
+  };
+  if (typeof store.themeColors !== 'object' || !store.themeColors) {
+    store.themeColors = {};
+    // migrate any legacy flat colors into the default theme
+    if (store.main || store.accent) {
+      store.themeColors.default = {
+        main: store.main || THEME_SEED.default.main,
+        accent: store.accent || THEME_SEED.default.accent,
+        customMain: store.customMain || THEME_SEED.default.customMain,
+        customAccent: store.customAccent || THEME_SEED.default.customAccent
+      };
+    }
+  }
+  Object.keys(THEME_SEED).forEach(id => {
+    store.themeColors[id] = Object.assign({}, THEME_SEED[id], store.themeColors[id] || {});
+  });
+  delete store.main; delete store.accent; delete store.customMain; delete store.customAccent;
   if (store.weekStart !== 'sun') store.weekStart = 'mon'; // 'mon' | 'sun'
   if (typeof store.hlSat !== 'boolean') store.hlSat = true; // highlight Saturday column
   if (typeof store.hlSun !== 'boolean') store.hlSun = true; // highlight Sunday column
@@ -886,6 +1029,7 @@
   if (typeof store.bgOriginal !== 'string') store.bgOriginal = ''; // pre-crop original, kept for RECROP
   if (typeof store.bgBrightness !== 'number') store.bgBrightness = 0.55;
   if (typeof store.scanlines !== 'boolean') store.scanlines = false; // scanline FX overlay
+  if (['default','bubblegum'].indexOf(store.theme) < 0) store.theme = 'default'; // visual theme
   if (LANGS.indexOf(store.calLang) < 0) store.calLang = 'en'; // calendar month/weekday language
   if (LANGS.indexOf(store.uiLang) < 0) {
     const browser = (navigator.language || 'en').slice(0, 2).toLowerCase();
@@ -913,6 +1057,7 @@
   const bgBrightnessInput = $('bgBrightness'), bgBrightnessVal = $('bgBrightnessVal');
   const uiLangSel = $('uiLangSel'), calLangSel = $('calLangSel');
   const scanToggle = $('scanToggle');
+  const sideThemes = $('sideThemes'), themesToggle = $('themesToggle'), themeList = $('themeList');
 
 
   // ---- UI i18n (pattern ported from commlink-ui js/i18n.js; shared strings
@@ -926,6 +1071,8 @@
       crop: { title: '// CROP BACKGROUND', use: 'USE', cancel: 'CANCEL' },
       hint: { pickMonth: '// Pick a month and export.', pickYear: '// Pick a year and export.', marks1: '// Click a day to cycle highlight colors, ctrl+click to repeat the last color.', marks2: '// Right-click to clear, ctrl+right-click to clear all.' },
       preview: 'PREVIEW',
+      panel: { themes: 'THEMES' },
+      theme: { default: 'DEFAULT', bubblegum: 'BUBBLEGUM', moreToCome: '// MORE TO COME' },
       toast: { pngExported: 'PNG EXPORTED', exportFailed: 'EXPORT FAILED', imgLoaded: 'IMG LOADED', noImageClipboard: 'NO IMAGE IN CLIPBOARD', clipboardBlocked: 'CLIPBOARD BLOCKED', noBgYet: 'NO BG YET', storageFull: 'STORAGE FULL', highlightsCleared: 'HIGHLIGHTS CLEARED', notAnImage: 'NOT AN IMAGE' }
     },
     ru: {
@@ -936,6 +1083,8 @@
       crop: { title: '// ОБРЕЗКА ФОНА', use: 'ПРИМЕНИТЬ', cancel: 'ОТМЕНА' },
       hint: { pickMonth: '// Выберите месяц и экспортируйте.', pickYear: '// Выберите год и экспортируйте.', marks1: '// Клик по дню — смена цвета подсветки, ctrl+клик — повтор последнего цвета.', marks2: '// Правый клик — убрать, ctrl+правый клик — убрать всё.' },
       preview: 'ПРЕВЬЮ',
+      panel: { themes: 'ТЕМЫ' },
+      theme: { default: 'СТАНДАРТ', bubblegum: 'БАББЛГАМ', moreToCome: '// СКОРО ЕЩЁ' },
       toast: { pngExported: 'PNG ЭКСПОРТИРОВАН', exportFailed: 'ОШИБКА ЭКСПОРТА', imgLoaded: 'ИЗО. ЗАГРУЖЕНО', noImageClipboard: 'НЕТ ИЗОБРАЖЕНИЯ В БУФЕРЕ', clipboardBlocked: 'БУФЕР ЗАБЛОКИРОВАН', noBgYet: 'НЕТ ФОНА', storageFull: 'ХРАНИЛИЩЕ ПЕРЕПОЛНЕНО', highlightsCleared: 'ПОДСВЕТКА ОЧИЩЕНА', notAnImage: 'НЕ ИЗОБРАЖЕНИЕ' }
     },
     fr: {
@@ -946,6 +1095,8 @@
       crop: { title: '// RECADRER LE FOND', use: 'UTILISER', cancel: 'ANNULER' },
       hint: { pickMonth: '// Choisissez un mois et exportez.', pickYear: '// Choisissez une année et exportez.', marks1: '// Clic sur un jour : couleurs de surbrillance, ctrl+clic : répéter la dernière.', marks2: '// Clic droit : effacer, ctrl+clic droit : tout effacer.' },
       preview: 'APERÇU',
+      panel: { themes: 'THÈMES' },
+      theme: { default: 'DÉFAUT', bubblegum: 'BUBBLEGUM', moreToCome: '// BIENTÔT PLUS' },
       toast: { pngExported: 'PNG EXPORTÉ', exportFailed: 'ÉCHEC EXPORT', imgLoaded: 'IMG CHARGÉE', noImageClipboard: 'AUCUNE IMG DANS LE PRESSE-PAPIERS', clipboardBlocked: 'PRESSE-PAPIERS BLOQUÉ', noBgYet: 'PAS DE FOND', storageFull: 'STOCKAGE PLEIN', highlightsCleared: 'SURBRILLANCES EFFACÉES', notAnImage: 'PAS UNE IMAGE' }
     },
     de: {
@@ -956,6 +1107,8 @@
       crop: { title: '// HINTERGRUND ZUSCHNEIDEN', use: 'VERWENDEN', cancel: 'ABBRECHEN' },
       hint: { pickMonth: '// Monat wählen und exportieren.', pickYear: '// Jahr wählen und exportieren.', marks1: '// Klick auf einen Tag wechselt die Markierungsfarbe, Strg+Klick wiederholt die letzte.', marks2: '// Rechtsklick löscht, Strg+Rechtsklick löscht alles.' },
       preview: 'VORSCHAU',
+      panel: { themes: 'THEMES' },
+      theme: { default: 'STANDARD', bubblegum: 'BUBBLEGUM', moreToCome: '// BALD MEHR' },
       toast: { pngExported: 'PNG EXPORTIERT', exportFailed: 'EXPORT FEHLGESCHL.', imgLoaded: 'BILD GELADEN', noImageClipboard: 'KEIN BILD IN ZWISCHENABLAGE', clipboardBlocked: 'ZWISCHENABLAGE BLOCKIERT', noBgYet: 'KEIN HINTERGRUND', storageFull: 'SPEICHER VOLL', highlightsCleared: 'MARKIERUNGEN GELÖSCHT', notAnImage: 'KEIN BILD' }
     },
     es: {
@@ -966,6 +1119,8 @@
       crop: { title: '// RECORTAR FONDO', use: 'USAR', cancel: 'CANCELAR' },
       hint: { pickMonth: '// Elige un mes y exporta.', pickYear: '// Elige un año y exporta.', marks1: '// Clic en un día cambia el color, ctrl+clic repite el último color.', marks2: '// Clic derecho borra, ctrl+clic derecho borra todo.' },
       preview: 'VISTA PREVIA',
+      panel: { themes: 'TEMAS' },
+      theme: { default: 'PREDET.', bubblegum: 'BUBBLEGUM', moreToCome: '// PRONTO MÁS' },
       toast: { pngExported: 'PNG EXPORTADO', exportFailed: 'EXPORT FALLÓ', imgLoaded: 'IMG CARGADA', noImageClipboard: 'SIN IMG EN PORTAPAPELES', clipboardBlocked: 'PORTAPAPELES BLOQUEADO', noBgYet: 'SIN FONDO', storageFull: 'ALMACÉN LLENO', highlightsCleared: 'RESALTADOS BORRADOS', notAnImage: 'NO ES IMAGEN' }
     },
     it: {
@@ -976,6 +1131,8 @@
       crop: { title: '// RITAGLIA SFONDO', use: 'USA', cancel: 'ANNULLA' },
       hint: { pickMonth: '// Scegli un mese ed esporta.', pickYear: '// Scegli un anno ed esporta.', marks1: '// Clic su un giorno cambia colore, ctrl+clic ripete l\'ultimo colore.', marks2: '// Clic destro cancella, ctrl+clic destro cancella tutto.' },
       preview: 'ANTEPRIMA',
+      panel: { themes: 'TEMI' },
+      theme: { default: 'DEFAULT', bubblegum: 'BUBBLEGUM', moreToCome: '// PRESTO ALTRI' },
       toast: { pngExported: 'PNG ESPORTATO', exportFailed: 'EXPORT FALLITO', imgLoaded: 'IMG CARICATA', noImageClipboard: 'NESSUNA IMG NEGLI APPUNTI', clipboardBlocked: 'APPUNTI BLOCCATI', noBgYet: 'NESSUNO SFONDO', storageFull: 'ARCHIVIO PIENO', highlightsCleared: 'EVIDENZIAZIONI RIMOSSE', notAnImage: 'NON È IMG' }
     },
     ja: {
@@ -986,6 +1143,8 @@
       crop: { title: '// 背景を切り抜く', use: '使用', cancel: 'キャンセル' },
       hint: { pickMonth: '// 月を選んでエクスポート。', pickYear: '// 年を選んでエクスポート。', marks1: '// 日をクリックで色切替、ctrl+クリックで直前の色。', marks2: '// 右クリックで解除、ctrl+右クリックで全解除。' },
       preview: 'プレビュー',
+      panel: { themes: 'テーマ' },
+      theme: { default: 'デフォルト', bubblegum: 'バブルガム', moreToCome: '// 近日追加' },
       toast: { pngExported: 'PNG出力完了', exportFailed: 'エクスポート失敗', imgLoaded: '画像読込完了', noImageClipboard: 'クリップボードに画像なし', clipboardBlocked: 'クリップボードブロック', noBgYet: '背景未設定', storageFull: 'ストレージ満杯', highlightsCleared: 'ハイライト消去', notAnImage: '画像ではない' }
     },
     zh: {
@@ -996,6 +1155,8 @@
       crop: { title: '// 裁剪背景', use: '使用', cancel: '取消' },
       hint: { pickMonth: '// 选择月份并导出。', pickYear: '// 选择年份并导出。', marks1: '// 点击日期切换高亮颜色，ctrl+点击重复上次颜色。', marks2: '// 右键清除，ctrl+右键全部清除。' },
       preview: '预览',
+      panel: { themes: '主题' },
+      theme: { default: '默认', bubblegum: '泡泡糖', moreToCome: '// 敬请期待' },
       toast: { pngExported: 'PNG导出完成', exportFailed: '导出失败', imgLoaded: '图片已加载', noImageClipboard: '剪贴板无图片', clipboardBlocked: '剪贴板被屏蔽', noBgYet: '无背景', storageFull: '存储已满', highlightsCleared: '高亮已清除', notAnImage: '不是图片' }
     }
   };
@@ -1090,14 +1251,52 @@
     wrap.querySelectorAll('.swatch').forEach(sw => sw.classList.toggle('active', sw.dataset.color === current));
     if (input && custom) input.value = custom;
   }
+  // ---- Themes (engine ported from commlink-ui js/themes.js) ----
+  // A theme may force a palette (overriding the user's Main/Accent while
+  // active) and reshape the capture frame's augmented-ui corners. The glossy
+  // styling itself lives in CSS under :root[data-theme=ID].
+  const THEMES = {
+    default: { label: 'DEFAULT' },
+    bubblegum: { label: 'BUBBLEGUM', shape: 'tl-round tr-round br-round bl-round border' }
+  };
+  const CAPTURE_SHAPE = 'tl-clip tr-clip br-clip bl-clip border'; // default frame
+  let previewThemeId = null;                         // transient hover preview
+  const curThemeId = () => previewThemeId || store.theme;
+  // Colors for a theme (defaults to the current/previewed one). Writes target
+  // store.theme; reads/display follow curThemeId() so hover-preview shows that
+  // theme's saved palette too.
+  const colorsOf = (id) => store.themeColors[id] || store.themeColors.default;
   function applyColors() {
+    const c = colorsOf(curThemeId());
     const root = document.documentElement.style;
-    root.setProperty('--main', store.main);
-    root.setProperty('--main-rgb', hexToRgb(store.main));
-    root.setProperty('--accent', store.accent);
-    root.setProperty('--accent-rgb', hexToRgb(store.accent));
-    refreshPalette(mainPalette, store.main, store.customMain, '[data-saved-main]', customMain);
-    refreshPalette(accentPalette, store.accent, store.customAccent, '[data-saved-accent]', customAccent);
+    root.setProperty('--main', c.main);
+    root.setProperty('--main-rgb', hexToRgb(c.main));
+    root.setProperty('--accent', c.accent);
+    root.setProperty('--accent-rgb', hexToRgb(c.accent));
+    refreshPalette(mainPalette, c.main, c.customMain, '[data-saved-main]', customMain);
+    refreshPalette(accentPalette, c.accent, c.customAccent, '[data-saved-accent]', customAccent);
+  }
+  function refreshTheme() {
+    const id = curThemeId();
+    document.documentElement.dataset.theme = id;
+    capture.setAttribute('data-augmented-ui', (THEMES[id] && THEMES[id].shape) || CAPTURE_SHAPE);
+    applyColors();
+  }
+  function renderThemes() {
+    themeList.innerHTML = '';
+    Object.entries(THEMES).forEach(([id, th]) => {
+      const item = document.createElement('div');
+      item.className = 'theme-item' + (id === store.theme ? ' active' : '');
+      const pip = document.createElement('span'); pip.className = 'theme-pip';
+      pip.style.background = colorsOf(id).accent;
+      const name = document.createElement('span'); name.className = 'theme-name';
+      name.textContent = t('theme.' + id) || th.label;
+      item.appendChild(pip); item.appendChild(name);
+      item.addEventListener('mouseenter', () => { previewThemeId = id; refreshTheme(); });
+      item.addEventListener('mouseleave', () => { if (previewThemeId !== null) { previewThemeId = null; refreshTheme(); } });
+      item.addEventListener('click', () => { store.theme = id; previewThemeId = null; refreshTheme(); renderThemes(); save(); });
+      themeList.appendChild(item);
+    });
   }
   function showToast(msg) {
     toast.textContent = msg; toast.classList.add('show');
@@ -1122,10 +1321,10 @@
       set(sw.dataset.color); applyColors(); save();
     });
   }
-  wirePalette(mainPalette, v => { store.main = v; });
-  wirePalette(accentPalette, v => { store.accent = v; });
-  customMain.addEventListener('input', () => { store.main = customMain.value; store.customMain = customMain.value; applyColors(); save(); });
-  customAccent.addEventListener('input', () => { store.accent = customAccent.value; store.customAccent = customAccent.value; applyColors(); save(); });
+  wirePalette(mainPalette, v => { colorsOf(store.theme).main = v; });
+  wirePalette(accentPalette, v => { colorsOf(store.theme).accent = v; });
+  customMain.addEventListener('input', () => { const c = colorsOf(store.theme); c.main = customMain.value; c.customMain = customMain.value; applyColors(); save(); });
+  customAccent.addEventListener('input', () => { const c = colorsOf(store.theme); c.accent = customAccent.value; c.customAccent = customAccent.value; applyColors(); save(); });
 
   function daysInMonth(y, m) { return new Date(y, m + 1, 0).getDate(); }
   const sunStart = () => store.weekStart === 'sun';
@@ -1287,7 +1486,7 @@
   // Language switchers: UI labels (top-right) and calendar text (config)
   uiLangSel.addEventListener('change', () => {
     store.uiLang = uiLangSel.value;
-    applyI18n(); buildMonthOptions(); syncView(); updatePreviewLabel(); save();
+    applyI18n(); renderThemes(); buildMonthOptions(); syncView(); updatePreviewLabel(); save();
   });
   calLangSel.addEventListener('change', () => {
     store.calLang = calLangSel.value;
@@ -1349,6 +1548,11 @@
     capture.classList.toggle('scanlines', store.scanlines);
   }
   scanToggle.addEventListener('click', () => { store.scanlines = !store.scanlines; syncScan(); save(); });
+
+  // THEMES drawer: toggle on tab click, close on outside-click / Escape
+  themesToggle.addEventListener('click', (e) => { e.stopPropagation(); sideThemes.classList.toggle('open'); });
+  document.addEventListener('click', (e) => { if (sideThemes.classList.contains('open') && !sideThemes.contains(e.target)) sideThemes.classList.remove('open'); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') sideThemes.classList.remove('open'); });
 
   // Size toggle (S | M | L) — caps the calendar width, then re-fits the header
   function applySize() {
@@ -1658,7 +1862,8 @@
   uiLangSel.value = store.uiLang;
   calLangSel.value = store.calLang;
   applyI18n();
-  applyColors();
+  refreshTheme();
+  renderThemes();
   bgBrightnessInput.value = store.bgBrightness;
   bgBrightnessVal.textContent = Math.round(store.bgBrightness * 100) + '%';
   applyCaptureBg();
@@ -1751,7 +1956,7 @@
     const meta = $('tagMeta');
     if (!meta) return;
     const GH_REPO = 'CyberDelaai/chronos-ui';
-    const VER = ' // v1.1.8';
+    const VER = ' // v1.2.0';
     const CHARS = '!@#$%&*<>{}[]/|01ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     let commitCount = '';
 
