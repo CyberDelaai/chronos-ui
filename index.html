@@ -1,4 +1,4 @@
-<!-- CHRONOS v1.2.2 -->
+<!-- CHRONOS v1.2.3 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11,14 +11,10 @@
 <meta name="robots" content="index, follow" />
 <meta name="theme-color" content="#050507" />
 <link rel="canonical" href="https://cyberdeck.tools/chronos-ui/" />
-<!-- favicons: .ico + PNG (48px multiples) for Google/browsers, SVG for modern browsers.
-     Relative paths — chronos is served from the /chronos-ui/ subpath. -->
-<!-- ico (sizes=any) is the Google Search / legacy fallback; SVG is preferred
-     by modern browsers for the tab. No explicit PNG <link>s, or Chrome would
-     pick a raster over the SVG. -->
-<link rel="icon" href="icons/favicon.ico" sizes="any" />
-<link rel="icon" type="image/svg+xml" href="icons/favicon.svg" />
-<link rel="apple-touch-icon" href="icons/favicon-192.png" />
+<!-- SVG-first: modern browsers use the SVG for the tab; .ico is the fallback -->
+<link rel="icon" href="favicon.ico" sizes="32x32" />
+<link rel="icon" type="image/svg+xml" href="favicon.svg" />
+<link rel="apple-touch-icon" href="favicon-192.png" />
 
 <!-- Open Graph / Twitter -->
 <meta property="og:type" content="website" />
@@ -742,7 +738,7 @@
         <a class="app-menu-item current" href="https://cyberdeck.tools/chronos-ui/" aria-current="page">&gt; CHRONOS_</a>
       </nav>
     </div>
-    <div class="tag"><span id="tagWord" class="glitchable">CALENDAR CONSTRUCTOR</span><span id="tagMeta" class="tag-meta"> // v<span id="tagVersion">1.2.2</span></span></div>
+    <div class="tag"><span id="tagWord" class="glitchable">CALENDAR CONSTRUCTOR</span><span id="tagMeta" class="tag-meta"> // v<span id="tagVersion">1.2.3</span></span></div>
     <select class="lang-select" id="uiLangSel" aria-label="interface language"><option value="en">EN</option><option value="ru">RU</option><option value="fr">FR</option><option value="de">DE</option><option value="es">ES</option><option value="it">IT</option><option value="ja">JP</option><option value="zh">CN</option></select>
   </header>
 
@@ -1963,7 +1959,7 @@
     const meta = $('tagMeta');
     if (!meta) return;
     const GH_REPO = 'CyberDelaai/chronos-ui';
-    const VER = ' // v1.2.2';
+    const VER = ' // v1.2.3';
     const CHARS = '!@#$%&*<>{}[]/|01ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     let commitCount = '';
 
