@@ -44,9 +44,10 @@ the colors and layout, then click **⬇ SAVE PNG**.
 - [html-to-image](https://github.com/bubkoo/html-to-image) — DOM → PNG export
 - [JetBrains Mono](https://www.jetbrains.com/lp/mono/) — embedded base64 webfont
 
-## Version
 
-`1.2.5`
+## Support
+
+If you find these tools useful, you can support development here: [boosty.to/cyberdelaai/donate](https://boosty.to/cyberdelaai/donate)
 
 ## License
 
