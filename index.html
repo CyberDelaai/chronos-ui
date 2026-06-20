@@ -1,4 +1,4 @@
-<!-- CHRONOS v1.2.7 -->
+<!-- CHRONOS v1.2.8 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -700,6 +700,93 @@
   :root[data-theme="bubblegum"] .mini-cell.blank.weekend { background: none; border-color: transparent; box-shadow: none; }
   :root[data-theme="bubblegum"] .mini-cell.weekend { background: linear-gradient(160deg, rgba(255,255,255,0.26), color-mix(in srgb, var(--accent) 50%, transparent)); }
 
+  /* ============================================================
+     PAPER theme — "electronic ink": dark ink printed on a pale
+     paper-white frame, the inverse of every other (dark) theme.
+     Ported from commlink-ui's PAPER. Mostly a color treatment: a
+     hardcoded e-ink palette recolors the calendar dark-on-light, while
+     the user's --accent still survives as a restrained stamp tint on the
+     header + day numbers. Scoped to data-theme so the surrounding
+     cyberpunk chrome stays dark. --eink-line drives the hairline grid.
+     ============================================================ */
+  :root[data-theme="paper"] {
+    --eink-paper: #e9e7e0;        /* warm paper white */
+    --eink-paper-2: #f4f2ec;      /* lighter highlight */
+    --eink-ink: #1b1a16;          /* near-black primary ink */
+    --eink-ink-2: #44423b;        /* secondary / dim ink */
+    /* Grid/hairline ink: the user's --main mixed heavily into dark ink, so the
+       lattice reads as COLORED ink printed on paper (mirrors --main's
+       structural role in NEON) while staying legible. Default seed main is a
+       near-black ink, so this looks monochrome until the user picks a color. */
+    --eink-line: color-mix(in srgb, var(--main) 35%, rgba(20,18,12,0.62));
+    /* Weekend column tint — a faint wash carrying just a hint of main (low %
+       so the wash stays subtle; main is opaque and would otherwise darken it). */
+    --wash: color-mix(in srgb, var(--main) 10%, rgba(20,18,12,0.06));
+    /* Pale halo traced around the ink — keeps the dark text legible when the
+       user drops in a DARKER background image (the ink would otherwise vanish). */
+    --eink-glow:
+      0 0 3px rgba(255,255,255,1),
+      0 0 7px rgba(255,255,255,1),
+      0 0 13px rgba(255,255,255,0.95),
+      0 0 20px rgba(255,255,255,0.85);
+  }
+  :root[data-theme="paper"] #capture {
+    /* 2-clip-x double-bevel notch on TL + BR only (TR/BL stay square).
+       The notch is a HORIZONTAL double-clip: the cut extends along each
+       corner's horizontal edge, which is the SECOND edge reached clockwise
+       at both corners — so both use -extend2. TL is the 180° rotation of BR
+       (opposite corners), so it takes the SAME clip sizes (N1=34, N2=16),
+       not swapped. */
+    --aug-tl1: 34px; --aug-tl2: 16px; --aug-tl-extend2: 34px;
+    --aug-br1: 34px; --aug-br2: 16px; --aug-br-extend2: 34px;
+    --aug-border-all: 1px; --aug-border-bg: var(--eink-line);
+    background:
+      radial-gradient(ellipse at 50% 0%, var(--eink-paper-2), transparent 65%)
+      var(--eink-paper);
+  }
+  /* header + month/mini names: dark ink, lightly tinted by the accent
+     (the one spot of color in a second ink), no neon glow */
+  :root[data-theme="paper"] .cal-head,
+  :root[data-theme="paper"] .mini-name {
+    color: color-mix(in srgb, var(--accent) 32%, var(--eink-ink));
+    text-shadow: var(--eink-glow);
+  }
+  :root[data-theme="paper"] .dow,
+  :root[data-theme="paper"] .mini-dow .md {
+    color: var(--eink-ink-2); text-shadow: var(--eink-glow);
+  }
+  :root[data-theme="paper"] .mini-dow .md.weekend { background: var(--wash); }
+  /* day cells: paper fill, dark hairline grid, no inner glow */
+  :root[data-theme="paper"] .cell {
+    border-color: var(--eink-line); box-shadow: none;
+  }
+  :root[data-theme="paper"] .cell.blank,
+  :root[data-theme="paper"] .cell.blank.weekend { border-color: transparent; box-shadow: none; }
+  :root[data-theme="paper"] .cell .num {
+    color: color-mix(in srgb, var(--accent) 22%, var(--eink-ink));
+    text-shadow: var(--eink-glow);
+  }
+  /* year-view mini cells — same e-ink treatment at small scale */
+  :root[data-theme="paper"] .mini-cell {
+    border-color: var(--eink-line); box-shadow: none;
+    color: var(--eink-ink); text-shadow: var(--eink-glow);
+  }
+  :root[data-theme="paper"] .mini-cell.blank,
+  :root[data-theme="paper"] .mini-cell.blank.weekend { border-color: transparent; box-shadow: none; }
+  /* YEAR VIEW only: lay a pale paper panel UNDER each mini-month card so the
+     dark ink stays readable when a darker background image shows through the
+     gaps between cards. */
+  :root[data-theme="paper"] .calendar-area.view-year .mini-month {
+    /* Square panel that fades to 0 at the top and bottom edges (no border /
+       radius / shadow — those would draw hard edges against the fade). */
+    background: linear-gradient(to bottom,
+      transparent 0%,
+      rgba(244,242,236,0.72) 16%,
+      rgba(244,242,236,0.72) 84%,
+      transparent 100%);
+    padding: 10px 10px 12px;
+  }
+
   .footer-stamp {
     position: fixed;
     left: 0;
@@ -739,7 +826,7 @@
         <a class="app-menu-item" href="https://cyberdeck.tools/gridmap-ui/">&gt; GRIDMAP_</a>
       </nav>
     </div>
-    <div class="tag"><span id="tagWord" class="glitchable">CALENDAR CONSTRUCTOR</span><span id="tagMeta" class="tag-meta"> // v<span id="tagVersion">1.2.7</span></span></div>
+    <div class="tag"><span id="tagWord" class="glitchable">CALENDAR CONSTRUCTOR</span><span id="tagMeta" class="tag-meta"> // v<span id="tagVersion">1.2.8</span></span></div>
     <select class="lang-select" id="uiLangSel" aria-label="interface language"><option value="en">EN</option><option value="ru">RU</option><option value="fr">FR</option><option value="de">DE</option><option value="es">ES</option><option value="it">IT</option><option value="ja">JP</option><option value="zh">CN</option></select>
   </header>
 
@@ -1004,7 +1091,11 @@
   // bubblegum seeds with the Y2K pink/blue, then is user-editable like any theme.
   const THEME_SEED = {
     default:   { main: DEFAULT_MAIN, accent: DEFAULT_ACCENT, customMain: DEFAULT_CUSTOM_MAIN, customAccent: DEFAULT_CUSTOM_ACCENT },
-    bubblegum: { main: '#8fd3ff', accent: '#ff4fa3', customMain: '#a0e9ff', customAccent: '#ff8fc7' }
+    bubblegum: { main: '#8fd3ff', accent: '#ff4fa3', customMain: '#a0e9ff', customAccent: '#ff8fc7' },
+    // PAPER: dark ink on pale paper. Most of the look is hardcoded in the
+    // scoped CSS (the e-ink palette), but --accent still survives as a
+    // restrained stamp-colored tint on the header / day numbers.
+    paper:     { main: '#2a2620', accent: '#9a3b2e', customMain: '#4a463e', customAccent: '#1f6f6a' }
   };
   if (typeof store.themeColors !== 'object' || !store.themeColors) {
     store.themeColors = {};
@@ -1033,7 +1124,7 @@
   if (typeof store.bgOriginal !== 'string') store.bgOriginal = ''; // pre-crop original, kept for RECROP
   if (typeof store.bgBrightness !== 'number') store.bgBrightness = 0.55;
   if (typeof store.scanlines !== 'boolean') store.scanlines = false; // scanline FX overlay
-  if (['default','bubblegum'].indexOf(store.theme) < 0) store.theme = 'default'; // visual theme
+  if (['default','bubblegum','paper'].indexOf(store.theme) < 0) store.theme = 'default'; // visual theme
   if (LANGS.indexOf(store.calLang) < 0) store.calLang = 'en'; // calendar month/weekday language
   if (LANGS.indexOf(store.uiLang) < 0) {
     const browser = (navigator.language || 'en').slice(0, 2).toLowerCase();
@@ -1076,7 +1167,7 @@
       hint: { pickMonth: '// Pick a month and export.', pickYear: '// Pick a year and export.', marks1: '// Click a day to cycle highlight colors, ctrl+click to repeat the last color.', marks2: '// Right-click to clear, ctrl+right-click to clear all.' },
       preview: 'PREVIEW',
       panel: { themes: 'THEMES' },
-      theme: { default: 'NEON', bubblegum: 'BUBBLEGUM', moreToCome: '// MORE TO COME' },
+      theme: { default: 'NEON', bubblegum: 'BUBBLEGUM', paper: 'PAPER', moreToCome: '// MORE TO COME' },
       toast: { pngExported: 'PNG EXPORTED', exportFailed: 'EXPORT FAILED', imgLoaded: 'IMG LOADED', noImageClipboard: 'NO IMAGE IN CLIPBOARD', clipboardBlocked: 'CLIPBOARD BLOCKED', noBgYet: 'NO BG YET', storageFull: 'STORAGE FULL', highlightsCleared: 'HIGHLIGHTS CLEARED', notAnImage: 'NOT AN IMAGE' }
     },
     ru: {
@@ -1088,7 +1179,7 @@
       hint: { pickMonth: '// Выберите месяц и экспортируйте.', pickYear: '// Выберите год и экспортируйте.', marks1: '// Клик по дню — смена цвета подсветки, ctrl+клик — повтор последнего цвета.', marks2: '// Правый клик — убрать, ctrl+правый клик — убрать всё.' },
       preview: 'ПРЕВЬЮ',
       panel: { themes: 'ТЕМЫ' },
-      theme: { default: 'NEON', bubblegum: 'БАББЛГАМ', moreToCome: '// СКОРО ЕЩЁ' },
+      theme: { default: 'NEON', bubblegum: 'БАББЛГАМ', paper: 'БУМАГА', moreToCome: '// СКОРО ЕЩЁ' },
       toast: { pngExported: 'PNG ЭКСПОРТИРОВАН', exportFailed: 'ОШИБКА ЭКСПОРТА', imgLoaded: 'ИЗО. ЗАГРУЖЕНО', noImageClipboard: 'НЕТ ИЗОБРАЖЕНИЯ В БУФЕРЕ', clipboardBlocked: 'БУФЕР ЗАБЛОКИРОВАН', noBgYet: 'НЕТ ФОНА', storageFull: 'ХРАНИЛИЩЕ ПЕРЕПОЛНЕНО', highlightsCleared: 'ПОДСВЕТКА ОЧИЩЕНА', notAnImage: 'НЕ ИЗОБРАЖЕНИЕ' }
     },
     fr: {
@@ -1100,7 +1191,7 @@
       hint: { pickMonth: '// Choisissez un mois et exportez.', pickYear: '// Choisissez une année et exportez.', marks1: '// Clic sur un jour : couleurs de surbrillance, ctrl+clic : répéter la dernière.', marks2: '// Clic droit : effacer, ctrl+clic droit : tout effacer.' },
       preview: 'APERÇU',
       panel: { themes: 'THÈMES' },
-      theme: { default: 'NEON', bubblegum: 'BUBBLEGUM', moreToCome: '// BIENTÔT PLUS' },
+      theme: { default: 'NEON', bubblegum: 'BUBBLEGUM', paper: 'PAPIER', moreToCome: '// BIENTÔT PLUS' },
       toast: { pngExported: 'PNG EXPORTÉ', exportFailed: 'ÉCHEC EXPORT', imgLoaded: 'IMG CHARGÉE', noImageClipboard: 'AUCUNE IMG DANS LE PRESSE-PAPIERS', clipboardBlocked: 'PRESSE-PAPIERS BLOQUÉ', noBgYet: 'PAS DE FOND', storageFull: 'STOCKAGE PLEIN', highlightsCleared: 'SURBRILLANCES EFFACÉES', notAnImage: 'PAS UNE IMAGE' }
     },
     de: {
@@ -1112,7 +1203,7 @@
       hint: { pickMonth: '// Monat wählen und exportieren.', pickYear: '// Jahr wählen und exportieren.', marks1: '// Klick auf einen Tag wechselt die Markierungsfarbe, Strg+Klick wiederholt die letzte.', marks2: '// Rechtsklick löscht, Strg+Rechtsklick löscht alles.' },
       preview: 'VORSCHAU',
       panel: { themes: 'THEMES' },
-      theme: { default: 'NEON', bubblegum: 'BUBBLEGUM', moreToCome: '// BALD MEHR' },
+      theme: { default: 'NEON', bubblegum: 'BUBBLEGUM', paper: 'PAPIER', moreToCome: '// BALD MEHR' },
       toast: { pngExported: 'PNG EXPORTIERT', exportFailed: 'EXPORT FEHLGESCHL.', imgLoaded: 'BILD GELADEN', noImageClipboard: 'KEIN BILD IN ZWISCHENABLAGE', clipboardBlocked: 'ZWISCHENABLAGE BLOCKIERT', noBgYet: 'KEIN HINTERGRUND', storageFull: 'SPEICHER VOLL', highlightsCleared: 'MARKIERUNGEN GELÖSCHT', notAnImage: 'KEIN BILD' }
     },
     es: {
@@ -1124,7 +1215,7 @@
       hint: { pickMonth: '// Elige un mes y exporta.', pickYear: '// Elige un año y exporta.', marks1: '// Clic en un día cambia el color, ctrl+clic repite el último color.', marks2: '// Clic derecho borra, ctrl+clic derecho borra todo.' },
       preview: 'VISTA PREVIA',
       panel: { themes: 'TEMAS' },
-      theme: { default: 'NEON', bubblegum: 'BUBBLEGUM', moreToCome: '// PRONTO MÁS' },
+      theme: { default: 'NEON', bubblegum: 'BUBBLEGUM', paper: 'PAPEL', moreToCome: '// PRONTO MÁS' },
       toast: { pngExported: 'PNG EXPORTADO', exportFailed: 'EXPORT FALLÓ', imgLoaded: 'IMG CARGADA', noImageClipboard: 'SIN IMG EN PORTAPAPELES', clipboardBlocked: 'PORTAPAPELES BLOQUEADO', noBgYet: 'SIN FONDO', storageFull: 'ALMACÉN LLENO', highlightsCleared: 'RESALTADOS BORRADOS', notAnImage: 'NO ES IMAGEN' }
     },
     it: {
@@ -1136,7 +1227,7 @@
       hint: { pickMonth: '// Scegli un mese ed esporta.', pickYear: '// Scegli un anno ed esporta.', marks1: '// Clic su un giorno cambia colore, ctrl+clic ripete l\'ultimo colore.', marks2: '// Clic destro cancella, ctrl+clic destro cancella tutto.' },
       preview: 'ANTEPRIMA',
       panel: { themes: 'TEMI' },
-      theme: { default: 'NEON', bubblegum: 'BUBBLEGUM', moreToCome: '// PRESTO ALTRI' },
+      theme: { default: 'NEON', bubblegum: 'BUBBLEGUM', paper: 'CARTA', moreToCome: '// PRESTO ALTRI' },
       toast: { pngExported: 'PNG ESPORTATO', exportFailed: 'EXPORT FALLITO', imgLoaded: 'IMG CARICATA', noImageClipboard: 'NESSUNA IMG NEGLI APPUNTI', clipboardBlocked: 'APPUNTI BLOCCATI', noBgYet: 'NESSUNO SFONDO', storageFull: 'ARCHIVIO PIENO', highlightsCleared: 'EVIDENZIAZIONI RIMOSSE', notAnImage: 'NON È IMG' }
     },
     ja: {
@@ -1148,7 +1239,7 @@
       hint: { pickMonth: '// 月を選んでエクスポート。', pickYear: '// 年を選んでエクスポート。', marks1: '// 日をクリックで色切替、ctrl+クリックで直前の色。', marks2: '// 右クリックで解除、ctrl+右クリックで全解除。' },
       preview: 'プレビュー',
       panel: { themes: 'テーマ' },
-      theme: { default: 'NEON', bubblegum: 'バブルガム', moreToCome: '// 近日追加' },
+      theme: { default: 'NEON', bubblegum: 'バブルガム', paper: 'ペーパー', moreToCome: '// 近日追加' },
       toast: { pngExported: 'PNG出力完了', exportFailed: 'エクスポート失敗', imgLoaded: '画像読込完了', noImageClipboard: 'クリップボードに画像なし', clipboardBlocked: 'クリップボードブロック', noBgYet: '背景未設定', storageFull: 'ストレージ満杯', highlightsCleared: 'ハイライト消去', notAnImage: '画像ではない' }
     },
     zh: {
@@ -1160,7 +1251,7 @@
       hint: { pickMonth: '// 选择月份并导出。', pickYear: '// 选择年份并导出。', marks1: '// 点击日期切换高亮颜色，ctrl+点击重复上次颜色。', marks2: '// 右键清除，ctrl+右键全部清除。' },
       preview: '预览',
       panel: { themes: '主题' },
-      theme: { default: 'NEON', bubblegum: '泡泡糖', moreToCome: '// 敬请期待' },
+      theme: { default: 'NEON', bubblegum: '泡泡糖', paper: '纸张', moreToCome: '// 敬请期待' },
       toast: { pngExported: 'PNG导出完成', exportFailed: '导出失败', imgLoaded: '图片已加载', noImageClipboard: '剪贴板无图片', clipboardBlocked: '剪贴板被屏蔽', noBgYet: '无背景', storageFull: '存储已满', highlightsCleared: '高亮已清除', notAnImage: '不是图片' }
     }
   };
@@ -1261,7 +1352,8 @@
   // styling itself lives in CSS under :root[data-theme=ID].
   const THEMES = {
     default: { label: 'NEON' },
-    bubblegum: { label: 'BUBBLEGUM', shape: 'tl-round tr-round br-round bl-round border' }
+    bubblegum: { label: 'BUBBLEGUM', shape: 'tl-round tr-round br-round bl-round border' },
+    paper: { label: 'PAPER', shape: 'tl-2-clip-x br-2-clip-x border' }
   };
   const CAPTURE_SHAPE = 'tl-clip tr-clip br-clip bl-clip border'; // default frame
   let previewThemeId = null;                         // transient hover preview
@@ -1963,7 +2055,7 @@
     // Version lives in 3 spots: this const, the #tagVersion span above, and
     // the line-1 `<!-- CHRONOS v… -->` comment. Bump them all in sync with:
     //   python3 bump_version.py {x|y|z}
-    const VER = ' // v1.2.7';
+    const VER = ' // v1.2.8';
     const CHARS = '!@#$%&*<>{}[]/|01ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     let commitCount = '';
 
