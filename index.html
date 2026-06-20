@@ -1,4 +1,4 @@
-<!-- CHRONOS v1.2.8 -->
+<!-- CHRONOS v1.2.9 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -101,11 +101,24 @@
     --panel: #0b0b10;
     --text: #e8e8ee;
     --dim: #7a7a88;
-    --accent: #fcee0a;        /* text + glow */
+    /* --accent / --accent-rgb mirror the --main / --cal-main split below: the
+       chrome accent only ever holds a PRESET color (custom is skipped to avoid a
+       dark-on-dark stamp), while --cal-accent carries the calendar's own accent
+       (custom allowed) for header/day-number text + glow. */
+    --accent: #fcee0a;
     --accent-rgb: 252,238,10;
-    --main: #00f0ff;          /* bg gradient, grid lines, frame */
+    --cal-accent: #fcee0a;    /* calendar text + glow (custom allowed) */
+    --cal-accent-rgb: 252,238,10;
+    /* --main / --main-rgb drive the UI chrome (labels, panels, buttons). They
+       only ever hold a PRESET palette color: applyColors() refuses a custom
+       Main pick here (a dark custom would render dark-on-dark chrome) and falls
+       back to this cyan. --cal-main is the calendar's own color and DOES accept
+       a custom pick — that's what the export gets recolored with. */
+    --main: #00f0ff;
     --main-rgb: 0,240,255;
-    --wash: rgba(var(--main-rgb),0.14); /* weekend column tint (month + year views) */
+    --cal-main: #00f0ff;      /* bg gradient, grid lines, frame (custom allowed) */
+    --cal-main-rgb: 0,240,255;
+    --wash: rgba(var(--cal-main-rgb),0.14); /* weekend column tint (month + year views) */
     --panel-2: #14141c;       /* slightly lighter panel (theme list rows) */
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -362,7 +375,7 @@
   #capture {
     position: relative;
     z-index: 0; /* stacking context: #captureBg slots between gradient and content */
-    --aug-border-all: 1px; --aug-border-bg: rgba(var(--main-rgb),0.5);
+    --aug-border-all: 1px; --aug-border-bg: rgba(var(--cal-main-rgb),0.5);
     --aug-tl: 18px; --aug-tr: 18px; --aug-br: 18px; --aug-bl: 18px;
     padding: 16px 18px 20px;
     /* main-tinted bloom leaking from the top-right corner over a dark base,
@@ -371,27 +384,27 @@
        it ignored the chosen MAIN color). */
     background:
       radial-gradient(58% 44% at 100% -8%, rgba(255,255,255,0.32) 0%, rgba(255,255,255,0) 42%),
-      radial-gradient(135% 100% at 100% -12%, rgba(var(--main-rgb),0.50) 0%, rgba(var(--main-rgb),0.12) 28%, rgba(var(--main-rgb),0) 56%),
-      radial-gradient(90% 70% at 110% 114%, rgba(var(--main-rgb),0.20) 0%, rgba(var(--main-rgb),0) 48%),
+      radial-gradient(135% 100% at 100% -12%, rgba(var(--cal-main-rgb),0.50) 0%, rgba(var(--cal-main-rgb),0.12) 28%, rgba(var(--cal-main-rgb),0) 56%),
+      radial-gradient(90% 70% at 110% 114%, rgba(var(--cal-main-rgb),0.20) 0%, rgba(var(--cal-main-rgb),0) 48%),
       linear-gradient(155deg,
-        color-mix(in srgb, rgb(var(--main-rgb)) 5%, var(--bg)) 0%,
-        color-mix(in srgb, rgb(var(--main-rgb)) 8%, var(--bg)) 55%,
-        color-mix(in srgb, rgb(var(--main-rgb)) 11%, var(--bg)) 100%);
+        color-mix(in srgb, rgb(var(--cal-main-rgb)) 5%, var(--bg)) 0%,
+        color-mix(in srgb, rgb(var(--cal-main-rgb)) 8%, var(--bg)) 55%,
+        color-mix(in srgb, rgb(var(--cal-main-rgb)) 11%, var(--bg)) 100%);
   }
   .cal-head {
     font-weight: 700;
     /* font-size is set by JS (fitHead) to fill the calendar width on one line.
        letter-spacing is in em so width scales linearly with font-size. */
-    font-size: 80px; letter-spacing: 0.06em; color: var(--accent);
+    font-size: 80px; letter-spacing: 0.06em; color: var(--cal-accent);
     text-transform: uppercase; text-align: center; margin-bottom: 8px; line-height: 1;
     white-space: nowrap;
-    text-shadow: 0 0 8px rgba(var(--accent-rgb),0.55), 0 0 22px rgba(var(--accent-rgb),0.35);
+    text-shadow: 0 0 8px rgba(var(--cal-accent-rgb),0.55), 0 0 22px rgba(var(--cal-accent-rgb),0.35);
   }
   .grid { display: grid; grid-template-columns: repeat(7, 1fr); }
   .dow {
     text-align: center; padding: 2px 0 8px; font-size: clamp(22px, 5vw, 36px); letter-spacing: 4px; font-weight: 700;
-    color: var(--accent); text-transform: uppercase;
-    text-shadow: 0 0 7px rgba(var(--accent-rgb),0.55), 0 0 18px rgba(var(--accent-rgb),0.3);
+    color: var(--cal-accent); text-transform: uppercase;
+    text-shadow: 0 0 7px rgba(var(--cal-accent-rgb),0.55), 0 0 18px rgba(var(--cal-accent-rgb),0.3);
     /* match the day cells' horizontal box geometry so each label centers over
        its column (same 4px transparent border + -4px overlap as .cell) */
     border: 4px solid transparent; border-bottom: 0; margin: 0 0 0 -4px;
@@ -400,8 +413,8 @@
   }
   .cell {
     aspect-ratio: 1 / 1;
-    border: 4px solid rgb(var(--main-rgb)); /* one consistent, opaque line color */
-    box-shadow: inset 0 0 12px rgba(var(--main-rgb),0.12);
+    border: 4px solid rgb(var(--cal-main-rgb)); /* one consistent, opaque line color */
+    box-shadow: inset 0 0 12px rgba(var(--cal-main-rgb),0.12);
     display: flex; align-items: center; justify-content: center;
     /* Uniform grid lines: with gap:0 every cell draws its own border, so a
        shared edge would otherwise stack two borders (double thickness) while
@@ -460,7 +473,7 @@
   .cell:not(.blank), .mini-cell:not(.blank) { cursor: pointer; }
   .cell .num {
     font-weight: 700; font-size: clamp(32px, 9vw, 60px);
-    line-height: 1; color: var(--accent); text-shadow: 0 0 8px rgba(var(--accent-rgb),0.5);
+    line-height: 1; color: var(--cal-accent); text-shadow: 0 0 8px rgba(var(--cal-accent-rgb),0.5);
   }
 
   /* ============================================================
@@ -477,26 +490,26 @@
   .calendar-area.view-year .cal-head { margin-bottom: 18px; }
   .mini-name {
     font-weight: 700;
-    color: var(--accent); text-transform: uppercase; text-align: center;
+    color: var(--cal-accent); text-transform: uppercase; text-align: center;
     font-size: clamp(11px, 1.6vw, 22px); letter-spacing: 2px; margin-bottom: 4px;
-    text-shadow: 0 0 6px rgba(var(--accent-rgb),0.5);
+    text-shadow: 0 0 6px rgba(var(--cal-accent-rgb),0.5);
   }
   .mini-dow { display: grid; grid-template-columns: repeat(7, 1fr); padding: 0 0 0 1px; }
   .mini-dow .md {
     text-align: center; font-size: clamp(7px, 1vw, 13px); font-weight: 700;
-    color: var(--accent); text-transform: uppercase; padding: 1px 0 3px;
-    text-shadow: 0 0 5px rgba(var(--accent-rgb),0.4);
+    color: var(--cal-accent); text-transform: uppercase; padding: 1px 0 3px;
+    text-shadow: 0 0 5px rgba(var(--cal-accent-rgb),0.4);
   }
   /* lattice: border 1px / margin -1px / wrapper padding 1px — keep in sync */
   .mini-grid { display: grid; grid-template-columns: repeat(7, 1fr); padding: 1px 0 0 1px; }
   .mini-cell {
     aspect-ratio: 1 / 1; display: flex; align-items: center; justify-content: center;
-    border: 1px solid rgb(var(--main-rgb));
-    box-shadow: inset 0 0 4px rgba(var(--main-rgb),0.12);
+    border: 1px solid rgb(var(--cal-main-rgb));
+    box-shadow: inset 0 0 4px rgba(var(--cal-main-rgb),0.12);
     margin: -1px 0 0 -1px;
     font-weight: 700;
     font-size: clamp(7px, 0.95vw, 13px); line-height: 1;
-    color: var(--accent); text-shadow: 0 0 4px rgba(var(--accent-rgb),0.45);
+    color: var(--cal-accent); text-shadow: 0 0 4px rgba(var(--cal-accent-rgb),0.45);
   }
   .mini-cell.blank { border-color: transparent; box-shadow: none; }
   /* weekend column tint — flat wash (no header strips at mini scale) */
@@ -641,19 +654,19 @@
      ============================================================ */
   :root[data-theme="bubblegum"] #capture {
     --aug-tl: 30px; --aug-tr: 30px; --aug-br: 30px; --aug-bl: 30px;
-    --aug-border-all: 2px; --aug-border-bg: var(--accent);
+    --aug-border-all: 2px; --aug-border-bg: var(--cal-accent);
     background:
       radial-gradient(80% 55% at 50% -12%, rgba(255,255,255,0.40), transparent 60%),
       linear-gradient(150deg,
-        color-mix(in srgb, var(--accent) 24%, #170a18) 0%,
+        color-mix(in srgb, var(--cal-accent) 24%, #170a18) 0%,
         #160a18 46%,
-        color-mix(in srgb, var(--main) 26%, #0b1222) 100%);
+        color-mix(in srgb, var(--cal-main) 26%, #0b1222) 100%);
   }
   /* glossy gradient (pink→blue) clipped to header + day-number text */
   :root[data-theme="bubblegum"] .cal-head,
   :root[data-theme="bubblegum"] .cell .num,
   :root[data-theme="bubblegum"] .mini-name {
-    background: linear-gradient(180deg, #ffd6ee 0%, var(--accent) 48%, var(--main) 100%);
+    background: linear-gradient(180deg, #ffd6ee 0%, var(--cal-accent) 48%, var(--cal-main) 100%);
     -webkit-background-clip: text; background-clip: text;
     -webkit-text-fill-color: transparent; color: transparent;
     text-shadow: none; filter: drop-shadow(0 1px 1px rgba(0,0,0,0.45));
@@ -661,7 +674,7 @@
   /* day numbers: brighter white→accent gradient + tight dark contour so they
      stay legible on the glossy candy cells */
   :root[data-theme="bubblegum"] .cell .num {
-    background: linear-gradient(180deg, #ffffff 0%, #ffe0f1 42%, var(--accent) 100%);
+    background: linear-gradient(180deg, #ffffff 0%, #ffe0f1 42%, var(--cal-accent) 100%);
     -webkit-background-clip: text; background-clip: text;
     -webkit-text-fill-color: transparent; color: transparent;
     filter:
@@ -670,35 +683,35 @@
   }
   :root[data-theme="bubblegum"] .dow,
   :root[data-theme="bubblegum"] .mini-dow .md {
-    color: #fff; text-shadow: 0 0 6px color-mix(in srgb, var(--accent) 70%, transparent);
+    color: #fff; text-shadow: 0 0 6px color-mix(in srgb, var(--cal-accent) 70%, transparent);
   }
   /* no weekend tint on the year-view weekday header letters */
   :root[data-theme="bubblegum"] .mini-dow .md.weekend { background: none; }
   /* candy bubble cells — rounded, gapped, glossy (override the lattice) */
   :root[data-theme="bubblegum"] .grid { gap: 6px; padding: 4px !important; }
   :root[data-theme="bubblegum"] .cell {
-    margin: 0; border: 2px solid color-mix(in srgb, var(--main) 65%, transparent); border-radius: 16px;
-    background: linear-gradient(160deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.04) 38%, color-mix(in srgb, var(--accent) 12%, transparent) 100%);
+    margin: 0; border: 2px solid color-mix(in srgb, var(--cal-main) 65%, transparent); border-radius: 16px;
+    background: linear-gradient(160deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.04) 38%, color-mix(in srgb, var(--cal-accent) 12%, transparent) 100%);
     box-shadow: 0 4px 10px rgba(0,0,0,0.3), inset 0 2px 0 rgba(255,255,255,0.6);
   }
   :root[data-theme="bubblegum"] .cell.blank,
   :root[data-theme="bubblegum"] .cell.blank.weekend { background: none; border-color: transparent; box-shadow: none; }
   :root[data-theme="bubblegum"] .cell.weekend {
-    background: linear-gradient(160deg, rgba(255,255,255,0.30), color-mix(in srgb, var(--accent) 55%, transparent));
+    background: linear-gradient(160deg, rgba(255,255,255,0.30), color-mix(in srgb, var(--cal-accent) 55%, transparent));
   }
   :root[data-theme="bubblegum"] .cell.weekend.r0::before { display: none; }
   /* year-view mini cells — smaller bubbles */
   :root[data-theme="bubblegum"] .mini-grid { gap: 2px; padding: 0; }
   :root[data-theme="bubblegum"] .mini-cell {
     margin: 0; border-radius: 6px; color: #fff;
-    border: 1px solid color-mix(in srgb, var(--main) 55%, transparent);
-    background: linear-gradient(160deg, rgba(255,255,255,0.16), color-mix(in srgb, var(--accent) 10%, transparent));
+    border: 1px solid color-mix(in srgb, var(--cal-main) 55%, transparent);
+    background: linear-gradient(160deg, rgba(255,255,255,0.16), color-mix(in srgb, var(--cal-accent) 10%, transparent));
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.5);
-    text-shadow: 0 0 4px color-mix(in srgb, var(--accent) 55%, transparent);
+    text-shadow: 0 0 4px color-mix(in srgb, var(--cal-accent) 55%, transparent);
   }
   :root[data-theme="bubblegum"] .mini-cell.blank,
   :root[data-theme="bubblegum"] .mini-cell.blank.weekend { background: none; border-color: transparent; box-shadow: none; }
-  :root[data-theme="bubblegum"] .mini-cell.weekend { background: linear-gradient(160deg, rgba(255,255,255,0.26), color-mix(in srgb, var(--accent) 50%, transparent)); }
+  :root[data-theme="bubblegum"] .mini-cell.weekend { background: linear-gradient(160deg, rgba(255,255,255,0.26), color-mix(in srgb, var(--cal-accent) 50%, transparent)); }
 
   /* ============================================================
      PAPER theme — "electronic ink": dark ink printed on a pale
@@ -714,14 +727,14 @@
     --eink-paper-2: #f4f2ec;      /* lighter highlight */
     --eink-ink: #1b1a16;          /* near-black primary ink */
     --eink-ink-2: #44423b;        /* secondary / dim ink */
-    /* Grid/hairline ink: the user's --main mixed heavily into dark ink, so the
-       lattice reads as COLORED ink printed on paper (mirrors --main's
+    /* Grid/hairline ink: the calendar's --cal-main mixed heavily into dark ink,
+       so the lattice reads as COLORED ink printed on paper (mirrors --cal-main's
        structural role in NEON) while staying legible. Default seed main is a
        near-black ink, so this looks monochrome until the user picks a color. */
-    --eink-line: color-mix(in srgb, var(--main) 35%, rgba(20,18,12,0.62));
+    --eink-line: color-mix(in srgb, var(--cal-main) 35%, rgba(20,18,12,0.62));
     /* Weekend column tint — a faint wash carrying just a hint of main (low %
        so the wash stays subtle; main is opaque and would otherwise darken it). */
-    --wash: color-mix(in srgb, var(--main) 10%, rgba(20,18,12,0.06));
+    --wash: color-mix(in srgb, var(--cal-main) 10%, rgba(20,18,12,0.06));
     /* Pale halo traced around the ink — keeps the dark text legible when the
        user drops in a DARKER background image (the ink would otherwise vanish). */
     --eink-glow:
@@ -748,7 +761,7 @@
      (the one spot of color in a second ink), no neon glow */
   :root[data-theme="paper"] .cal-head,
   :root[data-theme="paper"] .mini-name {
-    color: color-mix(in srgb, var(--accent) 32%, var(--eink-ink));
+    color: color-mix(in srgb, var(--cal-accent) 32%, var(--eink-ink));
     text-shadow: var(--eink-glow);
   }
   :root[data-theme="paper"] .dow,
@@ -763,7 +776,7 @@
   :root[data-theme="paper"] .cell.blank,
   :root[data-theme="paper"] .cell.blank.weekend { border-color: transparent; box-shadow: none; }
   :root[data-theme="paper"] .cell .num {
-    color: color-mix(in srgb, var(--accent) 22%, var(--eink-ink));
+    color: color-mix(in srgb, var(--cal-accent) 22%, var(--eink-ink));
     text-shadow: var(--eink-glow);
   }
   /* year-view mini cells — same e-ink treatment at small scale */
@@ -826,7 +839,7 @@
         <a class="app-menu-item" href="https://cyberdeck.tools/gridmap-ui/">&gt; GRIDMAP_</a>
       </nav>
     </div>
-    <div class="tag"><span id="tagWord" class="glitchable">CALENDAR CONSTRUCTOR</span><span id="tagMeta" class="tag-meta"> // v<span id="tagVersion">1.2.8</span></span></div>
+    <div class="tag"><span id="tagWord" class="glitchable">CALENDAR CONSTRUCTOR</span><span id="tagMeta" class="tag-meta"> // v<span id="tagVersion">1.2.9</span></span></div>
     <select class="lang-select" id="uiLangSel" aria-label="interface language"><option value="en">EN</option><option value="ru">RU</option><option value="fr">FR</option><option value="de">DE</option><option value="es">ES</option><option value="it">IT</option><option value="ja">JP</option><option value="zh">CN</option></select>
   </header>
 
@@ -1362,13 +1375,35 @@
   // store.theme; reads/display follow curThemeId() so hover-preview shows that
   // theme's saved palette too.
   const colorsOf = (id) => store.themeColors[id] || store.themeColors.default;
+  // The preset Main swatches (excludes the saved-custom slot). UI chrome only
+  // accepts one of these; a custom Main pick is skipped for chrome (it can be
+  // dark → dark-on-dark labels/panels) and the chrome falls back to UI_MAIN_FB.
+  const PRESET_MAINS = new Set(
+    [...mainPalette.querySelectorAll('.swatch:not(.swatch-saved)[data-color]')]
+      .map(sw => sw.dataset.color.toLowerCase()));
+  const UI_MAIN_FB = '#00f0ff'; // chrome's native cyan (matches :root --main)
+  // Same rule for Accent: chrome takes only a preset; a custom Accent is skipped
+  // for chrome and falls back to UI_ACCENT_FB (the calendar still gets the pick).
+  const PRESET_ACCENTS = new Set(
+    [...accentPalette.querySelectorAll('.swatch:not(.swatch-saved)[data-color]')]
+      .map(sw => sw.dataset.color.toLowerCase()));
+  const UI_ACCENT_FB = '#fcee0a'; // chrome's native yellow (matches :root --accent)
   function applyColors() {
     const c = colorsOf(curThemeId());
     const root = document.documentElement.style;
-    root.setProperty('--main', c.main);
-    root.setProperty('--main-rgb', hexToRgb(c.main));
-    root.setProperty('--accent', c.accent);
-    root.setProperty('--accent-rgb', hexToRgb(c.accent));
+    // Calendar gets the chosen Main (custom allowed) — it's what the export shows.
+    root.setProperty('--cal-main', c.main);
+    root.setProperty('--cal-main-rgb', hexToRgb(c.main));
+    // UI chrome only takes a preset Main; a custom pick reverts to the cyan.
+    const uiMain = PRESET_MAINS.has((c.main || '').toLowerCase()) ? c.main : UI_MAIN_FB;
+    root.setProperty('--main', uiMain);
+    root.setProperty('--main-rgb', hexToRgb(uiMain));
+    // Calendar gets the chosen Accent (custom allowed); chrome gets preset-or-fallback.
+    root.setProperty('--cal-accent', c.accent);
+    root.setProperty('--cal-accent-rgb', hexToRgb(c.accent));
+    const uiAccent = PRESET_ACCENTS.has((c.accent || '').toLowerCase()) ? c.accent : UI_ACCENT_FB;
+    root.setProperty('--accent', uiAccent);
+    root.setProperty('--accent-rgb', hexToRgb(uiAccent));
     refreshPalette(mainPalette, c.main, c.customMain, '[data-saved-main]', customMain);
     refreshPalette(accentPalette, c.accent, c.customAccent, '[data-saved-accent]', customAccent);
   }
@@ -2055,7 +2090,7 @@
     // Version lives in 3 spots: this const, the #tagVersion span above, and
     // the line-1 `<!-- CHRONOS v… -->` comment. Bump them all in sync with:
     //   python3 bump_version.py {x|y|z}
-    const VER = ' // v1.2.8';
+    const VER = ' // v1.2.9';
     const CHARS = '!@#$%&*<>{}[]/|01ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     let commitCount = '';
 
