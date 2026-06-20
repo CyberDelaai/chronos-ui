@@ -1,4 +1,4 @@
-<!-- CHRONOS v1.2.9 -->
+<!-- CHRONOS v1.2.10 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -340,6 +340,8 @@
   /* ---- Sliding toggle (ported from commlink-ui .side-switch / .fx) ---- */
   .fx-toggle { display: flex; align-items: center; gap: 8px; justify-content: space-between; }
   .fx-toggle[hidden] { display: none; } /* display:flex would otherwise override the hidden attribute */
+  /* accent hairline separating the FX/scanlines controls from the rows above */
+  .cfg-divider { height: 1px; margin: 2px 0; background: var(--accent); box-shadow: 0 0 6px rgba(var(--accent-rgb),0.6); }
   .fx-label { font-size: 12px; letter-spacing: 1.5px; color: var(--main); text-transform: uppercase; }
   .side-switch {
     position: relative; height: 32px; width: 96px; background: var(--panel);
@@ -839,7 +841,7 @@
         <a class="app-menu-item" href="https://cyberdeck.tools/gridmap-ui/">&gt; GRIDMAP_</a>
       </nav>
     </div>
-    <div class="tag"><span id="tagWord" class="glitchable">CALENDAR CONSTRUCTOR</span><span id="tagMeta" class="tag-meta"> // v<span id="tagVersion">1.2.9</span></span></div>
+    <div class="tag"><span id="tagWord" class="glitchable">CALENDAR CONSTRUCTOR</span><span id="tagMeta" class="tag-meta"> // v<span id="tagVersion">1.2.10</span></span></div>
     <select class="lang-select" id="uiLangSel" aria-label="interface language"><option value="en">EN</option><option value="ru">RU</option><option value="fr">FR</option><option value="de">DE</option><option value="es">ES</option><option value="it">IT</option><option value="ja">JP</option><option value="zh">CN</option></select>
   </header>
 
@@ -971,17 +973,34 @@
   </div>
 
   <div class="fx-toggle">
+    <span class="fx-label" data-i18n="field.calLang">// CALENDAR LANG:</span>
+    <select class="lang-select" id="calLangSel" aria-label="calendar language"><option value="en">EN</option><option value="ru">RU</option><option value="fr">FR</option><option value="de">DE</option><option value="es">ES</option><option value="it">IT</option><option value="ja">JP</option><option value="zh">CN</option></select>
+  </div>
+
+  <div class="controls">
+    <div class="group">
+      <button class="nav-arrow" id="prevBtn" type="button" aria-label="previous month">&lt;</button>
+      <select id="monthSel" aria-label="month"></select>
+      <div class="year-wrap">
+        <input type="number" id="yearInp" min="0" max="9999" aria-label="year" />
+        <div class="year-spin">
+          <button class="year-btn" id="yearUp" type="button" aria-label="year up">▲</button>
+          <button class="year-btn" id="yearDown" type="button" aria-label="year down">▼</button>
+        </div>
+      </div>
+      <button class="nav-arrow" id="nextBtn" type="button" aria-label="next month">&gt;</button>
+    </div>
+  </div>
+
+  <div class="cfg-divider" aria-hidden="true"></div>
+
+  <div class="fx-toggle">
     <span class="fx-label" data-i18n="field.scanlines">// SCANLINES:</span>
     <button class="side-switch fx" id="scanToggle" type="button" data-pos="left" aria-label="scanlines">
       <span class="thumb"></span>
       <span class="lab l">OFF</span>
       <span class="lab r">ON</span>
     </button>
-  </div>
-
-  <div class="fx-toggle">
-    <span class="fx-label" data-i18n="field.calLang">// CALENDAR LANG:</span>
-    <select class="lang-select" id="calLangSel" aria-label="calendar language"><option value="en">EN</option><option value="ru">RU</option><option value="fr">FR</option><option value="de">DE</option><option value="es">ES</option><option value="it">IT</option><option value="ja">JP</option><option value="zh">CN</option></select>
   </div>
 
   <div class="bg-field">
@@ -1000,20 +1019,7 @@
     </div>
   </div>
 
-  <div class="controls">
-    <div class="group">
-      <button class="nav-arrow" id="prevBtn" type="button" aria-label="previous month">&lt;</button>
-      <select id="monthSel" aria-label="month"></select>
-      <div class="year-wrap">
-        <input type="number" id="yearInp" min="0" max="9999" aria-label="year" />
-        <div class="year-spin">
-          <button class="year-btn" id="yearUp" type="button" aria-label="year up">▲</button>
-          <button class="year-btn" id="yearDown" type="button" aria-label="year down">▼</button>
-        </div>
-      </div>
-      <button class="nav-arrow" id="nextBtn" type="button" aria-label="next month">&gt;</button>
-    </div>
-  </div>
+  <div class="cfg-divider" aria-hidden="true"></div>
 
   <button class="btn export-btn" data-augmented-ui="tl-clip br-clip both" id="exportBtn" type="button" data-i18n="btn.savePng">⬇ SAVE PNG</button>
 
@@ -2090,7 +2096,7 @@
     // Version lives in 3 spots: this const, the #tagVersion span above, and
     // the line-1 `<!-- CHRONOS v… -->` comment. Bump them all in sync with:
     //   python3 bump_version.py {x|y|z}
-    const VER = ' // v1.2.9';
+    const VER = ' // v1.2.10';
     const CHARS = '!@#$%&*<>{}[]/|01ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     let commitCount = '';
 
