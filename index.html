@@ -1,4 +1,4 @@
-<!-- CHRONOS v1.3.2 -->
+<!-- CHRONOS v1.3.3 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -193,7 +193,7 @@
     --main-rgb: 0,240,255;
     --cal-main: #00f0ff;      /* bg gradient, grid lines, frame (custom allowed) */
     --cal-main-rgb: 0,240,255;
-    --wash: rgba(var(--cal-main-rgb),0.14); /* weekend column tint (month + year views) */
+    --wash: rgba(var(--wk-rgb, var(--cal-main-rgb)),var(--wash-a, 0.14)); /* weekend column tint (month + year views); --wash-a = WEEKEND TINT slider opacity */
     --panel-2: #14141c;       /* slightly lighter panel (theme list rows) */
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -680,6 +680,29 @@
     position: absolute; right: -7px; bottom: -7px; width: 14px; height: 14px;
     background: var(--main); cursor: nwse-resize;
   }
+  /* ---- Weekend tint color: picker button beside the slider + modal ---- */
+  .wk-color-btn { flex-shrink: 0; background: var(--panel); padding: 0; }
+  .wk-color-btn .pick-icon { width: 16px; height: 16px; }
+  /* no dim/blur: the calendar stays visible behind for a live preview; the
+     dialog is anchored beside the picker button by JS (left/top) */
+  #wkModal { background: none; backdrop-filter: none; display: block; }
+  #wkModal[hidden] { display: none; }
+  .wk-modal { position: fixed; width: 320px; max-width: none; padding: 20px; } /* 280px grid + padding */
+  .wk-modal h2 { margin-bottom: 14px; }
+  /* AUTO fills the last row's 3 free swatch slots (3×28 + 2×8 = 100px);
+     4px of that is a gap past the custom group's frame, which hangs 4px out */
+  .wk-modal .opt { width: 96px; margin-left: 4px; }
+  /* framed like the custom slot beside it: tl/br notches, 36px tall frame
+     hanging 4px above + below so the row's footprint stays 28px */
+  #wkAuto {
+    height: 36px; margin-top: -4px; margin-bottom: -4px; border: none;
+    --aug-border-all: 1px; --aug-border-bg: rgba(var(--main-rgb),0.45);
+    --aug-tl: 8px; --aug-br: 8px;
+  }
+  #wkAuto:hover, #wkAuto.active { --aug-border-bg: var(--main); }
+  /* exactly 8 swatches per row (8×28 + 7×8) → rows sit on one lattice */
+  .wk-modal .color-grid { width: 280px; justify-content: flex-start; }
+  .wk-modal .crop-actions { margin-top: 16px; }
   .crop-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 18px; }
   .crop-actions #cropMax { margin-right: auto; }
   /* Fixed license stamp pinned to the bottom of the viewport (sits behind
@@ -785,8 +808,10 @@
   }
   :root[data-theme="bubblegum"] .cell.blank,
   :root[data-theme="bubblegum"] .cell.blank.weekend { background: none; border-color: transparent; box-shadow: none; }
+  /* glossy top stop stays the theme's white sheen up to its native 55%,
+     then blends into a light accent so 100% is fully opaque */
   :root[data-theme="bubblegum"] .cell.weekend {
-    background: linear-gradient(160deg, rgba(255,255,255,0.30), color-mix(in srgb, var(--cal-accent) 55%, transparent));
+    background: linear-gradient(160deg, color-mix(in srgb, color-mix(in srgb, #fff 30%, var(--wk, var(--cal-accent))) calc(max(0, var(--wash-a, 0.55) - 0.55) / 0.45 * 100%), rgba(255,255,255,0.30)), color-mix(in srgb, var(--wk, var(--cal-accent)) calc(var(--wash-a, 0.55) * 100%), transparent));
   }
   :root[data-theme="bubblegum"] .cell.weekend.r0::before { display: none; }
   /* year-view mini cells — smaller bubbles */
@@ -803,7 +828,7 @@
   }
   :root[data-theme="bubblegum"] .mini-cell.blank,
   :root[data-theme="bubblegum"] .mini-cell.blank.weekend { background: none; border-color: transparent; box-shadow: none; }
-  :root[data-theme="bubblegum"] .mini-cell.weekend { background: linear-gradient(160deg, rgba(255,255,255,0.26), color-mix(in srgb, var(--cal-accent) 50%, transparent)); }
+  :root[data-theme="bubblegum"] .mini-cell.weekend { background: linear-gradient(160deg, color-mix(in srgb, color-mix(in srgb, #fff 30%, var(--wk, var(--cal-accent))) calc(max(0, var(--wash-a, 0.55) - 0.55) / 0.45 * 100%), rgba(255,255,255,0.26)), color-mix(in srgb, var(--wk, var(--cal-accent)) calc(var(--wash-a, 0.55) * 100%), transparent)); }
 
   /* ============================================================
      PAPER theme — "electronic ink": dark ink printed on a pale
@@ -824,9 +849,8 @@
        structural role in NEON) while staying legible. Default seed main is a
        near-black ink, so this looks monochrome until the user picks a color. */
     --eink-line: color-mix(in srgb, var(--cal-main) 35%, rgba(20,18,12,0.62));
-    /* Weekend column tint — a faint wash carrying just a hint of main (low %
-       so the wash stays subtle; main is opaque and would otherwise darken it). */
-    --wash: color-mix(in srgb, var(--cal-main) 10%, rgba(20,18,12,0.06));
+    /* Weekend column tint — main (dark ink by default) at the slider's opacity */
+    --wash: color-mix(in srgb, var(--wk, var(--cal-main)) calc(var(--wash-a, 0.15) * 100%), transparent);
     /* Pale halo traced around the ink — keeps the dark text legible when the
        user drops in a DARKER background image (the ink would otherwise vanish). */
     --eink-glow:
@@ -1214,7 +1238,7 @@
         <a class="app-menu-item" href="https://cyberdeck.tools/eidolon-ui/">&gt; EIDOLON_</a>
       </nav>
     </div>
-    <div class="tag"><span id="tagWord" class="glitchable">CALENDAR CONSTRUCTOR</span><span id="tagMeta" class="tag-meta"> // v<span id="tagVersion">1.3.2</span></span></div>
+    <div class="tag"><span id="tagWord" class="glitchable">CALENDAR CONSTRUCTOR</span><span id="tagMeta" class="tag-meta"> // v<span id="tagVersion">1.3.3</span></span></div>
     <select class="lang-select" id="uiLangSel" aria-label="interface language"><option value="en">EN</option><option value="ru">RU</option><option value="fr">FR</option><option value="de">DE</option><option value="es">ES</option><option value="it">IT</option><option value="ja">JP</option><option value="zh">CN</option></select>
   </header>
 
@@ -1343,6 +1367,17 @@
       <span class="lab l" data-i18n="lab.no">NO</span>
       <span class="lab r" data-i18n="lab.yes">YES</span>
     </button>
+  </div>
+
+  <div class="opt-field">
+    <span class="fx-label" data-i18n="field.wkTint">// WEEKEND TINT:</span>
+    <div class="brightness-row">
+      <input type="range" id="wkTint" min="0" max="100" step="1" aria-label="weekend tint opacity" title="double-click: theme default" />
+      <span class="brightness-val" id="wkTintVal"></span>
+      <button class="swatch-pick-btn wk-color-btn" id="wkColorBtn" type="button" title="Weekend tint color" aria-label="weekend tint color" data-augmented-ui="br-clip border">
+        <svg class="pick-icon" viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M480-80q-82 0-155-31.5t-127.5-86Q143-252 111.5-325T80-480q0-83 32.5-156t88-127Q256-817 330-848.5T488-880q80 0 151 27.5t124.5 76q53.5 48.5 85 115T880-518q0 115-70 176.5T640-280h-74q-9 0-12.5 5t-3.5 11q0 12 15 34.5t15 51.5q0 50-27.5 74T480-80Zm0-400Zm-177 23q17-17 17-43t-17-43q-17-17-43-17t-43 17q-17 17-17 43t17 43q17 17 43 17t43-17Zm120-160q17-17 17-43t-17-43q-17-17-43-17t-43 17q-17 17-17 43t17 43q17 17 43 17t43-17Zm200 0q17-17 17-43t-17-43q-17-17-43-17t-43 17q-17 17-17 43t17 43q17 17 43 17t43-17Zm120 160q17-17 17-43t-17-43q-17-17-43-17t-43 17q-17 17-17 43t17 43q17 17 43 17t43-17ZM480-160q9 0 14.5-5t5.5-13q0-14-15-33t-15-57q0-42 29-67t71-25h70q66 0 113-38.5T800-518q0-121-92.5-201.5T488-800q-136 0-232 93t-96 227q0 133 93.5 226.5T480-160Z"/></svg>
+      </button>
+    </div>
   </div>
 
   <div class="fx-toggle">
@@ -1542,6 +1577,26 @@
   </div>
 </div>
 
+<div class="modal-overlay" id="wkModal" hidden>
+  <div class="modal-content wk-modal" data-augmented-ui="tl-clip tr-clip br-clip bl-clip border">
+    <h2 data-i18n="field.wkColor">// WEEKEND TINT COLOR</h2>
+    <!-- presets are cloned from the Main palette by JS (before the custom group) -->
+    <div class="color-grid" id="wkPalette">
+      <div class="custom-color-group" data-augmented-ui="tl-clip br-clip border">
+        <div class="swatch swatch-saved" data-saved-wk data-augmented-ui="tl-clip border" hidden></div>
+        <label class="swatch-pick-btn" title="Pick any color" data-augmented-ui="br-clip border">
+          <input type="color" id="customWk" />
+          <svg class="pick-icon" viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M480-80q-82 0-155-31.5t-127.5-86Q143-252 111.5-325T80-480q0-83 32.5-156t88-127Q256-817 330-848.5T488-880q80 0 151 27.5t124.5 76q53.5 48.5 85 115T880-518q0 115-70 176.5T640-280h-74q-9 0-12.5 5t-3.5 11q0 12 15 34.5t15 51.5q0 50-27.5 74T480-80Zm0-400Zm-177 23q17-17 17-43t-17-43q-17-17-43-17t-43 17q-17 17-17 43t17 43q17 17 43 17t43-17Zm120-160q17-17 17-43t-17-43q-17-17-43-17t-43 17q-17 17-17 43t17 43q17 17 43 17t43-17Zm200 0q17-17 17-43t-17-43q-17-17-43-17t-43 17q-17 17-17 43t17 43q17 17 43 17t43-17Zm120 160q17-17 17-43t-17-43q-17-17-43-17t-43 17q-17 17-17 43t17 43q17 17 43 17t43-17ZM480-160q9 0 14.5-5t5.5-13q0-14-15-33t-15-57q0-42 29-67t71-25h70q66 0 113-38.5T800-518q0-121-92.5-201.5T488-800q-136 0-232 93t-96 227q0 133 93.5 226.5T480-160Z"/></svg>
+        </label>
+      </div>
+      <button class="opt" id="wkAuto" type="button" data-augmented-ui="tl-clip br-clip border" data-i18n="opt.auto">AUTO</button>
+    </div>
+    <div class="crop-actions">
+      <button class="btn" data-augmented-ui="tl-clip br-clip border" id="wkDone" type="button" data-i18n="btn.done">DONE</button>
+    </div>
+  </div>
+</div>
+
 <div class="footer-stamp" aria-hidden="true">CHRONOS_CALENDAR_CONSTRUCTOR (c) // 2026 // CYBERDELAAI // MIT</div>
 
 <script>
@@ -1584,13 +1639,14 @@
   try { store = JSON.parse(localStorage.getItem(LS_KEY) || '{}'); } catch (e) { store = {}; }
   // Per-theme color memory: each theme keeps its own main/accent + custom slots.
   // bubblegum seeds with the Y2K pink/blue, then is user-editable like any theme.
+  // wkTint = weekend column tint opacity % (0 = off, 100 = opaque).
   const THEME_SEED = {
-    default:   { main: DEFAULT_MAIN, accent: DEFAULT_ACCENT, customMain: DEFAULT_CUSTOM_MAIN, customAccent: DEFAULT_CUSTOM_ACCENT },
-    bubblegum: { main: '#8fd3ff', accent: '#ff4fa3', customMain: '#a0e9ff', customAccent: '#ff8fc7' },
+    default:   { main: DEFAULT_MAIN, accent: DEFAULT_ACCENT, customMain: DEFAULT_CUSTOM_MAIN, customAccent: DEFAULT_CUSTOM_ACCENT, wkTint: 14 },
+    bubblegum: { main: '#8fd3ff', accent: '#ff4fa3', customMain: '#a0e9ff', customAccent: '#ff8fc7', wkTint: 55 },
     // PAPER: dark ink on pale paper. Most of the look is hardcoded in the
     // scoped CSS (the e-ink palette), but --accent still survives as a
     // restrained stamp-colored tint on the header / day numbers.
-    paper:     { main: '#2a2620', accent: '#9a3b2e', customMain: '#4a463e', customAccent: '#1f6f6a' }
+    paper:     { main: '#2a2620', accent: '#9a3b2e', customMain: '#4a463e', customAccent: '#1f6f6a', wkTint: 15 }
   };
   // STYLE column options (value lists; chip labels come from i18n opt.*)
   const STYLE_OPTS = {
@@ -1641,6 +1697,16 @@
   if (store.weekStart !== 'sun') store.weekStart = 'mon'; // 'mon' | 'sun'
   if (typeof store.hlSat !== 'boolean') store.hlSat = true; // highlight Saturday column
   if (typeof store.hlSun !== 'boolean') store.hlSun = true; // highlight Sunday column
+  // weekend column tint strength, % of the theme's own wash (0 = off)
+  Object.keys(THEME_SEED).forEach(id => {
+    const c = store.themeColors[id], v = c.wkTint;
+    c.wkTint = (typeof v === 'number' && isFinite(v)) ? Math.max(0, Math.min(100, Math.round(v))) : THEME_SEED[id].wkTint;
+  });
+  delete store.wkTint; // earlier global relative strength
+  // weekend tint color: 'auto' (theme's own main/accent) or a '#rrggbb' pick
+  const isHex = (v) => typeof v === 'string' && /^#[0-9a-f]{6}$/i.test(v);
+  if (!isHex(store.wkColor)) store.wkColor = 'auto';
+  if (!isHex(store.wkCustom)) store.wkCustom = ''; // saved custom slot
   if (['s','m','l'].indexOf(store.size) < 0) store.size = 'm'; // calendar size
   if (store.view !== 'year') store.view = 'month'; // 'month' | 'year' construction
   if (store.yearLayout !== '3x4') store.yearLayout = '4x3'; // year mini-month lattice
@@ -1709,9 +1775,9 @@
   const I18N = {
     en: {
       tag: { app: 'CALENDAR CONSTRUCTOR', glitch: 'BORROW YOUR TIME' },
-      field: { view: '// VIEW:', size: '// SIZE:', layout: '// LAYOUT:', firstDay: '// FIRST WEEKDAY:', hlSat: '// HIGHLIGHT SATURDAY:', hlSun: '// HIGHLIGHT SUNDAY:', bg: '// BACKGROUND:', calLang: '// CALENDAR LANG:', main: 'Main', accent: 'Accent', scanlines: '// SCANLINES:', bright: 'BRIGHT' },
+      field: { view: '// VIEW:', size: '// SIZE:', layout: '// LAYOUT:', firstDay: '// FIRST WEEKDAY:', hlSat: '// HIGHLIGHT SATURDAY:', hlSun: '// HIGHLIGHT SUNDAY:', wkTint: '// WEEKEND TINT:', wkColor: '// WEEKEND TINT COLOR', bg: '// BACKGROUND:', calLang: '// CALENDAR LANG:', main: 'Main', accent: 'Accent', scanlines: '// SCANLINES:', bright: 'BRIGHT' },
       lab: { month: 'MONTH', year: 'YEAR', mon: 'MON', sun: 'SUN', no: 'NO', yes: 'YES' },
-      btn: { upload: 'UPLOAD', paste: 'PASTE', recrop: 'RECROP', savePng: '⬇ SAVE PNG' },
+      btn: { upload: 'UPLOAD', paste: 'PASTE', recrop: 'RECROP', savePng: '⬇ SAVE PNG', done: 'DONE' },
       crop: { title: '// CROP BACKGROUND', use: 'USE', cancel: 'CANCEL' },
       hint: { pickMonth: '// Pick a month and export.', pickYear: '// Pick a year and export.', marks1: '// Click a day to cycle highlight colors, ctrl+click to repeat the last color.', marks2: '// Right-click to clear, ctrl+right-click to clear all.' },
       preview: 'PREVIEW',
@@ -1723,9 +1789,9 @@
     },
     ru: {
       tag: { app: 'КОНСТРУКТОР КАЛЕНДАРЯ', glitch: 'ВРЕМЯ ВЗАЙМЫ' },
-      field: { view: '// ВИД:', size: '// РАЗМЕР:', layout: '// СЕТКА:', firstDay: '// ПЕРВЫЙ ДЕНЬ:', hlSat: '// ВЫДЕЛИТЬ СУББОТУ:', hlSun: '// ВЫДЕЛИТЬ ВОСКРЕСЕНЬЕ:', bg: '// ФОН:', calLang: '// ЯЗЫК КАЛЕНДАРЯ:', main: 'Основной', accent: 'Акцент', scanlines: '// ПОЛОСЫ:', bright: 'ЯРКОСТЬ' },
+      field: { view: '// ВИД:', size: '// РАЗМЕР:', layout: '// СЕТКА:', firstDay: '// ПЕРВЫЙ ДЕНЬ:', hlSat: '// ВЫДЕЛИТЬ СУББОТУ:', hlSun: '// ВЫДЕЛИТЬ ВОСКРЕСЕНЬЕ:', wkTint: '// ЗАЛИВКА ВЫХОДНЫХ:', wkColor: '// ЦВЕТ ЗАЛИВКИ ВЫХОДНЫХ', bg: '// ФОН:', calLang: '// ЯЗЫК КАЛЕНДАРЯ:', main: 'Основной', accent: 'Акцент', scanlines: '// ПОЛОСЫ:', bright: 'ЯРКОСТЬ' },
       lab: { month: 'МЕСЯЦ', year: 'ГОД', mon: 'ПН', sun: 'ВС', no: 'НЕТ', yes: 'ДА' },
-      btn: { upload: 'ЗАГРУЗ.', paste: 'ВСТАВ.', recrop: 'ОБРЕЗАТЬ', savePng: '⬇ СОХРАНИТЬ PNG' },
+      btn: { upload: 'ЗАГРУЗ.', paste: 'ВСТАВ.', recrop: 'ОБРЕЗАТЬ', savePng: '⬇ СОХРАНИТЬ PNG', done: 'ГОТОВО' },
       crop: { title: '// ОБРЕЗКА ФОНА', use: 'ПРИМЕНИТЬ', cancel: 'ОТМЕНА' },
       hint: { pickMonth: '// Выберите месяц и экспортируйте.', pickYear: '// Выберите год и экспортируйте.', marks1: '// Клик по дню — смена цвета подсветки, ctrl+клик — повтор последнего цвета.', marks2: '// Правый клик — убрать, ctrl+правый клик — убрать всё.' },
       preview: 'ПРЕВЬЮ',
@@ -1737,9 +1803,9 @@
     },
     fr: {
       tag: { app: 'CONSTRUCTEUR DE CALENDRIER', glitch: 'EMPRUNTE TON TEMPS' },
-      field: { view: '// VUE:', size: '// TAILLE:', layout: '// GRILLE:', firstDay: '// 1ER JOUR:', hlSat: '// SURLIGNER SAMEDI:', hlSun: '// SURLIGNER DIMANCHE:', bg: '// FOND:', calLang: '// LANGUE CALENDRIER:', main: 'Principal', accent: 'Accent', scanlines: '// SCANLINES:', bright: 'LUM.' },
+      field: { view: '// VUE:', size: '// TAILLE:', layout: '// GRILLE:', firstDay: '// 1ER JOUR:', hlSat: '// SURLIGNER SAMEDI:', hlSun: '// SURLIGNER DIMANCHE:', wkTint: '// TEINTE WEEK-END:', wkColor: '// COULEUR TEINTE WEEK-END', bg: '// FOND:', calLang: '// LANGUE CALENDRIER:', main: 'Principal', accent: 'Accent', scanlines: '// SCANLINES:', bright: 'LUM.' },
       lab: { month: 'MOIS', year: 'ANNÉE', mon: 'LUN', sun: 'DIM', no: 'NON', yes: 'OUI' },
-      btn: { upload: 'IMPORTER', paste: 'COLLER', recrop: 'RECADRER', savePng: '⬇ ENREGISTRER PNG' },
+      btn: { upload: 'IMPORTER', paste: 'COLLER', recrop: 'RECADRER', savePng: '⬇ ENREGISTRER PNG', done: 'OK' },
       crop: { title: '// RECADRER LE FOND', use: 'UTILISER', cancel: 'ANNULER' },
       hint: { pickMonth: '// Choisissez un mois et exportez.', pickYear: '// Choisissez une année et exportez.', marks1: '// Clic sur un jour : couleurs de surbrillance, ctrl+clic : répéter la dernière.', marks2: '// Clic droit : effacer, ctrl+clic droit : tout effacer.' },
       preview: 'APERÇU',
@@ -1751,9 +1817,9 @@
     },
     de: {
       tag: { app: 'KALENDER-KONSTRUKTOR', glitch: 'ZEIT AUF PUMP' },
-      field: { view: '// ANSICHT:', size: '// GRÖSSE:', layout: '// RASTER:', firstDay: '// WOCHENSTART:', hlSat: '// SAMSTAG MARKIEREN:', hlSun: '// SONNTAG MARKIEREN:', bg: '// HINTERGRUND:', calLang: '// KALENDERSPRACHE:', main: 'Haupt', accent: 'Akzent', scanlines: '// SCANLINES:', bright: 'HELL.' },
+      field: { view: '// ANSICHT:', size: '// GRÖSSE:', layout: '// RASTER:', firstDay: '// WOCHENSTART:', hlSat: '// SAMSTAG MARKIEREN:', hlSun: '// SONNTAG MARKIEREN:', wkTint: '// WOCHENENDTÖNUNG:', wkColor: '// FARBE WOCHENENDTÖNUNG', bg: '// HINTERGRUND:', calLang: '// KALENDERSPRACHE:', main: 'Haupt', accent: 'Akzent', scanlines: '// SCANLINES:', bright: 'HELL.' },
       lab: { month: 'MONAT', year: 'JAHR', mon: 'MO', sun: 'SO', no: 'NEIN', yes: 'JA' },
-      btn: { upload: 'HOCHLADEN', paste: 'EINFÜGEN', recrop: 'NEU ZUSCHN.', savePng: '⬇ PNG SPEICHERN' },
+      btn: { upload: 'HOCHLADEN', paste: 'EINFÜGEN', recrop: 'NEU ZUSCHN.', savePng: '⬇ PNG SPEICHERN', done: 'FERTIG' },
       crop: { title: '// HINTERGRUND ZUSCHNEIDEN', use: 'VERWENDEN', cancel: 'ABBRECHEN' },
       hint: { pickMonth: '// Monat wählen und exportieren.', pickYear: '// Jahr wählen und exportieren.', marks1: '// Klick auf einen Tag wechselt die Markierungsfarbe, Strg+Klick wiederholt die letzte.', marks2: '// Rechtsklick löscht, Strg+Rechtsklick löscht alles.' },
       preview: 'VORSCHAU',
@@ -1765,9 +1831,9 @@
     },
     es: {
       tag: { app: 'CONSTRUCTOR DE CALENDARIO', glitch: 'TIEMPO PRESTADO' },
-      field: { view: '// VISTA:', size: '// TAMAÑO:', layout: '// REJILLA:', firstDay: '// PRIMER DÍA:', hlSat: '// RESALTAR SÁBADO:', hlSun: '// RESALTAR DOMINGO:', bg: '// FONDO:', calLang: '// IDIOMA CALENDARIO:', main: 'Principal', accent: 'Acento', scanlines: '// LÍNEAS:', bright: 'BRILLO' },
+      field: { view: '// VISTA:', size: '// TAMAÑO:', layout: '// REJILLA:', firstDay: '// PRIMER DÍA:', hlSat: '// RESALTAR SÁBADO:', hlSun: '// RESALTAR DOMINGO:', wkTint: '// TINTE FIN DE SEMANA:', wkColor: '// COLOR TINTE FIN DE SEMANA', bg: '// FONDO:', calLang: '// IDIOMA CALENDARIO:', main: 'Principal', accent: 'Acento', scanlines: '// LÍNEAS:', bright: 'BRILLO' },
       lab: { month: 'MES', year: 'AÑO', mon: 'LUN', sun: 'DOM', no: 'NO', yes: 'SÍ' },
-      btn: { upload: 'SUBIR', paste: 'PEGAR', recrop: 'RECORTAR', savePng: '⬇ GUARDAR PNG' },
+      btn: { upload: 'SUBIR', paste: 'PEGAR', recrop: 'RECORTAR', savePng: '⬇ GUARDAR PNG', done: 'LISTO' },
       crop: { title: '// RECORTAR FONDO', use: 'USAR', cancel: 'CANCELAR' },
       hint: { pickMonth: '// Elige un mes y exporta.', pickYear: '// Elige un año y exporta.', marks1: '// Clic en un día cambia el color, ctrl+clic repite el último color.', marks2: '// Clic derecho borra, ctrl+clic derecho borra todo.' },
       preview: 'VISTA PREVIA',
@@ -1779,9 +1845,9 @@
     },
     it: {
       tag: { app: 'COSTRUTTORE DI CALENDARIO', glitch: 'TEMPO IN PRESTITO' },
-      field: { view: '// VISTA:', size: '// DIMENSIONE:', layout: '// GRIGLIA:', firstDay: '// PRIMO GIORNO:', hlSat: '// EVIDENZIA SABATO:', hlSun: '// EVIDENZIA DOMENICA:', bg: '// SFONDO:', calLang: '// LINGUA CALENDARIO:', main: 'Principale', accent: 'Accento', scanlines: '// SCANLINES:', bright: 'LUM.' },
+      field: { view: '// VISTA:', size: '// DIMENSIONE:', layout: '// GRIGLIA:', firstDay: '// PRIMO GIORNO:', hlSat: '// EVIDENZIA SABATO:', hlSun: '// EVIDENZIA DOMENICA:', wkTint: '// TINTA WEEKEND:', wkColor: '// COLORE TINTA WEEKEND', bg: '// SFONDO:', calLang: '// LINGUA CALENDARIO:', main: 'Principale', accent: 'Accento', scanlines: '// SCANLINES:', bright: 'LUM.' },
       lab: { month: 'MESE', year: 'ANNO', mon: 'LUN', sun: 'DOM', no: 'NO', yes: 'SÌ' },
-      btn: { upload: 'CARICA', paste: 'INCOLLA', recrop: 'RITAGLIA', savePng: '⬇ SALVA PNG' },
+      btn: { upload: 'CARICA', paste: 'INCOLLA', recrop: 'RITAGLIA', savePng: '⬇ SALVA PNG', done: 'FATTO' },
       crop: { title: '// RITAGLIA SFONDO', use: 'USA', cancel: 'ANNULLA' },
       hint: { pickMonth: '// Scegli un mese ed esporta.', pickYear: '// Scegli un anno ed esporta.', marks1: '// Clic su un giorno cambia colore, ctrl+clic ripete l\'ultimo colore.', marks2: '// Clic destro cancella, ctrl+clic destro cancella tutto.' },
       preview: 'ANTEPRIMA',
@@ -1793,9 +1859,9 @@
     },
     ja: {
       tag: { app: 'カレンダー・コンストラクタ', glitch: '時間を借りる' },
-      field: { view: '// 表示:', size: '// サイズ:', layout: '// 配置:', firstDay: '// 週の始まり:', hlSat: '// 土曜を強調:', hlSun: '// 日曜を強調:', bg: '// 背景:', calLang: '// カレンダー言語:', main: 'メイン', accent: 'アクセント', scanlines: '// スキャンライン:', bright: '明るさ' },
+      field: { view: '// 表示:', size: '// サイズ:', layout: '// 配置:', firstDay: '// 週の始まり:', hlSat: '// 土曜を強調:', hlSun: '// 日曜を強調:', wkTint: '// 週末の色合い:', wkColor: '// 週末の色', bg: '// 背景:', calLang: '// カレンダー言語:', main: 'メイン', accent: 'アクセント', scanlines: '// スキャンライン:', bright: '明るさ' },
       lab: { month: '月', year: '年', mon: '月', sun: '日', no: 'いいえ', yes: 'はい' },
-      btn: { upload: 'アップロード', paste: 'ペースト', recrop: '再切抜', savePng: '⬇ PNG保存' },
+      btn: { upload: 'アップロード', paste: 'ペースト', recrop: '再切抜', savePng: '⬇ PNG保存', done: '完了' },
       crop: { title: '// 背景を切り抜く', use: '使用', cancel: 'キャンセル' },
       hint: { pickMonth: '// 月を選んでエクスポート。', pickYear: '// 年を選んでエクスポート。', marks1: '// 日をクリックで色切替、ctrl+クリックで直前の色。', marks2: '// 右クリックで解除、ctrl+右クリックで全解除。' },
       preview: 'プレビュー',
@@ -1807,9 +1873,9 @@
     },
     zh: {
       tag: { app: '日历构建器', glitch: '借来的时间' },
-      field: { view: '// 视图:', size: '// 尺寸:', layout: '// 布局:', firstDay: '// 每周开始:', hlSat: '// 高亮周六:', hlSun: '// 高亮周日:', bg: '// 背景:', calLang: '// 日历语言:', main: '主色', accent: '强调色', scanlines: '// 扫描线:', bright: '亮度' },
+      field: { view: '// 视图:', size: '// 尺寸:', layout: '// 布局:', firstDay: '// 每周开始:', hlSat: '// 高亮周六:', hlSun: '// 高亮周日:', wkTint: '// 周末色调:', wkColor: '// 周末色调颜色', bg: '// 背景:', calLang: '// 日历语言:', main: '主色', accent: '强调色', scanlines: '// 扫描线:', bright: '亮度' },
       lab: { month: '月', year: '年', mon: '一', sun: '日', no: '否', yes: '是' },
-      btn: { upload: '上传', paste: '粘贴', recrop: '重剪', savePng: '⬇ 保存PNG' },
+      btn: { upload: '上传', paste: '粘贴', recrop: '重剪', savePng: '⬇ 保存PNG', done: '完成' },
       crop: { title: '// 裁剪背景', use: '使用', cancel: '取消' },
       hint: { pickMonth: '// 选择月份并导出。', pickYear: '// 选择年份并导出。', marks1: '// 点击日期切换高亮颜色，ctrl+点击重复上次颜色。', marks2: '// 右键清除，ctrl+右键全部清除。' },
       preview: '预览',
@@ -1958,6 +2024,13 @@
     root.setProperty('--accent-rgb', hexToRgb(uiAccent));
     refreshPalette(mainPalette, c.main, c.customMain, '[data-saved-main]', customMain);
     refreshPalette(accentPalette, c.accent, c.customAccent, '[data-saved-accent]', customAccent);
+    syncWkTint();
+  }
+  function syncWkTint() {
+    const v = colorsOf(curThemeId()).wkTint;
+    document.documentElement.style.setProperty('--wash-a', v / 100);
+    $('wkTint').value = v;
+    $('wkTintVal').textContent = v + '%';
   }
   function refreshTheme() {
     const id = curThemeId();
@@ -2473,6 +2546,47 @@
   }
   const syncSat = wireBoolToggle(satToggle, 'hlSat');
   const syncSun = wireBoolToggle(sunToggle, 'hlSun');
+  // Weekend tint slider: the wash's real opacity, kept per theme next to its
+  // colors (follows hover-preview like them). --wash-a is set on :root because
+  // --wash itself is defined there (vars resolve where declared).
+  const wkTintInput = $('wkTint'), wkTintVal = $('wkTintVal');
+  const liveWkTint = (v) => { colorsOf(store.theme).wkTint = v; syncWkTint(); };
+  wkTintInput.addEventListener('input', () => { const v = parseInt(wkTintInput.value, 10); liveWkTint(isNaN(v) ? 0 : v); });
+  wkTintInput.addEventListener('change', save);
+  wkTintInput.addEventListener('dblclick', () => { liveWkTint(THEME_SEED[store.theme].wkTint); save(); });
+  // Weekend tint color modal: AUTO clears --wk / --wk-rgb so each theme falls
+  // back to its own color; a pick applies live, the modal stays open until DONE.
+  const wkModal = $('wkModal'), wkPalette = $('wkPalette'), customWk = $('customWk'), wkColorBtn = $('wkColorBtn');
+  mainPalette.querySelectorAll('.swatch:not(.swatch-saved)[data-color]').forEach(sw => {
+    wkPalette.insertBefore(sw.cloneNode(false), wkPalette.querySelector('.custom-color-group'));
+  });
+  function applyWkColor() {
+    const root = document.documentElement.style, c = store.wkColor;
+    if (c === 'auto') { root.removeProperty('--wk'); root.removeProperty('--wk-rgb'); }
+    else { root.setProperty('--wk', c); root.setProperty('--wk-rgb', hexToRgb(c)); }
+    wkColorBtn.style.color = c === 'auto' ? '' : c;
+    $('wkAuto').classList.toggle('active', c === 'auto');
+    refreshPalette(wkPalette, c, store.wkCustom, '[data-saved-wk]', customWk);
+  }
+  const setWkColor = (v) => { store.wkColor = v; applyWkColor(); save(); };
+  wirePalette(wkPalette, setWkColor);
+  customWk.addEventListener('input', () => { store.wkCustom = customWk.value; setWkColor(customWk.value); });
+  $('wkAuto').addEventListener('click', () => setWkColor('auto'));
+  const closeWk = () => { wkModal.hidden = true; };
+  // open beside the button (right of it, clamped to the viewport)
+  wkColorBtn.addEventListener('click', () => {
+    wkModal.hidden = false;
+    const dlg = wkModal.firstElementChild, b = wkColorBtn.getBoundingClientRect(), M = 8;
+    const w = dlg.offsetWidth, h = dlg.offsetHeight;
+    let left = b.right + 12, top = b.top - 20;
+    if (left + w > innerWidth - M) left = Math.max(M, b.left - w - 12);
+    top = Math.max(M, Math.min(top, innerHeight - h - M));
+    dlg.style.left = left + 'px'; dlg.style.top = top + 'px';
+  });
+  $('wkDone').addEventListener('click', closeWk);
+  wkModal.addEventListener('click', (e) => { if (e.target === wkModal) closeWk(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeWk(); });
+  applyWkColor();
 
   // Scanlines FX (OFF | ON) — pure class flip on the capture, no re-render
   function syncScan() {
@@ -2892,7 +3006,7 @@
     // Version lives in 3 spots: this const, the #tagVersion span above, and
     // the line-1 `<!-- CHRONOS v… -->` comment. Bump them all in sync with:
     //   python3 bump_version.py {x|y|z}
-    const VER = ' // v1.3.2';
+    const VER = ' // v1.3.3';
     const CHARS = '!@#$%&*<>{}[]/|01ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     let commitCount = '';
 
