@@ -1,4 +1,4 @@
-<!-- CHRONOS v1.3.1 -->
+<!-- CHRONOS v1.3.2 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -950,13 +950,16 @@
   .font-row :is(select[data-val="glitch"], option[value="glitch"]) { font-family: var(--font-glitch); font-weight: 400; }
   .font-row :is(select[data-val="pixel"], option[value="pixel"])   { font-family: var(--font-pixel); font-weight: 400; font-size: 9px; }
   .font-row select[data-val="auto"] { color: var(--dim); }
+  /* weight dropdown: each choice drawn at its own weight */
+  .font-row :is(select[data-val="light"], option[value="light"])     { font-weight: 300; }
+  .font-row :is(select[data-val="regular"], option[value="regular"]) { font-weight: 500; }
+  .font-row :is(select[data-val="bold"], option[value="bold"])       { font-weight: 700; }
+  .font-row :is(select[data-val="heavy"], option[value="heavy"])     { font-weight: 800; }
 
   /* ---- Corner picker: a mini frame mirroring the capture's 4 corners.
      Each quadrant is a hit zone; hovering one lights that corner (a glowing
      copy of the frame clipped to the quadrant). Zones come BEFORE the glow
      layers in the DOM so plain ~ sibling selectors can target them. */
-  .opt-label-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-  .opt-label-row .opt { height: 22px; padding: 0 10px; font-size: 10px; }
   .cp-wrap { position: relative; }
   .corner-picker { position: relative; height: 96px; }
   .cp-frame {
@@ -968,6 +971,19 @@
     background: rgba(var(--main-rgb),0.05);
   }
   .corner-picker.is-auto .cp-base { --aug-border-bg: rgba(var(--main-rgb),0.3); }
+  /* RESET sits over the 4 zones' meeting point; back to the theme's own frame.
+     Shown only while the picker is hovered/focused, and never while corners
+     are already AUTO (disabled → stays hidden and clicks fall through). */
+  .cp-reset {
+    --btn-color: var(--magenta);
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 4;
+    height: 22px; padding: 0 10px; font-size: 10px; letter-spacing: 1.5px;
+    --aug-tl: 6px; --aug-br: 6px;
+    background: color-mix(in srgb, var(--magenta) 14%, var(--panel));
+    opacity: 0; pointer-events: none; transition: opacity .15s, background .15s, box-shadow .15s;
+  }
+  .cp-reset:hover { background: color-mix(in srgb, var(--magenta) 30%, var(--panel)); }
+  .corner-picker:is(:hover, :focus-within) .cp-reset:not(:disabled) { opacity: 1; pointer-events: auto; }
   .cp-glow {
     position: absolute; inset: 0; pointer-events: none; z-index: 1;
     opacity: 0; transition: opacity .15s;
@@ -1007,7 +1023,7 @@
   .cp-menu[hidden] { display: none; }
   .cp-menu-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
   .cp-menu-head .fx-label { color: var(--accent); }
-  .cp-menu-head .opt { height: 22px; padding: 0 8px; font-size: 10px; }
+  .cp-menu-head .cp-hint { font-size: 9px; letter-spacing: 0.06em; color: rgba(var(--main-rgb),0.5); }
   .cp-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
   .cp-opt {
     height: 46px; display: flex; align-items: center; justify-content: center;
@@ -1198,7 +1214,7 @@
         <a class="app-menu-item" href="https://cyberdeck.tools/eidolon-ui/">&gt; EIDOLON_</a>
       </nav>
     </div>
-    <div class="tag"><span id="tagWord" class="glitchable">CALENDAR CONSTRUCTOR</span><span id="tagMeta" class="tag-meta"> // v<span id="tagVersion">1.3.1</span></span></div>
+    <div class="tag"><span id="tagWord" class="glitchable">CALENDAR CONSTRUCTOR</span><span id="tagMeta" class="tag-meta"> // v<span id="tagVersion">1.3.2</span></span></div>
     <select class="lang-select" id="uiLangSel" aria-label="interface language"><option value="en">EN</option><option value="ru">RU</option><option value="fr">FR</option><option value="de">DE</option><option value="es">ES</option><option value="it">IT</option><option value="ja">JP</option><option value="zh">CN</option></select>
   </header>
 
@@ -1411,10 +1427,7 @@
       <button class="btn" data-augmented-ui="tl-clip br-clip border" id="styleReset" type="button" data-i18n="style.reset">RESET</button>
     </div>
     <div class="opt-field">
-      <div class="opt-label-row">
-        <span class="fx-label" data-i18n="style.corners">// CORNERS:</span>
-        <button class="opt" id="cornersAuto" type="button" data-val="auto" data-i18n="opt.auto">AUTO</button>
-      </div>
+      <span class="fx-label" data-i18n="style.corners">// CORNERS:</span>
       <!-- corner picker: click a quadrant to open that corner's shape list -->
       <div class="cp-wrap" id="cpWrap">
         <div class="corner-picker" id="cornerPicker">
@@ -1423,6 +1436,7 @@
           <button class="cp-zone" data-c="tr" type="button" aria-label="top-right corner"></button>
           <button class="cp-zone" data-c="br" type="button" aria-label="bottom-right corner"></button>
           <button class="cp-zone" data-c="bl" type="button" aria-label="bottom-left corner"></button>
+          <button class="btn cp-reset" data-augmented-ui="tl-clip br-clip border" id="cornersReset" type="button" data-i18n="style.reset">RESET</button>
           <div class="cp-glow" data-c="tl"><div class="cp-frame"></div></div>
           <div class="cp-glow" data-c="tr"><div class="cp-frame"></div></div>
           <div class="cp-glow" data-c="br"><div class="cp-frame"></div></div>
@@ -1431,7 +1445,7 @@
         <div class="cp-menu" id="cpMenu" data-augmented-ui="tl-clip br-clip border" hidden>
           <div class="cp-menu-head">
             <span class="fx-label" id="cpMenuTitle"></span>
-            <button class="opt" id="cpAll" type="button" data-i18n="style.applyAll">ALL 4</button>
+            <span class="cp-hint" data-i18n="style.allHint">CTRL+CLICK: ALL 4</span>
           </div>
           <div class="cp-grid" id="cpGrid"></div>
         </div>
@@ -1461,8 +1475,8 @@
     <div class="opt-field">
       <span class="fx-label" data-i18n="style.fontHead">// FONT: MONTH + YEAR</span>
       <div class="font-row">
-        <select data-font-role="fontHead" aria-label="month and year font"><option value="auto" hidden>—</option><option value="mono" data-i18n="opt.mono">MONO</option><option value="sans" data-i18n="opt.sans">SANS</option><option value="cond" data-i18n="opt.cond">COND</option><option value="poster" data-i18n="opt.poster">POSTER</option><option value="tektur" data-i18n="opt.tektur">TEKTUR</option><option value="unbounded" data-i18n="opt.unbounded">UNBOUNDED</option><option value="glitch" data-i18n="opt.glitch">GLITCH</option><option value="pixel" data-i18n="opt.pixel">PIXEL</option></select>
-        <button class="opt" type="button" data-font-auto="fontHead" data-val="auto" data-i18n="opt.auto">AUTO</button>
+        <select data-pick="fontHead" aria-label="month and year font"><option value="auto" hidden>—</option><option value="mono" data-i18n="opt.mono">MONO</option><option value="sans" data-i18n="opt.sans">SANS</option><option value="cond" data-i18n="opt.cond">COND</option><option value="poster" data-i18n="opt.poster">POSTER</option><option value="tektur" data-i18n="opt.tektur">TEKTUR</option><option value="unbounded" data-i18n="opt.unbounded">UNBOUNDED</option><option value="glitch" data-i18n="opt.glitch">GLITCH</option><option value="pixel" data-i18n="opt.pixel">PIXEL</option></select>
+        <button class="opt" type="button" data-pick-auto="fontHead" data-val="auto" data-i18n="opt.auto">AUTO</button>
       </div>
       <div class="brightness-row">
         <input type="range" data-font-size="sizeHead" step="5" aria-label="month and year size" title="double-click: 100%" />
@@ -1472,8 +1486,8 @@
     <div class="opt-field">
       <span class="fx-label" data-i18n="style.fontDays">// FONT: WEEKDAYS</span>
       <div class="font-row">
-        <select data-font-role="fontDays" aria-label="weekday font"><option value="auto" hidden>—</option><option value="mono" data-i18n="opt.mono">MONO</option><option value="sans" data-i18n="opt.sans">SANS</option><option value="cond" data-i18n="opt.cond">COND</option><option value="poster" data-i18n="opt.poster">POSTER</option><option value="tektur" data-i18n="opt.tektur">TEKTUR</option><option value="unbounded" data-i18n="opt.unbounded">UNBOUNDED</option><option value="glitch" data-i18n="opt.glitch">GLITCH</option><option value="pixel" data-i18n="opt.pixel">PIXEL</option></select>
-        <button class="opt" type="button" data-font-auto="fontDays" data-val="auto" data-i18n="opt.auto">AUTO</button>
+        <select data-pick="fontDays" aria-label="weekday font"><option value="auto" hidden>—</option><option value="mono" data-i18n="opt.mono">MONO</option><option value="sans" data-i18n="opt.sans">SANS</option><option value="cond" data-i18n="opt.cond">COND</option><option value="poster" data-i18n="opt.poster">POSTER</option><option value="tektur" data-i18n="opt.tektur">TEKTUR</option><option value="unbounded" data-i18n="opt.unbounded">UNBOUNDED</option><option value="glitch" data-i18n="opt.glitch">GLITCH</option><option value="pixel" data-i18n="opt.pixel">PIXEL</option></select>
+        <button class="opt" type="button" data-pick-auto="fontDays" data-val="auto" data-i18n="opt.auto">AUTO</button>
       </div>
       <div class="brightness-row">
         <input type="range" data-font-size="sizeDays" step="5" aria-label="weekday size" title="double-click: 100%" />
@@ -1483,8 +1497,8 @@
     <div class="opt-field">
       <span class="fx-label" data-i18n="style.fontNums">// FONT: NUMBERS</span>
       <div class="font-row">
-        <select data-font-role="fontNums" aria-label="day number font"><option value="auto" hidden>—</option><option value="mono" data-i18n="opt.mono">MONO</option><option value="sans" data-i18n="opt.sans">SANS</option><option value="cond" data-i18n="opt.cond">COND</option><option value="poster" data-i18n="opt.poster">POSTER</option><option value="tektur" data-i18n="opt.tektur">TEKTUR</option><option value="unbounded" data-i18n="opt.unbounded">UNBOUNDED</option><option value="glitch" data-i18n="opt.glitch">GLITCH</option><option value="pixel" data-i18n="opt.pixel">PIXEL</option></select>
-        <button class="opt" type="button" data-font-auto="fontNums" data-val="auto" data-i18n="opt.auto">AUTO</button>
+        <select data-pick="fontNums" aria-label="day number font"><option value="auto" hidden>—</option><option value="mono" data-i18n="opt.mono">MONO</option><option value="sans" data-i18n="opt.sans">SANS</option><option value="cond" data-i18n="opt.cond">COND</option><option value="poster" data-i18n="opt.poster">POSTER</option><option value="tektur" data-i18n="opt.tektur">TEKTUR</option><option value="unbounded" data-i18n="opt.unbounded">UNBOUNDED</option><option value="glitch" data-i18n="opt.glitch">GLITCH</option><option value="pixel" data-i18n="opt.pixel">PIXEL</option></select>
+        <button class="opt" type="button" data-pick-auto="fontNums" data-val="auto" data-i18n="opt.auto">AUTO</button>
       </div>
       <div class="brightness-row">
         <input type="range" data-font-size="sizeNums" step="5" aria-label="day number size" title="double-click: 100%" />
@@ -1493,7 +1507,10 @@
     </div>
     <div class="opt-field">
       <span class="fx-label" data-i18n="style.weight">// WEIGHT:</span>
-      <div class="opt-grid" data-opt="weight"></div>
+      <div class="font-row">
+        <select data-pick="weight" aria-label="font weight"><option value="auto" hidden>—</option><option value="light" data-i18n="opt.light">LIGHT</option><option value="regular" data-i18n="opt.regular">REGULAR</option><option value="bold" data-i18n="opt.bold">BOLD</option><option value="heavy" data-i18n="opt.heavy">BLACK</option></select>
+        <button class="opt" type="button" data-pick-auto="weight" data-val="auto" data-i18n="opt.auto">AUTO</button>
+      </div>
     </div>
     <div class="fx-toggle">
       <span class="fx-label" data-i18n="style.glow">// GLOW:</span>
@@ -1589,10 +1606,10 @@
   // Every corner variant augmented-ui v2 ships (minus the tl-/tr-/... prefix),
   // laid out as the dropdown's 4-per-row grid: one family per row.
   const AUG_CORNER_SHAPES = [
+    'none', 'rect', 'rect-x', 'rect-y',
     'clip', 'clip-x', 'clip-y', 'clip-inset',
     'round', 'round-x', 'round-y', 'round-inset',
     'scoop', 'scoop-x', 'scoop-y', 'scoop-inset',
-    'rect', 'rect-x', 'rect-y', 'none',
     '2-clip-x', '2-clip-y', '2-clip-xy', 'step-inset',
     '2-round', '2-round-x', '2-round-y', '2-round-xy',
     '2-scoop', '2-scoop-x', '2-scoop-y', '2-scoop-xy',
@@ -1699,7 +1716,7 @@
       hint: { pickMonth: '// Pick a month and export.', pickYear: '// Pick a year and export.', marks1: '// Click a day to cycle highlight colors, ctrl+click to repeat the last color.', marks2: '// Right-click to clear, ctrl+right-click to clear all.' },
       preview: 'PREVIEW',
       panel: { themes: 'THEMES' },
-      style: { title: '// STYLE', corners: '// CORNERS:', cornerSize: '// CORNER SIZE:', cells: '// CELLS:', lines: '// LINES:', numPos: '// DAY NUMBER:', fontHead: '// FONT: MONTH + YEAR', fontDays: '// FONT: WEEKDAYS', fontNums: '// FONT: NUMBERS', weight: '// WEIGHT:', glow: '// GLOW:', reset: 'RESET', applyAll: 'ALL 4' },
+      style: { title: '// STYLE', corners: '// CORNERS:', cornerSize: '// CORNER SIZE:', cells: '// CELLS:', lines: '// LINES:', numPos: '// DAY NUMBER:', fontHead: '// FONT: MONTH + YEAR', fontDays: '// FONT: WEEKDAYS', fontNums: '// FONT: NUMBERS', weight: '// WEIGHT:', glow: '// GLOW:', reset: 'RESET', allHint: 'CTRL+CLICK: ALL 4' },
       opt: { auto: 'AUTO', grid: 'GRID', boxes: 'BOXES', bubbles: 'BUBBLES', none: 'NONE', thin: 'THIN', medium: 'MEDIUM', thick: 'THICK', center: 'CENTER', corner: 'CORNER', mono: 'MONO', sans: 'SANS', cond: 'NARROW', poster: 'POSTER', tektur: 'TEKTUR', unbounded: 'UNBOUNDED', glitch: 'GLITCH', pixel: 'PIXEL', light: 'LIGHT', regular: 'REGULAR', bold: 'BOLD', heavy: 'BLACK' },
       theme: { default: 'NEON', bubblegum: 'BUBBLEGUM', paper: 'PAPER', moreToCome: '// MORE TO COME' },
       toast: { pngExported: 'PNG EXPORTED', exportFailed: 'EXPORT FAILED', imgLoaded: 'IMG LOADED', noImageClipboard: 'NO IMAGE IN CLIPBOARD', clipboardBlocked: 'CLIPBOARD BLOCKED', noBgYet: 'NO BG YET', storageFull: 'STORAGE FULL', highlightsCleared: 'HIGHLIGHTS CLEARED', notAnImage: 'NOT AN IMAGE' }
@@ -1713,7 +1730,7 @@
       hint: { pickMonth: '// Выберите месяц и экспортируйте.', pickYear: '// Выберите год и экспортируйте.', marks1: '// Клик по дню — смена цвета подсветки, ctrl+клик — повтор последнего цвета.', marks2: '// Правый клик — убрать, ctrl+правый клик — убрать всё.' },
       preview: 'ПРЕВЬЮ',
       panel: { themes: 'ТЕМЫ' },
-      style: { title: '// СТИЛЬ', corners: '// УГЛЫ:', cornerSize: '// РАЗМЕР УГЛОВ:', cells: '// ЯЧЕЙКИ:', lines: '// ЛИНИИ:', numPos: '// ЧИСЛО ДНЯ:', fontHead: '// ШРИФТ: МЕСЯЦ + ГОД', fontDays: '// ШРИФТ: ДНИ НЕДЕЛИ', fontNums: '// ШРИФТ: ЧИСЛА', weight: '// НАСЫЩЕННОСТЬ:', glow: '// СВЕЧЕНИЕ:', reset: 'СБРОС', applyAll: 'ВСЕ 4' },
+      style: { title: '// СТИЛЬ', corners: '// УГЛЫ:', cornerSize: '// РАЗМЕР УГЛОВ:', cells: '// ЯЧЕЙКИ:', lines: '// ЛИНИИ:', numPos: '// ЧИСЛО ДНЯ:', fontHead: '// ШРИФТ: МЕСЯЦ + ГОД', fontDays: '// ШРИФТ: ДНИ НЕДЕЛИ', fontNums: '// ШРИФТ: ЧИСЛА', weight: '// НАСЫЩЕННОСТЬ:', glow: '// СВЕЧЕНИЕ:', reset: 'СБРОС', allHint: 'CTRL+КЛИК: ВСЕ 4' },
       opt: { auto: 'АВТО', grid: 'СЕТКА', boxes: 'БЛОКИ', bubbles: 'ПУЗЫРИ', none: 'НЕТ', thin: 'ТОНКИЕ', medium: 'СРЕДНИЕ', thick: 'ТОЛСТЫЕ', center: 'ЦЕНТР', corner: 'УГОЛ', mono: 'МОНО', sans: 'ГРОТЕСК', cond: 'УЗКИЙ', poster: 'ПОСТЕР', tektur: 'TEKTUR', unbounded: 'UNBOUNDED', glitch: 'ГЛИТЧ', pixel: 'ПИКСЕЛЬ', light: 'ЛЁГКИЙ', regular: 'ОБЫЧНЫЙ', bold: 'ЖИРНЫЙ', heavy: 'ЧЁРНЫЙ' },
       theme: { default: 'NEON', bubblegum: 'БАББЛГАМ', paper: 'БУМАГА', moreToCome: '// СКОРО ЕЩЁ' },
       toast: { pngExported: 'PNG ЭКСПОРТИРОВАН', exportFailed: 'ОШИБКА ЭКСПОРТА', imgLoaded: 'ИЗО. ЗАГРУЖЕНО', noImageClipboard: 'НЕТ ИЗОБРАЖЕНИЯ В БУФЕРЕ', clipboardBlocked: 'БУФЕР ЗАБЛОКИРОВАН', noBgYet: 'НЕТ ФОНА', storageFull: 'ХРАНИЛИЩЕ ПЕРЕПОЛНЕНО', highlightsCleared: 'ПОДСВЕТКА ОЧИЩЕНА', notAnImage: 'НЕ ИЗОБРАЖЕНИЕ' }
@@ -1727,7 +1744,7 @@
       hint: { pickMonth: '// Choisissez un mois et exportez.', pickYear: '// Choisissez une année et exportez.', marks1: '// Clic sur un jour : couleurs de surbrillance, ctrl+clic : répéter la dernière.', marks2: '// Clic droit : effacer, ctrl+clic droit : tout effacer.' },
       preview: 'APERÇU',
       panel: { themes: 'THÈMES' },
-      style: { title: '// STYLE', corners: '// COINS:', cornerSize: '// TAILLE COINS:', cells: '// CASES:', lines: '// TRAITS:', numPos: '// N° DU JOUR:', fontHead: '// POLICE: MOIS + ANNÉE', fontDays: '// POLICE: JOURS', fontNums: '// POLICE: CHIFFRES', weight: '// GRAISSE:', glow: '// HALO:', reset: 'RÉINIT.', applyAll: 'LES 4' },
+      style: { title: '// STYLE', corners: '// COINS:', cornerSize: '// TAILLE COINS:', cells: '// CASES:', lines: '// TRAITS:', numPos: '// N° DU JOUR:', fontHead: '// POLICE: MOIS + ANNÉE', fontDays: '// POLICE: JOURS', fontNums: '// POLICE: CHIFFRES', weight: '// GRAISSE:', glow: '// HALO:', reset: 'RÉINIT.', allHint: 'CTRL+CLIC : LES 4' },
       opt: { auto: 'AUTO', grid: 'GRILLE', boxes: 'BLOCS', bubbles: 'BULLES', none: 'AUCUN', thin: 'FINS', medium: 'MOYENS', thick: 'ÉPAIS', center: 'CENTRE', corner: 'COIN', mono: 'MONO', sans: 'SANS', cond: 'ÉTROITE', poster: 'AFFICHE', tektur: 'TEKTUR', unbounded: 'UNBOUNDED', glitch: 'GLITCH', pixel: 'PIXEL', light: 'LÉGER', regular: 'NORMAL', bold: 'GRAS', heavy: 'NOIR' },
       theme: { default: 'NEON', bubblegum: 'BUBBLEGUM', paper: 'PAPIER', moreToCome: '// BIENTÔT PLUS' },
       toast: { pngExported: 'PNG EXPORTÉ', exportFailed: 'ÉCHEC EXPORT', imgLoaded: 'IMG CHARGÉE', noImageClipboard: 'AUCUNE IMG DANS LE PRESSE-PAPIERS', clipboardBlocked: 'PRESSE-PAPIERS BLOQUÉ', noBgYet: 'PAS DE FOND', storageFull: 'STOCKAGE PLEIN', highlightsCleared: 'SURBRILLANCES EFFACÉES', notAnImage: 'PAS UNE IMAGE' }
@@ -1741,7 +1758,7 @@
       hint: { pickMonth: '// Monat wählen und exportieren.', pickYear: '// Jahr wählen und exportieren.', marks1: '// Klick auf einen Tag wechselt die Markierungsfarbe, Strg+Klick wiederholt die letzte.', marks2: '// Rechtsklick löscht, Strg+Rechtsklick löscht alles.' },
       preview: 'VORSCHAU',
       panel: { themes: 'THEMES' },
-      style: { title: '// STIL', corners: '// ECKEN:', cornerSize: '// ECKENGRÖSSE:', cells: '// ZELLEN:', lines: '// LINIEN:', numPos: '// TAGESZAHL:', fontHead: '// SCHRIFT: MONAT + JAHR', fontDays: '// SCHRIFT: WOCHENTAGE', fontNums: '// SCHRIFT: ZAHLEN', weight: '// STÄRKE:', glow: '// LEUCHTEN:', reset: 'RESET', applyAll: 'ALLE 4' },
+      style: { title: '// STIL', corners: '// ECKEN:', cornerSize: '// ECKENGRÖSSE:', cells: '// ZELLEN:', lines: '// LINIEN:', numPos: '// TAGESZAHL:', fontHead: '// SCHRIFT: MONAT + JAHR', fontDays: '// SCHRIFT: WOCHENTAGE', fontNums: '// SCHRIFT: ZAHLEN', weight: '// STÄRKE:', glow: '// LEUCHTEN:', reset: 'RESET', allHint: 'STRG+KLICK: ALLE 4' },
       opt: { auto: 'AUTO', grid: 'RASTER', boxes: 'BLÖCKE', bubbles: 'BLASEN', none: 'KEINE', thin: 'DÜNN', medium: 'MITTEL', thick: 'DICK', center: 'MITTE', corner: 'ECKE', mono: 'MONO', sans: 'SANS', cond: 'SCHMAL', poster: 'PLAKAT', tektur: 'TEKTUR', unbounded: 'UNBOUNDED', glitch: 'GLITCH', pixel: 'PIXEL', light: 'LEICHT', regular: 'NORMAL', bold: 'FETT', heavy: 'SCHWARZ' },
       theme: { default: 'NEON', bubblegum: 'BUBBLEGUM', paper: 'PAPIER', moreToCome: '// BALD MEHR' },
       toast: { pngExported: 'PNG EXPORTIERT', exportFailed: 'EXPORT FEHLGESCHL.', imgLoaded: 'BILD GELADEN', noImageClipboard: 'KEIN BILD IN ZWISCHENABLAGE', clipboardBlocked: 'ZWISCHENABLAGE BLOCKIERT', noBgYet: 'KEIN HINTERGRUND', storageFull: 'SPEICHER VOLL', highlightsCleared: 'MARKIERUNGEN GELÖSCHT', notAnImage: 'KEIN BILD' }
@@ -1755,7 +1772,7 @@
       hint: { pickMonth: '// Elige un mes y exporta.', pickYear: '// Elige un año y exporta.', marks1: '// Clic en un día cambia el color, ctrl+clic repite el último color.', marks2: '// Clic derecho borra, ctrl+clic derecho borra todo.' },
       preview: 'VISTA PREVIA',
       panel: { themes: 'TEMAS' },
-      style: { title: '// ESTILO', corners: '// ESQUINAS:', cornerSize: '// TAMAÑO ESQUINAS:', cells: '// CELDAS:', lines: '// LÍNEAS:', numPos: '// N.º DEL DÍA:', fontHead: '// FUENTE: MES + AÑO', fontDays: '// FUENTE: DÍAS', fontNums: '// FUENTE: NÚMEROS', weight: '// GROSOR:', glow: '// BRILLO:', reset: 'RESTABL.', applyAll: 'LAS 4' },
+      style: { title: '// ESTILO', corners: '// ESQUINAS:', cornerSize: '// TAMAÑO ESQUINAS:', cells: '// CELDAS:', lines: '// LÍNEAS:', numPos: '// N.º DEL DÍA:', fontHead: '// FUENTE: MES + AÑO', fontDays: '// FUENTE: DÍAS', fontNums: '// FUENTE: NÚMEROS', weight: '// GROSOR:', glow: '// BRILLO:', reset: 'RESTABL.', allHint: 'CTRL+CLIC: LAS 4' },
       opt: { auto: 'AUTO', grid: 'REJILLA', boxes: 'BLOQUES', bubbles: 'BURBUJAS', none: 'NINGUNO', thin: 'FINAS', medium: 'MEDIAS', thick: 'GRUESAS', center: 'CENTRO', corner: 'ESQUINA', mono: 'MONO', sans: 'SANS', cond: 'ESTRECHA', poster: 'PÓSTER', tektur: 'TEKTUR', unbounded: 'UNBOUNDED', glitch: 'GLITCH', pixel: 'PÍXEL', light: 'LIGERA', regular: 'NORMAL', bold: 'NEGRITA', heavy: 'NEGRA' },
       theme: { default: 'NEON', bubblegum: 'BUBBLEGUM', paper: 'PAPEL', moreToCome: '// PRONTO MÁS' },
       toast: { pngExported: 'PNG EXPORTADO', exportFailed: 'EXPORT FALLÓ', imgLoaded: 'IMG CARGADA', noImageClipboard: 'SIN IMG EN PORTAPAPELES', clipboardBlocked: 'PORTAPAPELES BLOQUEADO', noBgYet: 'SIN FONDO', storageFull: 'ALMACÉN LLENO', highlightsCleared: 'RESALTADOS BORRADOS', notAnImage: 'NO ES IMAGEN' }
@@ -1769,7 +1786,7 @@
       hint: { pickMonth: '// Scegli un mese ed esporta.', pickYear: '// Scegli un anno ed esporta.', marks1: '// Clic su un giorno cambia colore, ctrl+clic ripete l\'ultimo colore.', marks2: '// Clic destro cancella, ctrl+clic destro cancella tutto.' },
       preview: 'ANTEPRIMA',
       panel: { themes: 'TEMI' },
-      style: { title: '// STILE', corners: '// ANGOLI:', cornerSize: '// DIM. ANGOLI:', cells: '// CELLE:', lines: '// LINEE:', numPos: '// N. GIORNO:', fontHead: '// FONT: MESE + ANNO', fontDays: '// FONT: GIORNI', fontNums: '// FONT: NUMERI', weight: '// PESO:', glow: '// BAGLIORE:', reset: 'RIPRISTINA', applyAll: 'TUTTI 4' },
+      style: { title: '// STILE', corners: '// ANGOLI:', cornerSize: '// DIM. ANGOLI:', cells: '// CELLE:', lines: '// LINEE:', numPos: '// N. GIORNO:', fontHead: '// FONT: MESE + ANNO', fontDays: '// FONT: GIORNI', fontNums: '// FONT: NUMERI', weight: '// PESO:', glow: '// BAGLIORE:', reset: 'RIPRISTINA', allHint: 'CTRL+CLIC: TUTTI 4' },
       opt: { auto: 'AUTO', grid: 'GRIGLIA', boxes: 'BLOCCHI', bubbles: 'BOLLE', none: 'NESSUNA', thin: 'SOTTILI', medium: 'MEDIE', thick: 'SPESSE', center: 'CENTRO', corner: 'ANGOLO', mono: 'MONO', sans: 'SANS', cond: 'STRETTO', poster: 'POSTER', tektur: 'TEKTUR', unbounded: 'UNBOUNDED', glitch: 'GLITCH', pixel: 'PIXEL', light: 'LEGGERO', regular: 'NORMALE', bold: 'GRASSO', heavy: 'NERO' },
       theme: { default: 'NEON', bubblegum: 'BUBBLEGUM', paper: 'CARTA', moreToCome: '// PRESTO ALTRI' },
       toast: { pngExported: 'PNG ESPORTATO', exportFailed: 'EXPORT FALLITO', imgLoaded: 'IMG CARICATA', noImageClipboard: 'NESSUNA IMG NEGLI APPUNTI', clipboardBlocked: 'APPUNTI BLOCCATI', noBgYet: 'NESSUNO SFONDO', storageFull: 'ARCHIVIO PIENO', highlightsCleared: 'EVIDENZIAZIONI RIMOSSE', notAnImage: 'NON È IMG' }
@@ -1783,7 +1800,7 @@
       hint: { pickMonth: '// 月を選んでエクスポート。', pickYear: '// 年を選んでエクスポート。', marks1: '// 日をクリックで色切替、ctrl+クリックで直前の色。', marks2: '// 右クリックで解除、ctrl+右クリックで全解除。' },
       preview: 'プレビュー',
       panel: { themes: 'テーマ' },
-      style: { title: '// スタイル', corners: '// 角:', cornerSize: '// 角のサイズ:', cells: '// セル:', lines: '// 線:', numPos: '// 日付の位置:', fontHead: '// フォント: 月+年', fontDays: '// フォント: 曜日', fontNums: '// フォント: 数字', weight: '// 太さ:', glow: '// 発光:', reset: 'リセット', applyAll: '全4角' },
+      style: { title: '// スタイル', corners: '// 角:', cornerSize: '// 角のサイズ:', cells: '// セル:', lines: '// 線:', numPos: '// 日付の位置:', fontHead: '// フォント: 月+年', fontDays: '// フォント: 曜日', fontNums: '// フォント: 数字', weight: '// 太さ:', glow: '// 発光:', reset: 'リセット', allHint: 'CTRL+クリック: 全4角' },
       opt: { auto: '自動', grid: '格子', boxes: 'ブロック', bubbles: 'バブル', none: 'なし', thin: '細い', medium: '中', thick: '太い', center: '中央', corner: '隅', mono: '等幅', sans: 'ゴシック', cond: '長体', poster: 'ポスター', tektur: 'TEKTUR', unbounded: 'UNBOUNDED', glitch: 'グリッチ', pixel: 'ピクセル', light: 'ライト', regular: '標準', bold: '太字', heavy: '極太' },
       theme: { default: 'NEON', bubblegum: 'バブルガム', paper: 'ペーパー', moreToCome: '// 近日追加' },
       toast: { pngExported: 'PNG出力完了', exportFailed: 'エクスポート失敗', imgLoaded: '画像読込完了', noImageClipboard: 'クリップボードに画像なし', clipboardBlocked: 'クリップボードブロック', noBgYet: '背景未設定', storageFull: 'ストレージ満杯', highlightsCleared: 'ハイライト消去', notAnImage: '画像ではない' }
@@ -1797,7 +1814,7 @@
       hint: { pickMonth: '// 选择月份并导出。', pickYear: '// 选择年份并导出。', marks1: '// 点击日期切换高亮颜色，ctrl+点击重复上次颜色。', marks2: '// 右键清除，ctrl+右键全部清除。' },
       preview: '预览',
       panel: { themes: '主题' },
-      style: { title: '// 样式', corners: '// 边角:', cornerSize: '// 边角大小:', cells: '// 单元格:', lines: '// 线条:', numPos: '// 日期位置:', fontHead: '// 字体: 月份+年份', fontDays: '// 字体: 星期', fontNums: '// 字体: 数字', weight: '// 字重:', glow: '// 发光:', reset: '重置', applyAll: '全部4角' },
+      style: { title: '// 样式', corners: '// 边角:', cornerSize: '// 边角大小:', cells: '// 单元格:', lines: '// 线条:', numPos: '// 日期位置:', fontHead: '// 字体: 月份+年份', fontDays: '// 字体: 星期', fontNums: '// 字体: 数字', weight: '// 字重:', glow: '// 发光:', reset: '重置', allHint: 'CTRL+点击: 全部4角' },
       opt: { auto: '自动', grid: '网格', boxes: '方块', bubbles: '气泡', none: '无', thin: '细', medium: '中', thick: '粗', center: '居中', corner: '角落', mono: '等宽', sans: '无衬线', cond: '窄体', poster: '海报', tektur: 'TEKTUR', unbounded: 'UNBOUNDED', glitch: '故障', pixel: '像素', light: '细体', regular: '常规', bold: '粗体', heavy: '特粗' },
       theme: { default: 'NEON', bubblegum: '泡泡糖', paper: '纸张', moreToCome: '// 敬请期待' },
       toast: { pngExported: 'PNG导出完成', exportFailed: '导出失败', imgLoaded: '图片已加载', noImageClipboard: '剪贴板无图片', clipboardBlocked: '剪贴板被屏蔽', noBgYet: '无背景', storageFull: '存储已满', highlightsCleared: '高亮已清除', notAnImage: '不是图片' }
@@ -1968,12 +1985,12 @@
     return out;
   }
   const shapeAttr = (sh) => CORNERS.filter(c => sh[c] !== 'none').map(c => c + '-' + sh[c]).concat('border').join(' ');
-  let cornerPreview = null; // { c, shape } while hovering a dropdown icon
+  let cornerPreview = null; // { c, shape, all } while hovering a dropdown icon (all = Ctrl held)
   const customCorners = () => store.style.corners === 'custom';
   const baseCornerShapes = (id) => customCorners() ? store.style.cornerShapes : themeCornerShapes(id);
   function applyCorners(id) {
     const sh = Object.assign({}, baseCornerShapes(id));
-    if (cornerPreview) sh[cornerPreview.c] = cornerPreview.shape;
+    if (cornerPreview) (cornerPreview.all ? CORNERS : [cornerPreview.c]).forEach(c => { sh[c] = cornerPreview.shape; });
     CORNERS.forEach(c => capture.style.removeProperty('--aug-' + c));
     capture.toggleAttribute('data-corners', customCorners());
     capture.setAttribute('data-augmented-ui', (customCorners() || cornerPreview) ? shapeAttr(sh) : ((THEMES[id] && THEMES[id].shape) || CAPTURE_SHAPE));
@@ -1987,7 +2004,7 @@
     const sh = baseCornerShapes(id);
     cornerPicker.querySelectorAll('.cp-frame').forEach(f => f.setAttribute('data-augmented-ui', shapeAttr(sh)));
     cornerPicker.classList.toggle('is-auto', !customCorners());
-    $('cornersAuto').classList.toggle('active', !customCorners());
+    $('cornersReset').disabled = !customCorners();
     if (editCorner) cpGrid.querySelectorAll('.cp-opt').forEach(b => b.classList.toggle('active', b.dataset.shape === sh[editCorner]));
   }
   function openCornerMenu(c) {
@@ -2009,7 +2026,7 @@
   }
   function closeCornerMenu() {
     if (!editCorner) return;
-    editCorner = null;
+    editCorner = null; cpHover = null;
     delete cornerPicker.dataset.editing;
     cpMenu.hidden = true;
     if (cornerPreview) { cornerPreview = null; refreshTheme(); }
@@ -2024,28 +2041,37 @@
   cornerPicker.querySelectorAll('.cp-zone').forEach(z => z.addEventListener('click', () => {
     editCorner === z.dataset.c ? closeCornerMenu() : openCornerMenu(z.dataset.c);
   }));
+  // click = this corner; Ctrl/Cmd+click = all 4 corners
   cpGrid.addEventListener('click', (e) => {
     const b = e.target.closest('.cp-opt');
-    if (b && editCorner) setCorners({ [editCorner]: b.dataset.shape });
+    if (!b || !editCorner) return;
+    const sh = b.dataset.shape;
+    setCorners((e.ctrlKey || e.metaKey) ? { tl: sh, tr: sh, br: sh, bl: sh } : { [editCorner]: sh });
   });
-  // hover an icon → live-preview it on the calendar
+  // hover an icon → live-preview it on the calendar (on all 4 while Ctrl is held)
+  let cpHover = null;
+  function previewCorner(all) {
+    if (!cpHover || !editCorner) return;
+    const shape = cpHover.dataset.shape;
+    if (cornerPreview && cornerPreview.shape === shape && cornerPreview.all === all) return;
+    cornerPreview = { c: editCorner, shape, all }; applyCorners(curThemeId());
+  }
   cpGrid.addEventListener('mouseover', (e) => {
     const b = e.target.closest('.cp-opt');
-    if (!b || !editCorner || (cornerPreview && cornerPreview.shape === b.dataset.shape)) return;
-    cornerPreview = { c: editCorner, shape: b.dataset.shape }; applyCorners(curThemeId());
+    if (!b) return;
+    cpHover = b; previewCorner(e.ctrlKey || e.metaKey);
   });
-  cpGrid.addEventListener('mouseleave', () => { if (cornerPreview) { cornerPreview = null; applyCorners(curThemeId()); } });
-  // ALL 4: copy the edited corner's shape to every corner
-  $('cpAll').addEventListener('click', () => {
-    const sh = baseCornerShapes(curThemeId())[editCorner];
-    setCorners({ tl: sh, tr: sh, br: sh, bl: sh });
-  });
-  $('cornersAuto').addEventListener('click', () => { store.style.corners = 'auto'; closeCornerMenu(); applyStyle(); save(); });
+  cpGrid.addEventListener('mouseleave', () => { cpHover = null; if (cornerPreview) { cornerPreview = null; applyCorners(curThemeId()); } });
+  ['keydown', 'keyup'].forEach(t => document.addEventListener(t, (e) => {
+    if (e.key === 'Control' || e.key === 'Meta') previewCorner(e.type === 'keydown');
+  }));
+  $('cornersReset').addEventListener('click', () => { store.style.corners = 'auto'; closeCornerMenu(); applyStyle(); save(); });
   document.addEventListener('click', (e) => { if (editCorner && !cpWrap.contains(e.target)) closeCornerMenu(); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeCornerMenu(); });
   // Everything else is data-* attributes on #capture, styled in CSS.
   const stylePanel = $('stylePanel'), glowToggle = $('glowToggle');
   const FONT_ROLES = ['fontHead', 'fontDays', 'fontNums'];
+  const PICK_KEYS = FONT_ROLES.concat('weight'); // dropdown + AUTO button settings
   function applyStyle() {
     const st = store.style;
     ['cells', 'lines', 'weight'].forEach(k => {
@@ -2055,9 +2081,11 @@
     FONT_ROLES.forEach(k => {
       const attr = 'data-font-' + k.slice(4).toLowerCase();
       if (st[k] === 'auto') capture.removeAttribute(attr); else capture.setAttribute(attr, st[k]);
-      const sel = stylePanel.querySelector('select[data-font-role="' + k + '"]');
+    });
+    PICK_KEYS.forEach(k => {
+      const sel = stylePanel.querySelector('select[data-pick="' + k + '"]');
       sel.value = st[k]; sel.dataset.val = st[k];
-      stylePanel.querySelector('[data-font-auto="' + k + '"]').classList.toggle('active', st[k] === 'auto');
+      stylePanel.querySelector('[data-pick-auto="' + k + '"]').classList.toggle('active', st[k] === 'auto');
     });
     applyFontSizes();
     capture.dataset.num = st.numPos;
@@ -2120,10 +2148,10 @@
     inp.addEventListener('change', save);
     inp.addEventListener('dblclick', () => { live(100); save(); });
   });
-  // Font dropdowns + their AUTO buttons
-  FONT_ROLES.forEach(k => {
-    stylePanel.querySelector('select[data-font-role="' + k + '"]').addEventListener('change', (e) => { store.style[k] = e.target.value; applyStyle(); save(); });
-    stylePanel.querySelector('[data-font-auto="' + k + '"]').addEventListener('click', () => { store.style[k] = 'auto'; applyStyle(); save(); });
+  // Font / weight dropdowns + their AUTO buttons
+  PICK_KEYS.forEach(k => {
+    stylePanel.querySelector('select[data-pick="' + k + '"]').addEventListener('change', (e) => { store.style[k] = e.target.value; applyStyle(); save(); });
+    stylePanel.querySelector('[data-pick-auto="' + k + '"]').addEventListener('click', () => { store.style[k] = 'auto'; applyStyle(); save(); });
   });
   glowToggle.addEventListener('click', () => { store.style.glow = !store.style.glow; applyStyle(); save(); });
   $('styleReset').addEventListener('click', () => {
@@ -2864,7 +2892,7 @@
     // Version lives in 3 spots: this const, the #tagVersion span above, and
     // the line-1 `<!-- CHRONOS v… -->` comment. Bump them all in sync with:
     //   python3 bump_version.py {x|y|z}
-    const VER = ' // v1.3.1';
+    const VER = ' // v1.3.2';
     const CHARS = '!@#$%&*<>{}[]/|01ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     let commitCount = '';
 
