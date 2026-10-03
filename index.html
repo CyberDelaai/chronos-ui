@@ -1,4 +1,4 @@
-<!-- CHRONOS v1.3.3 -->
+<!-- CHRONOS v1.3.4 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -209,11 +209,24 @@
     padding: 28px 18px 64px 50px;
     background-image: repeating-linear-gradient(0deg, rgba(var(--main-rgb),0.03) 0 1px, transparent 1px 3px);
   }
-  /* widened by the right STYLE column (260px + gap) so the calendar keeps its width */
-  .app { max-width: 1860px; margin: 0 auto; }
+  /* widened by the right STYLE column (292px + gap) so the calendar keeps its width */
+  .app { max-width: 1924px; margin: 0 auto; }
   /* Controls sidebar on the left, calendar in the middle, STYLE column on the right */
   .layout { display: flex; gap: 28px; align-items: stretch; flex-wrap: wrap; }
-  .sidebar { display: flex; flex-direction: column; gap: 10px; width: 320px; flex-shrink: 0; }
+  /* framed config panels (EIDOLON .config look): clipped augmented-ui border
+     on the panel bg; widths = old content width (320 / 260px) + 2×16px padding */
+  .sidebar {
+    display: flex; flex-direction: column; gap: 10px; width: 352px; flex-shrink: 0;
+    padding: 16px 16px 22px; align-self: flex-start;
+    background: var(--panel);
+    --aug-border-all: 1px; --aug-border-bg: rgba(var(--main-rgb),0.35);
+    --aug-tl: 12px; --aug-br: 12px;
+  }
+  .sidebar h2, .side-inner h2 {
+    font-size: 13px; letter-spacing: 2px; color: var(--dim);
+    text-transform: uppercase; font-weight: 700;
+  }
+  .side-inner h2 { margin-bottom: 12px; }
   /* min-content: never narrower than the calendar itself — on mid-width
      screens the STYLE column wraps below instead of being overlapped */
   .calendar-area { flex: 1; min-width: min-content; }
@@ -364,22 +377,8 @@
   .btn.export-btn { height: 44px; font-size: 14px; letter-spacing: 3px; --aug-tl: 12px; --aug-br: 12px; }
 
   /* ---- Color palettes (pattern copied from commlink-ui) ---- */
-  .palette-row {
-    display: flex; align-items: center; gap: 10px;
-    padding: 12px 14px;
-    --aug-border-all: 1px; --aug-border-bg: rgba(var(--main-rgb),0.4);
-    --aug-tl: 10px; --aug-br: 10px;
-  }
-  /* MAIN / ACCENT run vertically (reading bottom→top) OUTSIDE the panel,
-     along its left edge — same idiom as the // PREVIEW label */
-  .palette-wrap { display: flex; align-items: stretch; gap: 8px; }
-  .palette-wrap > label.fld { writing-mode: sideways-lr; text-align: center; font-size: 14px; letter-spacing: 2px; }
-  /* CJK UI languages: vertical text flows top→bottom with upright glyphs
-     (no rotation) — proper CJK vertical typesetting */
-  .palette-wrap > label.fld:lang(ja), .palette-wrap > label.fld:lang(zh) {
-    writing-mode: vertical-rl; text-orientation: upright;
-  }
-  .palette-wrap > .palette-row { flex: 1; }
+  /* MAIN / ACCENT: "// LABEL:" above a two-row grid (EIDOLON look) */
+  .palette-wrap { display: flex; flex-direction: column; gap: 10px; }
   .color-grid { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; justify-content: center; }
   .swatch { width: 28px; height: 28px; border: 1px solid var(--dim); cursor: pointer; transition: transform .1s, border-color .1s; }
   .swatch:hover { transform: scale(1.1); }
@@ -406,6 +405,32 @@
   }
   .swatch-pick-btn .pick-icon { position: absolute; inset: 0; margin: auto; width: 18px; height: 18px; pointer-events: none; }
   .swatch-pick-btn input[type="color"] { position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer; border: none; }
+  /* two-row variant (ported from eidolon-ui): 9 equal columns stretched
+     across the panel — neon row = 7 presets + the custom group (span 2),
+     soft row = 8 tones + white, so both rows line up */
+  .color-grid.two-row { display: grid; grid-template-columns: repeat(9, 1fr); grid-auto-rows: 26px; gap: 6px; align-items: stretch; }
+  .two-row .swatch { width: 100%; height: 100%; min-width: 0; }
+  .two-row .custom-color-group {
+    grid-column: span 2; display: flex; align-items: stretch; gap: 3px;
+    box-sizing: border-box; width: auto; height: auto; padding: 3px;
+    margin: -3px 0; /* spill the padding into the row gap so its swatches stay full height */
+  }
+  .two-row .custom-color-group .swatch { flex: 1; width: auto; }
+  .two-row .swatch-pick-btn { flex: 1; min-width: 0; width: auto; height: 100%; }
+  .two-row .swatch-pick-btn:hover { background: color-mix(in srgb, var(--main) 18%, transparent); }
+  .two-row .swatch-pick-btn .pick-icon { width: 16px; height: 16px; }
+  .color-pair { display: flex; align-items: stretch; gap: 8px; }
+  .color-pair-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 10px; }
+  /* tall swap strip, starting level with the first grid (below its label) */
+  .fill-swap {
+    flex: 0 0 26px; width: 26px; margin-top: 27px; padding: 0; border: none; cursor: pointer;
+    background: var(--panel); color: var(--main);
+    font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 700;
+    --aug-border-all: 1px; --aug-border-bg: rgba(var(--main-rgb),0.4);
+    --aug-tl: 8px; --aug-br: 8px;
+    transition: background .15s;
+  }
+  .fill-swap:hover { background: rgba(var(--main-rgb),0.15); }
 
   /* ---- Month nav arrows (look ported from commlink-ui .side-switch labels) ---- */
   .nav-arrow {
@@ -420,8 +445,8 @@
   /* ---- Sliding toggle (ported from commlink-ui .side-switch / .fx) ---- */
   .fx-toggle { display: flex; align-items: center; gap: 8px; justify-content: space-between; }
   .fx-toggle[hidden] { display: none; } /* display:flex would otherwise override the hidden attribute */
-  /* accent hairline separating the FX/scanlines controls from the rows above */
-  .cfg-divider { height: 1px; margin: 2px 0; background: var(--accent); box-shadow: 0 0 6px rgba(var(--accent-rgb),0.6); }
+  /* faded main-color hairline between config sections (EIDOLON .divider) */
+  .cfg-divider { height: 1px; margin: 8px 0; background: linear-gradient(90deg, transparent, rgba(var(--main-rgb),0.55), transparent); }
   .fx-label { font-size: 12px; letter-spacing: 1.5px; color: var(--main); text-transform: uppercase; }
   .side-switch {
     position: relative; height: 32px; width: 96px; background: var(--panel);
@@ -683,26 +708,26 @@
   /* ---- Weekend tint color: picker button beside the slider + modal ---- */
   .wk-color-btn { flex-shrink: 0; background: var(--panel); padding: 0; }
   .wk-color-btn .pick-icon { width: 16px; height: 16px; }
+  /* reset (circle arrow) back to AUTO — weekend tint color + font pickers (EIDOLON .pos-reset look); dimmed while already AUTO */
+  .reset-btn {
+    width: 28px; height: 28px; flex-shrink: 0; padding: 5px; line-height: 0; cursor: pointer;
+    background: var(--panel); color: var(--magenta); border: 1px solid rgba(255,0,60,0.45);
+    transition: border-color .12s, box-shadow .12s, opacity .12s;
+  }
+  .reset-btn svg { width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: square; }
+  .reset-btn:hover { border-color: var(--magenta); box-shadow: 0 0 8px rgba(255,0,60,0.45); }
+  .reset-btn:disabled { opacity: .35; cursor: default; box-shadow: none; border-color: rgba(255,0,60,0.45); }
   /* no dim/blur: the calendar stays visible behind for a live preview; the
      dialog is anchored beside the picker button by JS (left/top) */
   #wkModal { background: none; backdrop-filter: none; display: block; }
   #wkModal[hidden] { display: none; }
   .wk-modal { position: fixed; width: 320px; max-width: none; padding: 20px; } /* 280px grid + padding */
   .wk-modal h2 { margin-bottom: 14px; }
-  /* AUTO fills the last row's 3 free swatch slots (3×28 + 2×8 = 100px);
-     4px of that is a gap past the custom group's frame, which hangs 4px out */
-  .wk-modal .opt { width: 96px; margin-left: 4px; }
-  /* framed like the custom slot beside it: tl/br notches, 36px tall frame
-     hanging 4px above + below so the row's footprint stays 28px */
-  #wkAuto {
-    height: 36px; margin-top: -4px; margin-bottom: -4px; border: none;
-    --aug-border-all: 1px; --aug-border-bg: rgba(var(--main-rgb),0.45);
-    --aug-tl: 8px; --aug-br: 8px;
-  }
-  #wkAuto:hover, #wkAuto.active { --aug-border-bg: var(--main); }
   /* exactly 8 swatches per row (8×28 + 7×8) → rows sit on one lattice */
   .wk-modal .color-grid { width: 280px; justify-content: flex-start; }
-  .wk-modal .crop-actions { margin-top: 16px; }
+  /* last row: custom group, then DONE pushed to the right edge — 36px framed,
+     hanging 4px above + below so the row's footprint stays 28px */
+  #wkDone { height: 36px; margin: -4px 0 -4px auto; padding: 0 14px; }
   .crop-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 18px; }
   .crop-actions #cropMax { margin-right: auto; }
   /* Fixed license stamp pinned to the bottom of the viewport (sits behind
@@ -938,9 +963,8 @@
     --font-glitch: 'Rubik Glitch', var(--font-poster);
     --font-pixel: 'Press Start 2P', var(--font-mono);
   }
-  .sidebar-right { width: 260px; }
+  .sidebar-right { width: 292px; }
   .style-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-  .style-title { font-size: 14px; font-weight: 700; letter-spacing: 3px; color: var(--accent); text-transform: uppercase; }
   .style-head .btn { --btn-color: var(--magenta); height: 26px; padding: 0 10px; font-size: 11px; letter-spacing: 1.5px; --aug-tl: 6px; --aug-br: 6px; }
   .opt-field { display: flex; flex-direction: column; gap: 6px; }
   .opt-field[hidden] { display: none; }
@@ -965,7 +989,6 @@
     font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
   }
   .font-row select:focus { outline: 2px solid var(--accent); outline-offset: 0; }
-  .font-row .opt { flex: 0 0 64px; }
   .font-row :is(select[data-val="sans"], option[value="sans"])     { font-family: var(--font-sans); }
   .font-row :is(select[data-val="cond"], option[value="cond"])     { font-family: var(--font-cond); }
   .font-row :is(select[data-val="poster"], option[value="poster"]) { font-family: var(--font-poster); font-weight: 400; }
@@ -1221,6 +1244,7 @@
     <span class="arrow" id="themesArrow">&gt;</span>
   </button>
   <div class="side-inner">
+    <h2 data-i18n="panel.themesTitle">// THEMES</h2>
     <div class="theme-list" id="themeList"></div>
     <div class="themes-coming" data-i18n="theme.moreToCome">// MORE TO COME</div>
   </div>
@@ -1238,36 +1262,27 @@
         <a class="app-menu-item" href="https://cyberdeck.tools/eidolon-ui/">&gt; EIDOLON_</a>
       </nav>
     </div>
-    <div class="tag"><span id="tagWord" class="glitchable">CALENDAR CONSTRUCTOR</span><span id="tagMeta" class="tag-meta"> // v<span id="tagVersion">1.3.3</span></span></div>
+    <div class="tag"><span id="tagWord" class="glitchable">CALENDAR CONSTRUCTOR</span><span id="tagMeta" class="tag-meta"> // v<span id="tagVersion">1.3.4</span></span></div>
     <select class="lang-select" id="uiLangSel" aria-label="interface language"><option value="en">EN</option><option value="ru">RU</option><option value="fr">FR</option><option value="de">DE</option><option value="es">ES</option><option value="it">IT</option><option value="ja">JP</option><option value="zh">CN</option></select>
   </header>
 
   <div class="layout">
-  <aside class="sidebar">
+  <aside class="sidebar" data-augmented-ui="tl-clip br-clip border">
+  <h2 data-i18n="panel.calendar">// CALENDAR</h2>
 
+  <!-- Main + Accent pickers share a tall swap strip on their right (EIDOLON .color-pair) -->
+  <div class="color-pair">
+  <div class="color-pair-main">
   <div class="palette-wrap">
-  <label class="fld" data-i18n="field.main">Main</label>
-  <div class="palette-row" data-augmented-ui="tl-clip br-clip border">
-    <div class="color-grid" id="mainPalette">
+  <span class="fx-label" data-i18n="field.main">// MAIN:</span>
+    <div class="color-grid two-row" id="mainPalette">
       <div class="swatch" data-color="#fcee0a" style="background:#fcee0a; color:#fcee0a"></div>
       <div class="swatch" data-color="#00f0ff" style="background:#00f0ff; color:#00f0ff"></div>
       <div class="swatch" data-color="#ff003c" style="background:#ff003c; color:#ff003c"></div>
       <div class="swatch" data-color="#39ff14" style="background:#39ff14; color:#39ff14"></div>
       <div class="swatch" data-color="#ff8800" style="background:#ff8800; color:#ff8800"></div>
       <div class="swatch" data-color="#c800ff" style="background:#c800ff; color:#c800ff"></div>
-      <div class="swatch" data-color="#00ff9d" style="background:#00ff9d; color:#00ff9d"></div>
       <div class="swatch" data-color="#ff10f0" style="background:#ff10f0; color:#ff10f0"></div>
-      <div class="swatch" data-color="#ff6b6b" style="background:#ff6b6b; color:#ff6b6b"></div>
-      <div class="swatch" data-color="#ff9f43" style="background:#ff9f43; color:#ff9f43"></div>
-      <div class="swatch" data-color="#feca57" style="background:#feca57; color:#feca57"></div>
-      <div class="swatch" data-color="#1dd1a1" style="background:#1dd1a1; color:#1dd1a1"></div>
-      <div class="swatch" data-color="#00d2d3" style="background:#00d2d3; color:#00d2d3"></div>
-      <div class="swatch" data-color="#54a0ff" style="background:#54a0ff; color:#54a0ff"></div>
-      <div class="swatch" data-color="#a29bfe" style="background:#a29bfe; color:#a29bfe"></div>
-      <div class="swatch" data-color="#cd84f1" style="background:#cd84f1; color:#cd84f1"></div>
-      <div class="swatch" data-color="#ff9ff3" style="background:#ff9ff3; color:#ff9ff3"></div>
-      <div class="swatch" data-color="#ee5a9b" style="background:#ee5a9b; color:#ee5a9b"></div>
-      <div class="swatch" data-color="#ffffff" style="background:#ffffff; color:#ffffff"></div>
       <div class="custom-color-group" data-augmented-ui="tl-clip br-clip border">
         <div class="swatch swatch-saved" data-saved-main data-augmented-ui="tl-clip border" hidden></div>
         <label class="swatch-pick-btn" title="Pick any color" data-augmented-ui="br-clip border">
@@ -1275,22 +1290,6 @@
           <svg class="pick-icon" viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M480-80q-82 0-155-31.5t-127.5-86Q143-252 111.5-325T80-480q0-83 32.5-156t88-127Q256-817 330-848.5T488-880q80 0 151 27.5t124.5 76q53.5 48.5 85 115T880-518q0 115-70 176.5T640-280h-74q-9 0-12.5 5t-3.5 11q0 12 15 34.5t15 51.5q0 50-27.5 74T480-80Zm0-400Zm-177 23q17-17 17-43t-17-43q-17-17-43-17t-43 17q-17 17-17 43t17 43q17 17 43 17t43-17Zm120-160q17-17 17-43t-17-43q-17-17-43-17t-43 17q-17 17-17 43t17 43q17 17 43 17t43-17Zm200 0q17-17 17-43t-17-43q-17-17-43-17t-43 17q-17 17-17 43t17 43q17 17 43 17t43-17Zm120 160q17-17 17-43t-17-43q-17-17-43-17t-43 17q-17 17-17 43t17 43q17 17 43 17t43-17ZM480-160q9 0 14.5-5t5.5-13q0-14-15-33t-15-57q0-42 29-67t71-25h70q66 0 113-38.5T800-518q0-121-92.5-201.5T488-800q-136 0-232 93t-96 227q0 133 93.5 226.5T480-160Z"/></svg>
         </label>
       </div>
-    </div>
-  </div>
-  </div>
-
-  <div class="palette-wrap">
-  <label class="fld" data-i18n="field.accent">Accent</label>
-  <div class="palette-row" data-augmented-ui="tl-clip br-clip border">
-    <div class="color-grid" id="accentPalette">
-      <div class="swatch" data-color="#fcee0a" style="background:#fcee0a; color:#fcee0a"></div>
-      <div class="swatch" data-color="#00f0ff" style="background:#00f0ff; color:#00f0ff"></div>
-      <div class="swatch" data-color="#ff003c" style="background:#ff003c; color:#ff003c"></div>
-      <div class="swatch" data-color="#39ff14" style="background:#39ff14; color:#39ff14"></div>
-      <div class="swatch" data-color="#ff8800" style="background:#ff8800; color:#ff8800"></div>
-      <div class="swatch" data-color="#c800ff" style="background:#c800ff; color:#c800ff"></div>
-      <div class="swatch" data-color="#00ff9d" style="background:#00ff9d; color:#00ff9d"></div>
-      <div class="swatch" data-color="#ff10f0" style="background:#ff10f0; color:#ff10f0"></div>
       <div class="swatch" data-color="#ff6b6b" style="background:#ff6b6b; color:#ff6b6b"></div>
       <div class="swatch" data-color="#ff9f43" style="background:#ff9f43; color:#ff9f43"></div>
       <div class="swatch" data-color="#feca57" style="background:#feca57; color:#feca57"></div>
@@ -1299,9 +1298,20 @@
       <div class="swatch" data-color="#54a0ff" style="background:#54a0ff; color:#54a0ff"></div>
       <div class="swatch" data-color="#a29bfe" style="background:#a29bfe; color:#a29bfe"></div>
       <div class="swatch" data-color="#cd84f1" style="background:#cd84f1; color:#cd84f1"></div>
-      <div class="swatch" data-color="#ff9ff3" style="background:#ff9ff3; color:#ff9ff3"></div>
-      <div class="swatch" data-color="#ee5a9b" style="background:#ee5a9b; color:#ee5a9b"></div>
       <div class="swatch" data-color="#ffffff" style="background:#ffffff; color:#ffffff"></div>
+    </div>
+  </div>
+
+  <div class="palette-wrap">
+  <span class="fx-label" data-i18n="field.accent">// ACCENT:</span>
+    <div class="color-grid two-row" id="accentPalette">
+      <div class="swatch" data-color="#fcee0a" style="background:#fcee0a; color:#fcee0a"></div>
+      <div class="swatch" data-color="#00f0ff" style="background:#00f0ff; color:#00f0ff"></div>
+      <div class="swatch" data-color="#ff003c" style="background:#ff003c; color:#ff003c"></div>
+      <div class="swatch" data-color="#39ff14" style="background:#39ff14; color:#39ff14"></div>
+      <div class="swatch" data-color="#ff8800" style="background:#ff8800; color:#ff8800"></div>
+      <div class="swatch" data-color="#c800ff" style="background:#c800ff; color:#c800ff"></div>
+      <div class="swatch" data-color="#ff10f0" style="background:#ff10f0; color:#ff10f0"></div>
       <div class="custom-color-group" data-augmented-ui="tl-clip br-clip border">
         <div class="swatch swatch-saved" data-saved-accent data-augmented-ui="tl-clip border" hidden></div>
         <label class="swatch-pick-btn" title="Pick any color" data-augmented-ui="br-clip border">
@@ -1309,8 +1319,19 @@
           <svg class="pick-icon" viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M480-80q-82 0-155-31.5t-127.5-86Q143-252 111.5-325T80-480q0-83 32.5-156t88-127Q256-817 330-848.5T488-880q80 0 151 27.5t124.5 76q53.5 48.5 85 115T880-518q0 115-70 176.5T640-280h-74q-9 0-12.5 5t-3.5 11q0 12 15 34.5t15 51.5q0 50-27.5 74T480-80Zm0-400Zm-177 23q17-17 17-43t-17-43q-17-17-43-17t-43 17q-17 17-17 43t17 43q17 17 43 17t43-17Zm120-160q17-17 17-43t-17-43q-17-17-43-17t-43 17q-17 17-17 43t17 43q17 17 43 17t43-17Zm200 0q17-17 17-43t-17-43q-17-17-43-17t-43 17q-17 17-17 43t17 43q17 17 43 17t43-17Zm120 160q17-17 17-43t-17-43q-17-17-43-17t-43 17q-17 17-17 43t17 43q17 17 43 17t43-17ZM480-160q9 0 14.5-5t5.5-13q0-14-15-33t-15-57q0-42 29-67t71-25h70q66 0 113-38.5T800-518q0-121-92.5-201.5T488-800q-136 0-232 93t-96 227q0 133 93.5 226.5T480-160Z"/></svg>
         </label>
       </div>
+      <div class="swatch" data-color="#ff6b6b" style="background:#ff6b6b; color:#ff6b6b"></div>
+      <div class="swatch" data-color="#ff9f43" style="background:#ff9f43; color:#ff9f43"></div>
+      <div class="swatch" data-color="#feca57" style="background:#feca57; color:#feca57"></div>
+      <div class="swatch" data-color="#1dd1a1" style="background:#1dd1a1; color:#1dd1a1"></div>
+      <div class="swatch" data-color="#00d2d3" style="background:#00d2d3; color:#00d2d3"></div>
+      <div class="swatch" data-color="#54a0ff" style="background:#54a0ff; color:#54a0ff"></div>
+      <div class="swatch" data-color="#a29bfe" style="background:#a29bfe; color:#a29bfe"></div>
+      <div class="swatch" data-color="#cd84f1" style="background:#cd84f1; color:#cd84f1"></div>
+      <div class="swatch" data-color="#ffffff" style="background:#ffffff; color:#ffffff"></div>
     </div>
   </div>
+  </div>
+  <button class="fill-swap" id="swapColors" type="button" data-augmented-ui="tl-clip br-clip border" data-i18n-title="field.swap" title="swap main / accent">⇅</button>
   </div>
 
   <div class="fx-toggle">
@@ -1377,6 +1398,7 @@
       <button class="swatch-pick-btn wk-color-btn" id="wkColorBtn" type="button" title="Weekend tint color" aria-label="weekend tint color" data-augmented-ui="br-clip border">
         <svg class="pick-icon" viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M480-80q-82 0-155-31.5t-127.5-86Q143-252 111.5-325T80-480q0-83 32.5-156t88-127Q256-817 330-848.5T488-880q80 0 151 27.5t124.5 76q53.5 48.5 85 115T880-518q0 115-70 176.5T640-280h-74q-9 0-12.5 5t-3.5 11q0 12 15 34.5t15 51.5q0 50-27.5 74T480-80Zm0-400Zm-177 23q17-17 17-43t-17-43q-17-17-43-17t-43 17q-17 17-17 43t17 43q17 17 43 17t43-17Zm120-160q17-17 17-43t-17-43q-17-17-43-17t-43 17q-17 17-17 43t17 43q17 17 43 17t43-17Zm200 0q17-17 17-43t-17-43q-17-17-43-17t-43 17q-17 17-17 43t17 43q17 17 43 17t43-17Zm120 160q17-17 17-43t-17-43q-17-17-43-17t-43 17q-17 17-17 43t17 43q17 17 43 17t43-17ZM480-160q9 0 14.5-5t5.5-13q0-14-15-33t-15-57q0-42 29-67t71-25h70q66 0 113-38.5T800-518q0-121-92.5-201.5T488-800q-136 0-232 93t-96 227q0 133 93.5 226.5T480-160Z"/></svg>
       </button>
+      <button class="reset-btn" id="wkReset" type="button" data-i18n-title="field.wkReset" title="reset tint color to auto" aria-label="reset weekend tint color"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.4-5.7M4 4v5h5" /></svg></button>
     </div>
   </div>
 
@@ -1456,9 +1478,9 @@
 
   <!-- STYLE column: manual look overrides. Chips are built by JS from
        STYLE_OPTS into each [data-opt] grid (--cols = chips per row). -->
-  <aside class="sidebar sidebar-right" id="stylePanel">
+  <aside class="sidebar sidebar-right" id="stylePanel" data-augmented-ui="tl-clip br-clip border">
     <div class="style-head">
-      <span class="style-title" data-i18n="style.title">// STYLE</span>
+      <h2 data-i18n="style.title">// STYLE</h2>
       <button class="btn" data-augmented-ui="tl-clip br-clip border" id="styleReset" type="button" data-i18n="style.reset">RESET</button>
     </div>
     <div class="opt-field">
@@ -1511,7 +1533,7 @@
       <span class="fx-label" data-i18n="style.fontHead">// FONT: MONTH + YEAR</span>
       <div class="font-row">
         <select data-pick="fontHead" aria-label="month and year font"><option value="auto" hidden>—</option><option value="mono" data-i18n="opt.mono">MONO</option><option value="sans" data-i18n="opt.sans">SANS</option><option value="cond" data-i18n="opt.cond">COND</option><option value="poster" data-i18n="opt.poster">POSTER</option><option value="tektur" data-i18n="opt.tektur">TEKTUR</option><option value="unbounded" data-i18n="opt.unbounded">UNBOUNDED</option><option value="glitch" data-i18n="opt.glitch">GLITCH</option><option value="pixel" data-i18n="opt.pixel">PIXEL</option></select>
-        <button class="opt" type="button" data-pick-auto="fontHead" data-val="auto" data-i18n="opt.auto">AUTO</button>
+        <button class="reset-btn" type="button" data-pick-auto="fontHead" data-i18n-title="style.resetAuto" title="reset to auto" aria-label="reset to auto"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.4-5.7M4 4v5h5" /></svg></button>
       </div>
       <div class="brightness-row">
         <input type="range" data-font-size="sizeHead" step="5" aria-label="month and year size" title="double-click: 100%" />
@@ -1522,7 +1544,7 @@
       <span class="fx-label" data-i18n="style.fontDays">// FONT: WEEKDAYS</span>
       <div class="font-row">
         <select data-pick="fontDays" aria-label="weekday font"><option value="auto" hidden>—</option><option value="mono" data-i18n="opt.mono">MONO</option><option value="sans" data-i18n="opt.sans">SANS</option><option value="cond" data-i18n="opt.cond">COND</option><option value="poster" data-i18n="opt.poster">POSTER</option><option value="tektur" data-i18n="opt.tektur">TEKTUR</option><option value="unbounded" data-i18n="opt.unbounded">UNBOUNDED</option><option value="glitch" data-i18n="opt.glitch">GLITCH</option><option value="pixel" data-i18n="opt.pixel">PIXEL</option></select>
-        <button class="opt" type="button" data-pick-auto="fontDays" data-val="auto" data-i18n="opt.auto">AUTO</button>
+        <button class="reset-btn" type="button" data-pick-auto="fontDays" data-i18n-title="style.resetAuto" title="reset to auto" aria-label="reset to auto"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.4-5.7M4 4v5h5" /></svg></button>
       </div>
       <div class="brightness-row">
         <input type="range" data-font-size="sizeDays" step="5" aria-label="weekday size" title="double-click: 100%" />
@@ -1533,7 +1555,7 @@
       <span class="fx-label" data-i18n="style.fontNums">// FONT: NUMBERS</span>
       <div class="font-row">
         <select data-pick="fontNums" aria-label="day number font"><option value="auto" hidden>—</option><option value="mono" data-i18n="opt.mono">MONO</option><option value="sans" data-i18n="opt.sans">SANS</option><option value="cond" data-i18n="opt.cond">COND</option><option value="poster" data-i18n="opt.poster">POSTER</option><option value="tektur" data-i18n="opt.tektur">TEKTUR</option><option value="unbounded" data-i18n="opt.unbounded">UNBOUNDED</option><option value="glitch" data-i18n="opt.glitch">GLITCH</option><option value="pixel" data-i18n="opt.pixel">PIXEL</option></select>
-        <button class="opt" type="button" data-pick-auto="fontNums" data-val="auto" data-i18n="opt.auto">AUTO</button>
+        <button class="reset-btn" type="button" data-pick-auto="fontNums" data-i18n-title="style.resetAuto" title="reset to auto" aria-label="reset to auto"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.4-5.7M4 4v5h5" /></svg></button>
       </div>
       <div class="brightness-row">
         <input type="range" data-font-size="sizeNums" step="5" aria-label="day number size" title="double-click: 100%" />
@@ -1544,7 +1566,7 @@
       <span class="fx-label" data-i18n="style.weight">// WEIGHT:</span>
       <div class="font-row">
         <select data-pick="weight" aria-label="font weight"><option value="auto" hidden>—</option><option value="light" data-i18n="opt.light">LIGHT</option><option value="regular" data-i18n="opt.regular">REGULAR</option><option value="bold" data-i18n="opt.bold">BOLD</option><option value="heavy" data-i18n="opt.heavy">BLACK</option></select>
-        <button class="opt" type="button" data-pick-auto="weight" data-val="auto" data-i18n="opt.auto">AUTO</button>
+        <button class="reset-btn" type="button" data-pick-auto="weight" data-i18n-title="style.resetAuto" title="reset to auto" aria-label="reset to auto"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.4-5.7M4 4v5h5" /></svg></button>
       </div>
     </div>
     <div class="fx-toggle">
@@ -1589,9 +1611,6 @@
           <svg class="pick-icon" viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M480-80q-82 0-155-31.5t-127.5-86Q143-252 111.5-325T80-480q0-83 32.5-156t88-127Q256-817 330-848.5T488-880q80 0 151 27.5t124.5 76q53.5 48.5 85 115T880-518q0 115-70 176.5T640-280h-74q-9 0-12.5 5t-3.5 11q0 12 15 34.5t15 51.5q0 50-27.5 74T480-80Zm0-400Zm-177 23q17-17 17-43t-17-43q-17-17-43-17t-43 17q-17 17-17 43t17 43q17 17 43 17t43-17Zm120-160q17-17 17-43t-17-43q-17-17-43-17t-43 17q-17 17-17 43t17 43q17 17 43 17t43-17Zm200 0q17-17 17-43t-17-43q-17-17-43-17t-43 17q-17 17-17 43t17 43q17 17 43 17t43-17Zm120 160q17-17 17-43t-17-43q-17-17-43-17t-43 17q-17 17-17 43t17 43q17 17 43 17t43-17ZM480-160q9 0 14.5-5t5.5-13q0-14-15-33t-15-57q0-42 29-67t71-25h70q66 0 113-38.5T800-518q0-121-92.5-201.5T488-800q-136 0-232 93t-96 227q0 133 93.5 226.5T480-160Z"/></svg>
         </label>
       </div>
-      <button class="opt" id="wkAuto" type="button" data-augmented-ui="tl-clip br-clip border" data-i18n="opt.auto">AUTO</button>
-    </div>
-    <div class="crop-actions">
       <button class="btn" data-augmented-ui="tl-clip br-clip border" id="wkDone" type="button" data-i18n="btn.done">DONE</button>
     </div>
   </div>
@@ -1630,6 +1649,7 @@
   const DEFAULT_ACCENT = '#fcee0a';
   const DEFAULT_CUSTOM_MAIN = '#1fd1a0';   // pre-loaded into the Main custom slot
   const DEFAULT_CUSTOM_ACCENT = '#ff7b00'; // pre-loaded into the Accent custom slot
+  const DEFAULT_CUSTOM_WK = '#7a5cff';     // pre-loaded into the weekend tint custom slot
   const LS_KEY = 'chronos.v1';
   // Export scale per size: S/M are 1× (PNG matches on-screen); L renders at 2×.
   // YEAR mode always uses L regardless of the (hidden) size toggle.
@@ -1706,7 +1726,14 @@
   // weekend tint color: 'auto' (theme's own main/accent) or a '#rrggbb' pick
   const isHex = (v) => typeof v === 'string' && /^#[0-9a-f]{6}$/i.test(v);
   if (!isHex(store.wkColor)) store.wkColor = 'auto';
-  if (!isHex(store.wkCustom)) store.wkCustom = ''; // saved custom slot
+  // saved custom slots are never empty: an unset / invalid one gets a
+  // pre-defined color, so the slot shows and the picker doesn't open on black
+  if (!isHex(store.wkCustom)) store.wkCustom = DEFAULT_CUSTOM_WK;
+  Object.keys(THEME_SEED).forEach(id => {
+    const c = store.themeColors[id];
+    if (!isHex(c.customMain)) c.customMain = THEME_SEED[id].customMain;
+    if (!isHex(c.customAccent)) c.customAccent = THEME_SEED[id].customAccent;
+  });
   if (['s','m','l'].indexOf(store.size) < 0) store.size = 'm'; // calendar size
   if (store.view !== 'year') store.view = 'month'; // 'month' | 'year' construction
   if (store.yearLayout !== '3x4') store.yearLayout = '4x3'; // year mini-month lattice
@@ -1775,112 +1802,112 @@
   const I18N = {
     en: {
       tag: { app: 'CALENDAR CONSTRUCTOR', glitch: 'BORROW YOUR TIME' },
-      field: { view: '// VIEW:', size: '// SIZE:', layout: '// LAYOUT:', firstDay: '// FIRST WEEKDAY:', hlSat: '// HIGHLIGHT SATURDAY:', hlSun: '// HIGHLIGHT SUNDAY:', wkTint: '// WEEKEND TINT:', wkColor: '// WEEKEND TINT COLOR', bg: '// BACKGROUND:', calLang: '// CALENDAR LANG:', main: 'Main', accent: 'Accent', scanlines: '// SCANLINES:', bright: 'BRIGHT' },
+      field: { view: '// VIEW:', size: '// SIZE:', layout: '// LAYOUT:', firstDay: '// FIRST WEEKDAY:', hlSat: '// HIGHLIGHT SATURDAY:', hlSun: '// HIGHLIGHT SUNDAY:', wkTint: '// WEEKEND TINT:', wkColor: '// WEEKEND TINT COLOR', wkReset: 'reset tint color to auto', bg: '// BACKGROUND:', calLang: '// CALENDAR LANG:', main: '// MAIN:', accent: '// ACCENT:', swap: 'swap main / accent colors', scanlines: '// SCANLINES:', bright: 'BRIGHT' },
       lab: { month: 'MONTH', year: 'YEAR', mon: 'MON', sun: 'SUN', no: 'NO', yes: 'YES' },
       btn: { upload: 'UPLOAD', paste: 'PASTE', recrop: 'RECROP', savePng: '⬇ SAVE PNG', done: 'DONE' },
       crop: { title: '// CROP BACKGROUND', use: 'USE', cancel: 'CANCEL' },
       hint: { pickMonth: '// Pick a month and export.', pickYear: '// Pick a year and export.', marks1: '// Click a day to cycle highlight colors, ctrl+click to repeat the last color.', marks2: '// Right-click to clear, ctrl+right-click to clear all.' },
       preview: 'PREVIEW',
-      panel: { themes: 'THEMES' },
-      style: { title: '// STYLE', corners: '// CORNERS:', cornerSize: '// CORNER SIZE:', cells: '// CELLS:', lines: '// LINES:', numPos: '// DAY NUMBER:', fontHead: '// FONT: MONTH + YEAR', fontDays: '// FONT: WEEKDAYS', fontNums: '// FONT: NUMBERS', weight: '// WEIGHT:', glow: '// GLOW:', reset: 'RESET', allHint: 'CTRL+CLICK: ALL 4' },
+      panel: { themes: 'THEMES', themesTitle: '// THEMES', calendar: '// CALENDAR' },
+      style: { title: '// STYLE', resetAuto: 'reset to auto', corners: '// CORNERS:', cornerSize: '// CORNER SIZE:', cells: '// CELLS:', lines: '// LINES:', numPos: '// DAY NUMBER:', fontHead: '// FONT: MONTH + YEAR', fontDays: '// FONT: WEEKDAYS', fontNums: '// FONT: NUMBERS', weight: '// WEIGHT:', glow: '// GLOW:', reset: 'RESET', allHint: 'CTRL+CLICK: ALL 4' },
       opt: { auto: 'AUTO', grid: 'GRID', boxes: 'BOXES', bubbles: 'BUBBLES', none: 'NONE', thin: 'THIN', medium: 'MEDIUM', thick: 'THICK', center: 'CENTER', corner: 'CORNER', mono: 'MONO', sans: 'SANS', cond: 'NARROW', poster: 'POSTER', tektur: 'TEKTUR', unbounded: 'UNBOUNDED', glitch: 'GLITCH', pixel: 'PIXEL', light: 'LIGHT', regular: 'REGULAR', bold: 'BOLD', heavy: 'BLACK' },
       theme: { default: 'NEON', bubblegum: 'BUBBLEGUM', paper: 'PAPER', moreToCome: '// MORE TO COME' },
       toast: { pngExported: 'PNG EXPORTED', exportFailed: 'EXPORT FAILED', imgLoaded: 'IMG LOADED', noImageClipboard: 'NO IMAGE IN CLIPBOARD', clipboardBlocked: 'CLIPBOARD BLOCKED', noBgYet: 'NO BG YET', storageFull: 'STORAGE FULL', highlightsCleared: 'HIGHLIGHTS CLEARED', notAnImage: 'NOT AN IMAGE' }
     },
     ru: {
       tag: { app: 'КОНСТРУКТОР КАЛЕНДАРЯ', glitch: 'ВРЕМЯ ВЗАЙМЫ' },
-      field: { view: '// ВИД:', size: '// РАЗМЕР:', layout: '// СЕТКА:', firstDay: '// ПЕРВЫЙ ДЕНЬ:', hlSat: '// ВЫДЕЛИТЬ СУББОТУ:', hlSun: '// ВЫДЕЛИТЬ ВОСКРЕСЕНЬЕ:', wkTint: '// ЗАЛИВКА ВЫХОДНЫХ:', wkColor: '// ЦВЕТ ЗАЛИВКИ ВЫХОДНЫХ', bg: '// ФОН:', calLang: '// ЯЗЫК КАЛЕНДАРЯ:', main: 'Основной', accent: 'Акцент', scanlines: '// ПОЛОСЫ:', bright: 'ЯРКОСТЬ' },
+      field: { view: '// ВИД:', size: '// РАЗМЕР:', layout: '// СЕТКА:', firstDay: '// ПЕРВЫЙ ДЕНЬ:', hlSat: '// ВЫДЕЛИТЬ СУББОТУ:', hlSun: '// ВЫДЕЛИТЬ ВОСКРЕСЕНЬЕ:', wkTint: '// ЗАЛИВКА ВЫХОДНЫХ:', wkColor: '// ЦВЕТ ЗАЛИВКИ ВЫХОДНЫХ', wkReset: 'сбросить цвет заливки на авто', bg: '// ФОН:', calLang: '// ЯЗЫК КАЛЕНДАРЯ:', main: '// ОСНОВНОЙ:', accent: '// АКЦЕНТ:', swap: 'поменять основной и акцентный цвета', scanlines: '// ПОЛОСЫ:', bright: 'ЯРКОСТЬ' },
       lab: { month: 'МЕСЯЦ', year: 'ГОД', mon: 'ПН', sun: 'ВС', no: 'НЕТ', yes: 'ДА' },
       btn: { upload: 'ЗАГРУЗ.', paste: 'ВСТАВ.', recrop: 'ОБРЕЗАТЬ', savePng: '⬇ СОХРАНИТЬ PNG', done: 'ГОТОВО' },
       crop: { title: '// ОБРЕЗКА ФОНА', use: 'ПРИМЕНИТЬ', cancel: 'ОТМЕНА' },
       hint: { pickMonth: '// Выберите месяц и экспортируйте.', pickYear: '// Выберите год и экспортируйте.', marks1: '// Клик по дню — смена цвета подсветки, ctrl+клик — повтор последнего цвета.', marks2: '// Правый клик — убрать, ctrl+правый клик — убрать всё.' },
       preview: 'ПРЕВЬЮ',
-      panel: { themes: 'ТЕМЫ' },
-      style: { title: '// СТИЛЬ', corners: '// УГЛЫ:', cornerSize: '// РАЗМЕР УГЛОВ:', cells: '// ЯЧЕЙКИ:', lines: '// ЛИНИИ:', numPos: '// ЧИСЛО ДНЯ:', fontHead: '// ШРИФТ: МЕСЯЦ + ГОД', fontDays: '// ШРИФТ: ДНИ НЕДЕЛИ', fontNums: '// ШРИФТ: ЧИСЛА', weight: '// НАСЫЩЕННОСТЬ:', glow: '// СВЕЧЕНИЕ:', reset: 'СБРОС', allHint: 'CTRL+КЛИК: ВСЕ 4' },
+      panel: { themes: 'ТЕМЫ', themesTitle: '// ТЕМЫ', calendar: '// КАЛЕНДАРЬ' },
+      style: { title: '// СТИЛЬ', resetAuto: 'сбросить на авто', corners: '// УГЛЫ:', cornerSize: '// РАЗМЕР УГЛОВ:', cells: '// ЯЧЕЙКИ:', lines: '// ЛИНИИ:', numPos: '// ЧИСЛО ДНЯ:', fontHead: '// ШРИФТ: МЕСЯЦ + ГОД', fontDays: '// ШРИФТ: ДНИ НЕДЕЛИ', fontNums: '// ШРИФТ: ЧИСЛА', weight: '// НАСЫЩЕННОСТЬ:', glow: '// СВЕЧЕНИЕ:', reset: 'СБРОС', allHint: 'CTRL+КЛИК: ВСЕ 4' },
       opt: { auto: 'АВТО', grid: 'СЕТКА', boxes: 'БЛОКИ', bubbles: 'ПУЗЫРИ', none: 'НЕТ', thin: 'ТОНКИЕ', medium: 'СРЕДНИЕ', thick: 'ТОЛСТЫЕ', center: 'ЦЕНТР', corner: 'УГОЛ', mono: 'МОНО', sans: 'ГРОТЕСК', cond: 'УЗКИЙ', poster: 'ПОСТЕР', tektur: 'TEKTUR', unbounded: 'UNBOUNDED', glitch: 'ГЛИТЧ', pixel: 'ПИКСЕЛЬ', light: 'ЛЁГКИЙ', regular: 'ОБЫЧНЫЙ', bold: 'ЖИРНЫЙ', heavy: 'ЧЁРНЫЙ' },
       theme: { default: 'NEON', bubblegum: 'БАББЛГАМ', paper: 'БУМАГА', moreToCome: '// СКОРО ЕЩЁ' },
       toast: { pngExported: 'PNG ЭКСПОРТИРОВАН', exportFailed: 'ОШИБКА ЭКСПОРТА', imgLoaded: 'ИЗО. ЗАГРУЖЕНО', noImageClipboard: 'НЕТ ИЗОБРАЖЕНИЯ В БУФЕРЕ', clipboardBlocked: 'БУФЕР ЗАБЛОКИРОВАН', noBgYet: 'НЕТ ФОНА', storageFull: 'ХРАНИЛИЩЕ ПЕРЕПОЛНЕНО', highlightsCleared: 'ПОДСВЕТКА ОЧИЩЕНА', notAnImage: 'НЕ ИЗОБРАЖЕНИЕ' }
     },
     fr: {
       tag: { app: 'CONSTRUCTEUR DE CALENDRIER', glitch: 'EMPRUNTE TON TEMPS' },
-      field: { view: '// VUE:', size: '// TAILLE:', layout: '// GRILLE:', firstDay: '// 1ER JOUR:', hlSat: '// SURLIGNER SAMEDI:', hlSun: '// SURLIGNER DIMANCHE:', wkTint: '// TEINTE WEEK-END:', wkColor: '// COULEUR TEINTE WEEK-END', bg: '// FOND:', calLang: '// LANGUE CALENDRIER:', main: 'Principal', accent: 'Accent', scanlines: '// SCANLINES:', bright: 'LUM.' },
+      field: { view: '// VUE:', size: '// TAILLE:', layout: '// GRILLE:', firstDay: '// 1ER JOUR:', hlSat: '// SURLIGNER SAMEDI:', hlSun: '// SURLIGNER DIMANCHE:', wkTint: '// TEINTE WEEK-END:', wkColor: '// COULEUR TEINTE WEEK-END', wkReset: 'réinitialiser la teinte en auto', bg: '// FOND:', calLang: '// LANGUE CALENDRIER:', main: '// PRINCIPAL:', accent: '// ACCENT:', swap: 'inverser principal / accent', scanlines: '// SCANLINES:', bright: 'LUM.' },
       lab: { month: 'MOIS', year: 'ANNÉE', mon: 'LUN', sun: 'DIM', no: 'NON', yes: 'OUI' },
       btn: { upload: 'IMPORTER', paste: 'COLLER', recrop: 'RECADRER', savePng: '⬇ ENREGISTRER PNG', done: 'OK' },
       crop: { title: '// RECADRER LE FOND', use: 'UTILISER', cancel: 'ANNULER' },
       hint: { pickMonth: '// Choisissez un mois et exportez.', pickYear: '// Choisissez une année et exportez.', marks1: '// Clic sur un jour : couleurs de surbrillance, ctrl+clic : répéter la dernière.', marks2: '// Clic droit : effacer, ctrl+clic droit : tout effacer.' },
       preview: 'APERÇU',
-      panel: { themes: 'THÈMES' },
-      style: { title: '// STYLE', corners: '// COINS:', cornerSize: '// TAILLE COINS:', cells: '// CASES:', lines: '// TRAITS:', numPos: '// N° DU JOUR:', fontHead: '// POLICE: MOIS + ANNÉE', fontDays: '// POLICE: JOURS', fontNums: '// POLICE: CHIFFRES', weight: '// GRAISSE:', glow: '// HALO:', reset: 'RÉINIT.', allHint: 'CTRL+CLIC : LES 4' },
+      panel: { themes: 'THÈMES', themesTitle: '// THÈMES', calendar: '// CALENDRIER' },
+      style: { title: '// STYLE', resetAuto: 'réinitialiser en auto', corners: '// COINS:', cornerSize: '// TAILLE COINS:', cells: '// CASES:', lines: '// TRAITS:', numPos: '// N° DU JOUR:', fontHead: '// POLICE: MOIS + ANNÉE', fontDays: '// POLICE: JOURS', fontNums: '// POLICE: CHIFFRES', weight: '// GRAISSE:', glow: '// HALO:', reset: 'RÉINIT.', allHint: 'CTRL+CLIC : LES 4' },
       opt: { auto: 'AUTO', grid: 'GRILLE', boxes: 'BLOCS', bubbles: 'BULLES', none: 'AUCUN', thin: 'FINS', medium: 'MOYENS', thick: 'ÉPAIS', center: 'CENTRE', corner: 'COIN', mono: 'MONO', sans: 'SANS', cond: 'ÉTROITE', poster: 'AFFICHE', tektur: 'TEKTUR', unbounded: 'UNBOUNDED', glitch: 'GLITCH', pixel: 'PIXEL', light: 'LÉGER', regular: 'NORMAL', bold: 'GRAS', heavy: 'NOIR' },
       theme: { default: 'NEON', bubblegum: 'BUBBLEGUM', paper: 'PAPIER', moreToCome: '// BIENTÔT PLUS' },
       toast: { pngExported: 'PNG EXPORTÉ', exportFailed: 'ÉCHEC EXPORT', imgLoaded: 'IMG CHARGÉE', noImageClipboard: 'AUCUNE IMG DANS LE PRESSE-PAPIERS', clipboardBlocked: 'PRESSE-PAPIERS BLOQUÉ', noBgYet: 'PAS DE FOND', storageFull: 'STOCKAGE PLEIN', highlightsCleared: 'SURBRILLANCES EFFACÉES', notAnImage: 'PAS UNE IMAGE' }
     },
     de: {
       tag: { app: 'KALENDER-KONSTRUKTOR', glitch: 'ZEIT AUF PUMP' },
-      field: { view: '// ANSICHT:', size: '// GRÖSSE:', layout: '// RASTER:', firstDay: '// WOCHENSTART:', hlSat: '// SAMSTAG MARKIEREN:', hlSun: '// SONNTAG MARKIEREN:', wkTint: '// WOCHENENDTÖNUNG:', wkColor: '// FARBE WOCHENENDTÖNUNG', bg: '// HINTERGRUND:', calLang: '// KALENDERSPRACHE:', main: 'Haupt', accent: 'Akzent', scanlines: '// SCANLINES:', bright: 'HELL.' },
+      field: { view: '// ANSICHT:', size: '// GRÖSSE:', layout: '// RASTER:', firstDay: '// WOCHENSTART:', hlSat: '// SAMSTAG MARKIEREN:', hlSun: '// SONNTAG MARKIEREN:', wkTint: '// WOCHENENDTÖNUNG:', wkColor: '// FARBE WOCHENENDTÖNUNG', wkReset: 'Tönungsfarbe auf Auto zurücksetzen', bg: '// HINTERGRUND:', calLang: '// KALENDERSPRACHE:', main: '// HAUPT:', accent: '// AKZENT:', swap: 'Haupt- und Akzentfarbe tauschen', scanlines: '// SCANLINES:', bright: 'HELL.' },
       lab: { month: 'MONAT', year: 'JAHR', mon: 'MO', sun: 'SO', no: 'NEIN', yes: 'JA' },
       btn: { upload: 'HOCHLADEN', paste: 'EINFÜGEN', recrop: 'NEU ZUSCHN.', savePng: '⬇ PNG SPEICHERN', done: 'FERTIG' },
       crop: { title: '// HINTERGRUND ZUSCHNEIDEN', use: 'VERWENDEN', cancel: 'ABBRECHEN' },
       hint: { pickMonth: '// Monat wählen und exportieren.', pickYear: '// Jahr wählen und exportieren.', marks1: '// Klick auf einen Tag wechselt die Markierungsfarbe, Strg+Klick wiederholt die letzte.', marks2: '// Rechtsklick löscht, Strg+Rechtsklick löscht alles.' },
       preview: 'VORSCHAU',
-      panel: { themes: 'THEMES' },
-      style: { title: '// STIL', corners: '// ECKEN:', cornerSize: '// ECKENGRÖSSE:', cells: '// ZELLEN:', lines: '// LINIEN:', numPos: '// TAGESZAHL:', fontHead: '// SCHRIFT: MONAT + JAHR', fontDays: '// SCHRIFT: WOCHENTAGE', fontNums: '// SCHRIFT: ZAHLEN', weight: '// STÄRKE:', glow: '// LEUCHTEN:', reset: 'RESET', allHint: 'STRG+KLICK: ALLE 4' },
+      panel: { themes: 'THEMES', themesTitle: '// THEMES', calendar: '// KALENDER' },
+      style: { title: '// STIL', resetAuto: 'auf Auto zurücksetzen', corners: '// ECKEN:', cornerSize: '// ECKENGRÖSSE:', cells: '// ZELLEN:', lines: '// LINIEN:', numPos: '// TAGESZAHL:', fontHead: '// SCHRIFT: MONAT + JAHR', fontDays: '// SCHRIFT: WOCHENTAGE', fontNums: '// SCHRIFT: ZAHLEN', weight: '// STÄRKE:', glow: '// LEUCHTEN:', reset: 'RESET', allHint: 'STRG+KLICK: ALLE 4' },
       opt: { auto: 'AUTO', grid: 'RASTER', boxes: 'BLÖCKE', bubbles: 'BLASEN', none: 'KEINE', thin: 'DÜNN', medium: 'MITTEL', thick: 'DICK', center: 'MITTE', corner: 'ECKE', mono: 'MONO', sans: 'SANS', cond: 'SCHMAL', poster: 'PLAKAT', tektur: 'TEKTUR', unbounded: 'UNBOUNDED', glitch: 'GLITCH', pixel: 'PIXEL', light: 'LEICHT', regular: 'NORMAL', bold: 'FETT', heavy: 'SCHWARZ' },
       theme: { default: 'NEON', bubblegum: 'BUBBLEGUM', paper: 'PAPIER', moreToCome: '// BALD MEHR' },
       toast: { pngExported: 'PNG EXPORTIERT', exportFailed: 'EXPORT FEHLGESCHL.', imgLoaded: 'BILD GELADEN', noImageClipboard: 'KEIN BILD IN ZWISCHENABLAGE', clipboardBlocked: 'ZWISCHENABLAGE BLOCKIERT', noBgYet: 'KEIN HINTERGRUND', storageFull: 'SPEICHER VOLL', highlightsCleared: 'MARKIERUNGEN GELÖSCHT', notAnImage: 'KEIN BILD' }
     },
     es: {
       tag: { app: 'CONSTRUCTOR DE CALENDARIO', glitch: 'TIEMPO PRESTADO' },
-      field: { view: '// VISTA:', size: '// TAMAÑO:', layout: '// REJILLA:', firstDay: '// PRIMER DÍA:', hlSat: '// RESALTAR SÁBADO:', hlSun: '// RESALTAR DOMINGO:', wkTint: '// TINTE FIN DE SEMANA:', wkColor: '// COLOR TINTE FIN DE SEMANA', bg: '// FONDO:', calLang: '// IDIOMA CALENDARIO:', main: 'Principal', accent: 'Acento', scanlines: '// LÍNEAS:', bright: 'BRILLO' },
+      field: { view: '// VISTA:', size: '// TAMAÑO:', layout: '// REJILLA:', firstDay: '// PRIMER DÍA:', hlSat: '// RESALTAR SÁBADO:', hlSun: '// RESALTAR DOMINGO:', wkTint: '// TINTE FIN DE SEMANA:', wkColor: '// COLOR TINTE FIN DE SEMANA', wkReset: 'restablecer color del tinte a auto', bg: '// FONDO:', calLang: '// IDIOMA CALENDARIO:', main: '// PRINCIPAL:', accent: '// ACENTO:', swap: 'intercambiar principal / acento', scanlines: '// LÍNEAS:', bright: 'BRILLO' },
       lab: { month: 'MES', year: 'AÑO', mon: 'LUN', sun: 'DOM', no: 'NO', yes: 'SÍ' },
       btn: { upload: 'SUBIR', paste: 'PEGAR', recrop: 'RECORTAR', savePng: '⬇ GUARDAR PNG', done: 'LISTO' },
       crop: { title: '// RECORTAR FONDO', use: 'USAR', cancel: 'CANCELAR' },
       hint: { pickMonth: '// Elige un mes y exporta.', pickYear: '// Elige un año y exporta.', marks1: '// Clic en un día cambia el color, ctrl+clic repite el último color.', marks2: '// Clic derecho borra, ctrl+clic derecho borra todo.' },
       preview: 'VISTA PREVIA',
-      panel: { themes: 'TEMAS' },
-      style: { title: '// ESTILO', corners: '// ESQUINAS:', cornerSize: '// TAMAÑO ESQUINAS:', cells: '// CELDAS:', lines: '// LÍNEAS:', numPos: '// N.º DEL DÍA:', fontHead: '// FUENTE: MES + AÑO', fontDays: '// FUENTE: DÍAS', fontNums: '// FUENTE: NÚMEROS', weight: '// GROSOR:', glow: '// BRILLO:', reset: 'RESTABL.', allHint: 'CTRL+CLIC: LAS 4' },
+      panel: { themes: 'TEMAS', themesTitle: '// TEMAS', calendar: '// CALENDARIO' },
+      style: { title: '// ESTILO', resetAuto: 'restablecer a auto', corners: '// ESQUINAS:', cornerSize: '// TAMAÑO ESQUINAS:', cells: '// CELDAS:', lines: '// LÍNEAS:', numPos: '// N.º DEL DÍA:', fontHead: '// FUENTE: MES + AÑO', fontDays: '// FUENTE: DÍAS', fontNums: '// FUENTE: NÚMEROS', weight: '// GROSOR:', glow: '// BRILLO:', reset: 'RESTABL.', allHint: 'CTRL+CLIC: LAS 4' },
       opt: { auto: 'AUTO', grid: 'REJILLA', boxes: 'BLOQUES', bubbles: 'BURBUJAS', none: 'NINGUNO', thin: 'FINAS', medium: 'MEDIAS', thick: 'GRUESAS', center: 'CENTRO', corner: 'ESQUINA', mono: 'MONO', sans: 'SANS', cond: 'ESTRECHA', poster: 'PÓSTER', tektur: 'TEKTUR', unbounded: 'UNBOUNDED', glitch: 'GLITCH', pixel: 'PÍXEL', light: 'LIGERA', regular: 'NORMAL', bold: 'NEGRITA', heavy: 'NEGRA' },
       theme: { default: 'NEON', bubblegum: 'BUBBLEGUM', paper: 'PAPEL', moreToCome: '// PRONTO MÁS' },
       toast: { pngExported: 'PNG EXPORTADO', exportFailed: 'EXPORT FALLÓ', imgLoaded: 'IMG CARGADA', noImageClipboard: 'SIN IMG EN PORTAPAPELES', clipboardBlocked: 'PORTAPAPELES BLOQUEADO', noBgYet: 'SIN FONDO', storageFull: 'ALMACÉN LLENO', highlightsCleared: 'RESALTADOS BORRADOS', notAnImage: 'NO ES IMAGEN' }
     },
     it: {
       tag: { app: 'COSTRUTTORE DI CALENDARIO', glitch: 'TEMPO IN PRESTITO' },
-      field: { view: '// VISTA:', size: '// DIMENSIONE:', layout: '// GRIGLIA:', firstDay: '// PRIMO GIORNO:', hlSat: '// EVIDENZIA SABATO:', hlSun: '// EVIDENZIA DOMENICA:', wkTint: '// TINTA WEEKEND:', wkColor: '// COLORE TINTA WEEKEND', bg: '// SFONDO:', calLang: '// LINGUA CALENDARIO:', main: 'Principale', accent: 'Accento', scanlines: '// SCANLINES:', bright: 'LUM.' },
+      field: { view: '// VISTA:', size: '// DIMENSIONE:', layout: '// GRIGLIA:', firstDay: '// PRIMO GIORNO:', hlSat: '// EVIDENZIA SABATO:', hlSun: '// EVIDENZIA DOMENICA:', wkTint: '// TINTA WEEKEND:', wkColor: '// COLORE TINTA WEEKEND', wkReset: 'ripristina colore tinta su auto', bg: '// SFONDO:', calLang: '// LINGUA CALENDARIO:', main: '// PRINCIPALE:', accent: '// ACCENTO:', swap: 'scambia principale / accento', scanlines: '// SCANLINES:', bright: 'LUM.' },
       lab: { month: 'MESE', year: 'ANNO', mon: 'LUN', sun: 'DOM', no: 'NO', yes: 'SÌ' },
       btn: { upload: 'CARICA', paste: 'INCOLLA', recrop: 'RITAGLIA', savePng: '⬇ SALVA PNG', done: 'FATTO' },
       crop: { title: '// RITAGLIA SFONDO', use: 'USA', cancel: 'ANNULLA' },
       hint: { pickMonth: '// Scegli un mese ed esporta.', pickYear: '// Scegli un anno ed esporta.', marks1: '// Clic su un giorno cambia colore, ctrl+clic ripete l\'ultimo colore.', marks2: '// Clic destro cancella, ctrl+clic destro cancella tutto.' },
       preview: 'ANTEPRIMA',
-      panel: { themes: 'TEMI' },
-      style: { title: '// STILE', corners: '// ANGOLI:', cornerSize: '// DIM. ANGOLI:', cells: '// CELLE:', lines: '// LINEE:', numPos: '// N. GIORNO:', fontHead: '// FONT: MESE + ANNO', fontDays: '// FONT: GIORNI', fontNums: '// FONT: NUMERI', weight: '// PESO:', glow: '// BAGLIORE:', reset: 'RIPRISTINA', allHint: 'CTRL+CLIC: TUTTI 4' },
+      panel: { themes: 'TEMI', themesTitle: '// TEMI', calendar: '// CALENDARIO' },
+      style: { title: '// STILE', resetAuto: 'ripristina su auto', corners: '// ANGOLI:', cornerSize: '// DIM. ANGOLI:', cells: '// CELLE:', lines: '// LINEE:', numPos: '// N. GIORNO:', fontHead: '// FONT: MESE + ANNO', fontDays: '// FONT: GIORNI', fontNums: '// FONT: NUMERI', weight: '// PESO:', glow: '// BAGLIORE:', reset: 'RIPRISTINA', allHint: 'CTRL+CLIC: TUTTI 4' },
       opt: { auto: 'AUTO', grid: 'GRIGLIA', boxes: 'BLOCCHI', bubbles: 'BOLLE', none: 'NESSUNA', thin: 'SOTTILI', medium: 'MEDIE', thick: 'SPESSE', center: 'CENTRO', corner: 'ANGOLO', mono: 'MONO', sans: 'SANS', cond: 'STRETTO', poster: 'POSTER', tektur: 'TEKTUR', unbounded: 'UNBOUNDED', glitch: 'GLITCH', pixel: 'PIXEL', light: 'LEGGERO', regular: 'NORMALE', bold: 'GRASSO', heavy: 'NERO' },
       theme: { default: 'NEON', bubblegum: 'BUBBLEGUM', paper: 'CARTA', moreToCome: '// PRESTO ALTRI' },
       toast: { pngExported: 'PNG ESPORTATO', exportFailed: 'EXPORT FALLITO', imgLoaded: 'IMG CARICATA', noImageClipboard: 'NESSUNA IMG NEGLI APPUNTI', clipboardBlocked: 'APPUNTI BLOCCATI', noBgYet: 'NESSUNO SFONDO', storageFull: 'ARCHIVIO PIENO', highlightsCleared: 'EVIDENZIAZIONI RIMOSSE', notAnImage: 'NON È IMG' }
     },
     ja: {
       tag: { app: 'カレンダー・コンストラクタ', glitch: '時間を借りる' },
-      field: { view: '// 表示:', size: '// サイズ:', layout: '// 配置:', firstDay: '// 週の始まり:', hlSat: '// 土曜を強調:', hlSun: '// 日曜を強調:', wkTint: '// 週末の色合い:', wkColor: '// 週末の色', bg: '// 背景:', calLang: '// カレンダー言語:', main: 'メイン', accent: 'アクセント', scanlines: '// スキャンライン:', bright: '明るさ' },
+      field: { view: '// 表示:', size: '// サイズ:', layout: '// 配置:', firstDay: '// 週の始まり:', hlSat: '// 土曜を強調:', hlSun: '// 日曜を強調:', wkTint: '// 週末の色合い:', wkColor: '// 週末の色', wkReset: '色合いの色を自動に戻す', bg: '// 背景:', calLang: '// カレンダー言語:', main: '// メイン:', accent: '// アクセント:', swap: 'メイン色とアクセント色を入れ替え', scanlines: '// スキャンライン:', bright: '明るさ' },
       lab: { month: '月', year: '年', mon: '月', sun: '日', no: 'いいえ', yes: 'はい' },
       btn: { upload: 'アップロード', paste: 'ペースト', recrop: '再切抜', savePng: '⬇ PNG保存', done: '完了' },
       crop: { title: '// 背景を切り抜く', use: '使用', cancel: 'キャンセル' },
       hint: { pickMonth: '// 月を選んでエクスポート。', pickYear: '// 年を選んでエクスポート。', marks1: '// 日をクリックで色切替、ctrl+クリックで直前の色。', marks2: '// 右クリックで解除、ctrl+右クリックで全解除。' },
       preview: 'プレビュー',
-      panel: { themes: 'テーマ' },
-      style: { title: '// スタイル', corners: '// 角:', cornerSize: '// 角のサイズ:', cells: '// セル:', lines: '// 線:', numPos: '// 日付の位置:', fontHead: '// フォント: 月+年', fontDays: '// フォント: 曜日', fontNums: '// フォント: 数字', weight: '// 太さ:', glow: '// 発光:', reset: 'リセット', allHint: 'CTRL+クリック: 全4角' },
+      panel: { themes: 'テーマ', themesTitle: '// テーマ', calendar: '// カレンダー' },
+      style: { title: '// スタイル', resetAuto: '自動に戻す', corners: '// 角:', cornerSize: '// 角のサイズ:', cells: '// セル:', lines: '// 線:', numPos: '// 日付の位置:', fontHead: '// フォント: 月+年', fontDays: '// フォント: 曜日', fontNums: '// フォント: 数字', weight: '// 太さ:', glow: '// 発光:', reset: 'リセット', allHint: 'CTRL+クリック: 全4角' },
       opt: { auto: '自動', grid: '格子', boxes: 'ブロック', bubbles: 'バブル', none: 'なし', thin: '細い', medium: '中', thick: '太い', center: '中央', corner: '隅', mono: '等幅', sans: 'ゴシック', cond: '長体', poster: 'ポスター', tektur: 'TEKTUR', unbounded: 'UNBOUNDED', glitch: 'グリッチ', pixel: 'ピクセル', light: 'ライト', regular: '標準', bold: '太字', heavy: '極太' },
       theme: { default: 'NEON', bubblegum: 'バブルガム', paper: 'ペーパー', moreToCome: '// 近日追加' },
       toast: { pngExported: 'PNG出力完了', exportFailed: 'エクスポート失敗', imgLoaded: '画像読込完了', noImageClipboard: 'クリップボードに画像なし', clipboardBlocked: 'クリップボードブロック', noBgYet: '背景未設定', storageFull: 'ストレージ満杯', highlightsCleared: 'ハイライト消去', notAnImage: '画像ではない' }
     },
     zh: {
       tag: { app: '日历构建器', glitch: '借来的时间' },
-      field: { view: '// 视图:', size: '// 尺寸:', layout: '// 布局:', firstDay: '// 每周开始:', hlSat: '// 高亮周六:', hlSun: '// 高亮周日:', wkTint: '// 周末色调:', wkColor: '// 周末色调颜色', bg: '// 背景:', calLang: '// 日历语言:', main: '主色', accent: '强调色', scanlines: '// 扫描线:', bright: '亮度' },
+      field: { view: '// 视图:', size: '// 尺寸:', layout: '// 布局:', firstDay: '// 每周开始:', hlSat: '// 高亮周六:', hlSun: '// 高亮周日:', wkTint: '// 周末色调:', wkColor: '// 周末色调颜色', wkReset: '将色调颜色重置为自动', bg: '// 背景:', calLang: '// 日历语言:', main: '// 主色:', accent: '// 强调色:', swap: '交换主色 / 强调色', scanlines: '// 扫描线:', bright: '亮度' },
       lab: { month: '月', year: '年', mon: '一', sun: '日', no: '否', yes: '是' },
       btn: { upload: '上传', paste: '粘贴', recrop: '重剪', savePng: '⬇ 保存PNG', done: '完成' },
       crop: { title: '// 裁剪背景', use: '使用', cancel: '取消' },
       hint: { pickMonth: '// 选择月份并导出。', pickYear: '// 选择年份并导出。', marks1: '// 点击日期切换高亮颜色，ctrl+点击重复上次颜色。', marks2: '// 右键清除，ctrl+右键全部清除。' },
       preview: '预览',
-      panel: { themes: '主题' },
-      style: { title: '// 样式', corners: '// 边角:', cornerSize: '// 边角大小:', cells: '// 单元格:', lines: '// 线条:', numPos: '// 日期位置:', fontHead: '// 字体: 月份+年份', fontDays: '// 字体: 星期', fontNums: '// 字体: 数字', weight: '// 字重:', glow: '// 发光:', reset: '重置', allHint: 'CTRL+点击: 全部4角' },
+      panel: { themes: '主题', themesTitle: '// 主题', calendar: '// 日历' },
+      style: { title: '// 样式', resetAuto: '重置为自动', corners: '// 边角:', cornerSize: '// 边角大小:', cells: '// 单元格:', lines: '// 线条:', numPos: '// 日期位置:', fontHead: '// 字体: 月份+年份', fontDays: '// 字体: 星期', fontNums: '// 字体: 数字', weight: '// 字重:', glow: '// 发光:', reset: '重置', allHint: 'CTRL+点击: 全部4角' },
       opt: { auto: '自动', grid: '网格', boxes: '方块', bubbles: '气泡', none: '无', thin: '细', medium: '中', thick: '粗', center: '居中', corner: '角落', mono: '等宽', sans: '无衬线', cond: '窄体', poster: '海报', tektur: 'TEKTUR', unbounded: 'UNBOUNDED', glitch: '故障', pixel: '像素', light: '细体', regular: '常规', bold: '粗体', heavy: '特粗' },
       theme: { default: 'NEON', bubblegum: '泡泡糖', paper: '纸张', moreToCome: '// 敬请期待' },
       toast: { pngExported: 'PNG导出完成', exportFailed: '导出失败', imgLoaded: '图片已加载', noImageClipboard: '剪贴板无图片', clipboardBlocked: '剪贴板被屏蔽', noBgYet: '无背景', storageFull: '存储已满', highlightsCleared: '高亮已清除', notAnImage: '不是图片' }
@@ -1899,6 +1926,7 @@
   }
   function applyI18n() {
     document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.getAttribute('data-i18n')); });
+    document.querySelectorAll('[data-i18n-title]').forEach(el => { el.title = t(el.getAttribute('data-i18n-title')); });
     const tw = $('tagWord');
     if (tw) tw.textContent = t('tag.app');
     document.documentElement.lang = store.uiLang;
@@ -2158,7 +2186,7 @@
     PICK_KEYS.forEach(k => {
       const sel = stylePanel.querySelector('select[data-pick="' + k + '"]');
       sel.value = st[k]; sel.dataset.val = st[k];
-      stylePanel.querySelector('[data-pick-auto="' + k + '"]').classList.toggle('active', st[k] === 'auto');
+      stylePanel.querySelector('[data-pick-auto="' + k + '"]').disabled = st[k] === 'auto';
     });
     applyFontSizes();
     capture.dataset.num = st.numPos;
@@ -2274,6 +2302,13 @@
   wirePalette(mainPalette, v => { colorsOf(store.theme).main = v; });
   wirePalette(accentPalette, v => { colorsOf(store.theme).accent = v; });
   customMain.addEventListener('input', () => { const c = colorsOf(store.theme); c.main = customMain.value; c.customMain = customMain.value; applyColors(); save(); });
+  // swap Main <-> Accent (custom slots too, so a custom pick keeps its saved swatch)
+  $('swapColors').addEventListener('click', () => {
+    const c = colorsOf(store.theme);
+    [c.main, c.accent] = [c.accent, c.main];
+    [c.customMain, c.customAccent] = [c.customAccent, c.customMain];
+    applyColors(); save();
+  });
   customAccent.addEventListener('input', () => { const c = colorsOf(store.theme); c.accent = customAccent.value; c.customAccent = customAccent.value; applyColors(); save(); });
 
   function daysInMonth(y, m) { return new Date(y, m + 1, 0).getDate(); }
@@ -2554,7 +2589,7 @@
   wkTintInput.addEventListener('input', () => { const v = parseInt(wkTintInput.value, 10); liveWkTint(isNaN(v) ? 0 : v); });
   wkTintInput.addEventListener('change', save);
   wkTintInput.addEventListener('dblclick', () => { liveWkTint(THEME_SEED[store.theme].wkTint); save(); });
-  // Weekend tint color modal: AUTO clears --wk / --wk-rgb so each theme falls
+  // Weekend tint color modal: AUTO (the reset button beside the picker) clears --wk / --wk-rgb so each theme falls
   // back to its own color; a pick applies live, the modal stays open until DONE.
   const wkModal = $('wkModal'), wkPalette = $('wkPalette'), customWk = $('customWk'), wkColorBtn = $('wkColorBtn');
   mainPalette.querySelectorAll('.swatch:not(.swatch-saved)[data-color]').forEach(sw => {
@@ -2565,13 +2600,13 @@
     if (c === 'auto') { root.removeProperty('--wk'); root.removeProperty('--wk-rgb'); }
     else { root.setProperty('--wk', c); root.setProperty('--wk-rgb', hexToRgb(c)); }
     wkColorBtn.style.color = c === 'auto' ? '' : c;
-    $('wkAuto').classList.toggle('active', c === 'auto');
+    $('wkReset').disabled = c === 'auto';
     refreshPalette(wkPalette, c, store.wkCustom, '[data-saved-wk]', customWk);
   }
   const setWkColor = (v) => { store.wkColor = v; applyWkColor(); save(); };
   wirePalette(wkPalette, setWkColor);
   customWk.addEventListener('input', () => { store.wkCustom = customWk.value; setWkColor(customWk.value); });
-  $('wkAuto').addEventListener('click', () => setWkColor('auto'));
+  $('wkReset').addEventListener('click', () => setWkColor('auto'));
   const closeWk = () => { wkModal.hidden = true; };
   // open beside the button (right of it, clamped to the viewport)
   wkColorBtn.addEventListener('click', () => {
@@ -3006,7 +3041,7 @@
     // Version lives in 3 spots: this const, the #tagVersion span above, and
     // the line-1 `<!-- CHRONOS v… -->` comment. Bump them all in sync with:
     //   python3 bump_version.py {x|y|z}
-    const VER = ' // v1.3.3';
+    const VER = ' // v1.3.4';
     const CHARS = '!@#$%&*<>{}[]/|01ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     let commitCount = '';
 
