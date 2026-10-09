@@ -17,6 +17,7 @@ THREE spots in index.html, all kept in sync here:
 """
 import re
 import sys
+from datetime import date
 from pathlib import Path
 
 INDEX = Path(__file__).resolve().parent / "index.html"
@@ -26,6 +27,40 @@ PATTERNS = [
     re.compile(r'(<span id="tagVersion">)(\d+)\.(\d+)\.(\d+)(</span>)'),
     re.compile(r"(const VER = ' // v)(\d+)\.(\d+)\.(\d+)(';)"),
 ]
+
+# ---- SEO dates -------------------------------------------------------------
+# A bump is a release, so it also stamps the release where crawlers read it:
+# "softwareVersion" / "dateModified" in the index.html JSON-LD, and this tool's
+# <lastmod> in its own sitemap.xml and in the hub's (../cyberdeck-tools/) — the
+# hub sitemap is the one the root robots.txt actually points search engines at.
+TOOL_DIR = Path(__file__).resolve().parent
+TOOL_URL = "https://cyberdeck.tools/chronos-ui/"
+SITEMAPS = [TOOL_DIR / "sitemap.xml", TOOL_DIR.parent / "cyberdeck-tools" / "sitemap.xml"]
+
+
+def stamp_seo(version):
+    today = date.today().isoformat()
+    index = TOOL_DIR / "index.html"
+    text = index.read_text(encoding="utf-8")
+    text, n_ver = re.subn(r'("softwareVersion": ")[^"]*(")', rf"\g<1>{version}\g<2>", text)
+    text, n_date = re.subn(r'("dateModified": ")[^"]*(")', rf"\g<1>{today}\g<2>", text)
+    index.write_text(text, encoding="utf-8")
+    if n_ver != 1 or n_date != 1:
+        print('warning: JSON-LD "softwareVersion" / "dateModified" not found/updated in index.html')
+
+    lastmod_re = re.compile(rf"(<loc>{re.escape(TOOL_URL)}</loc>\s*<lastmod>)[^<]*(</lastmod>)")
+    for path in SITEMAPS:
+        if not path.exists():
+            print(f"note: {path} not found, skipped")
+            continue
+        text, n = lastmod_re.subn(rf"\g<1>{today}\g<2>", path.read_text(encoding="utf-8"))
+        if n == 0:
+            print(f"note: {TOOL_URL} is not listed in {path.parent.name}/sitemap.xml, skipped")
+            continue
+        path.write_text(text, encoding="utf-8")
+        print(f"lastmod: {today} in {path.parent.name}/sitemap.xml")
+        if path.parent.name == "cyberdeck-tools":
+            print("reminder: the hub repo (cyberdeck-tools) changed too - commit it separately")
 
 
 def main():
@@ -57,6 +92,7 @@ def main():
             print(f"warning: pattern not found/updated: {p.pattern}")
     INDEX.write_text(text, encoding="utf-8")
     print(f"version: {old} -> {new}  ({total}/3 occurrences updated)")
+    stamp_seo(new)
 
 
 if __name__ == "__main__":
