@@ -1,7 +1,7 @@
 # CHRONOS
 
 **Cyberpunk Monthly Calendar Constructor** — a free, in-browser tool that builds a
-Cyberpunk 2077-styled monthly calendar and exports it as a clean PNG. Great for TTRPG
+cyberpunk-styled monthly calendar and exports it as a clean PNG. Great for TTRPG
 game masters and netrunner handouts.
 
 ## Features
